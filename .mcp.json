@@ -1,7 +1,7 @@
 {
   "mcpServers": {
     "flutterflow": {
-      "command": "flutterflow-mcp",
+      "command": "community-ff-mcp",
       "args": []
     }
   }
