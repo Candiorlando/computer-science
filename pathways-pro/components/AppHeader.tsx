@@ -40,6 +40,7 @@ export function AppHeader() {
     { href: "/caseload", label: "Caseload" },
     { href: "/ipe", label: "IPE Builder" },
     { href: "/report", label: "Assessment Reports" },
+    { href: "/clinical-assessments", label: "Assessment Library" },
     { href: "/ce", label: "CE Tracker" },
     { href: "/resources/counselor", label: "Resource Library" },
     { href: "/assessment", label: "Interest Profiler" },
