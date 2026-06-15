@@ -161,10 +161,19 @@ function OccupationCard({
   userEducationCeiling: number;
 }) {
   const meetsEducation = occ.jobZone <= userEducationCeiling;
-  const careerOneStop = `https://www.careeronestop.org/Toolkit/Jobs/find-jobs-results.aspx?keyword=${encodeURIComponent(occ.title)}&location=${encodeURIComponent(userLocation ?? "")}&radius=25`;
+  const loc = userLocation ?? "";
+  const careerOneStop = `https://www.careeronestop.org/Toolkit/Jobs/find-jobs-results.aspx?keyword=${encodeURIComponent(occ.title)}&location=${encodeURIComponent(loc)}&radius=25`;
   const onetUrl = `https://www.onetonline.org/link/summary/${occ.socCode}`;
-  const apprUrl = `https://www.apprenticeship.gov/apprenticeship-job-finder?keyword=${encodeURIComponent(occ.title)}&location=${encodeURIComponent(userLocation ?? "")}`;
+  const apprUrl = `https://www.apprenticeship.gov/apprenticeship-job-finder?keyword=${encodeURIComponent(occ.title)}&location=${encodeURIComponent(loc)}`;
   const oohUrl = getOohUrl(occ);
+  // Funding: CareerOneStop financial aid finder — scholarships, grants, loans
+  // filtered by occupation and (where available) state.
+  const fundingUrl = `https://www.careeronestop.org/Toolkit/Training/find-financial-aid.aspx?keyword=${encodeURIComponent(occ.title)}&location=${encodeURIComponent(loc)}`;
+  // WIOA programs: American Job Centers (Title I — Adult, Dislocated Worker,
+  // Youth) located by zip/city.
+  const wioaUrl = `https://www.careeronestop.org/LocalHelp/AmericanJobCenters/find-american-job-centers.aspx?location=${encodeURIComponent(loc)}&radius=25`;
+  // Training programs near you (eligible training provider list under WIOA)
+  const trainingUrl = `https://www.careeronestop.org/Toolkit/Training/find-local-training.aspx?keyword=${encodeURIComponent(occ.title)}&location=${encodeURIComponent(loc)}`;
 
   return (
     <article className="border border-ink/15 rounded-lg p-5 bg-white/60">
@@ -198,7 +207,10 @@ function OccupationCard({
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2 text-sm">
+      <div className="text-xs uppercase tracking-wider text-ink/50 mb-2 mt-1">
+        Find work
+      </div>
+      <div className="flex flex-wrap gap-2 text-sm mb-3">
         <a className="link-btn" href={careerOneStop} target="_blank" rel="noreferrer">
           Find openings near {userLocation || "you"} ↗
         </a>
@@ -207,6 +219,27 @@ function OccupationCard({
             Apprenticeships ↗
           </a>
         )}
+      </div>
+
+      <div className="text-xs uppercase tracking-wider text-ink/50 mb-2">
+        Pay for training
+      </div>
+      <div className="flex flex-wrap gap-2 text-sm mb-3">
+        <a className="link-btn link-btn-money" href={fundingUrl} target="_blank" rel="noreferrer">
+          💰 Funding & financial aid ↗
+        </a>
+        <a className="link-btn link-btn-money" href={wioaUrl} target="_blank" rel="noreferrer">
+          🏛️ WIOA programs near {userLocation || "you"} ↗
+        </a>
+        <a className="link-btn link-btn-money" href={trainingUrl} target="_blank" rel="noreferrer">
+          🎓 Training programs ↗
+        </a>
+      </div>
+
+      <div className="text-xs uppercase tracking-wider text-ink/50 mb-2">
+        Learn more about this career
+      </div>
+      <div className="flex flex-wrap gap-2 text-sm">
         <a className="link-btn" href={onetUrl} target="_blank" rel="noreferrer">
           Full O*NET profile ↗
         </a>
@@ -216,6 +249,13 @@ function OccupationCard({
       </div>
 
       <style jsx>{`
+        :global(.link-btn-money) {
+          background-color: rgba(185, 92, 60, 0.08);
+          border-color: rgba(185, 92, 60, 0.35) !important;
+        }
+        :global(.link-btn-money:hover) {
+          background-color: rgba(185, 92, 60, 0.15);
+        }
         :global(.link-btn) {
           border: 1px solid rgba(31, 29, 26, 0.2);
           padding: 0.35rem 0.75rem;
