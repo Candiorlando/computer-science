@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { loadProfile, type UserProfile } from "@/lib/storage";
 import {
-  rankOccupations, jobZoneDescription, wageBandDescription, type Occupation,
+  rankOccupations, jobZoneDescription, wageBandDescription, getOohUrl, type Occupation,
 } from "@/lib/onet-data";
 import { riasecNames, traitNames } from "@/lib/assessments";
 import { Disclaimer } from "@/components/Disclaimer";
@@ -164,6 +164,7 @@ function OccupationCard({
   const careerOneStop = `https://www.careeronestop.org/Toolkit/Jobs/find-jobs-results.aspx?keyword=${encodeURIComponent(occ.title)}&location=${encodeURIComponent(userLocation ?? "")}&radius=25`;
   const onetUrl = `https://www.onetonline.org/link/summary/${occ.socCode}`;
   const apprUrl = `https://www.apprenticeship.gov/apprenticeship-job-finder?keyword=${encodeURIComponent(occ.title)}&location=${encodeURIComponent(userLocation ?? "")}`;
+  const oohUrl = getOohUrl(occ);
 
   return (
     <article className="border border-ink/15 rounded-lg p-5 bg-white/60">
@@ -208,6 +209,9 @@ function OccupationCard({
         )}
         <a className="link-btn" href={onetUrl} target="_blank" rel="noreferrer">
           Full O*NET profile ↗
+        </a>
+        <a className="link-btn" href={oohUrl} target="_blank" rel="noreferrer">
+          BLS OOH outlook ↗
         </a>
       </div>
 

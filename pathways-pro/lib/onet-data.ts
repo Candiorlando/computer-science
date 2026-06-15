@@ -155,3 +155,84 @@ export const wageBandDescription: Record<Occupation["medianWageBand"], string> =
   "75-100k": "$75,000 – $100,000 / yr",
   "100k+": "Over $100,000 / yr",
 };
+
+// BLS Occupational Outlook Handbook profile URLs by O*NET-SOC code.
+// Curated 2026-06; URLs may shift as BLS updates the OOH — getOohUrl() falls
+// back to an OOH search query if a code isn't mapped or the page moves.
+export const oohProfileUrls: Record<string, string> = {
+  // Realistic
+  "47-2031.00": "https://www.bls.gov/ooh/construction-and-extraction/carpenters.htm",
+  "47-2111.00": "https://www.bls.gov/ooh/construction-and-extraction/electricians.htm",
+  "47-2152.02": "https://www.bls.gov/ooh/construction-and-extraction/plumbers-pipefitters-and-steamfitters.htm",
+  "49-3023.00": "https://www.bls.gov/ooh/installation-maintenance-and-repair/automotive-service-technicians-and-mechanics.htm",
+  "53-3032.00": "https://www.bls.gov/ooh/transportation-and-material-moving/heavy-and-tractor-trailer-truck-drivers.htm",
+  "49-9071.00": "https://www.bls.gov/ooh/installation-maintenance-and-repair/general-maintenance-and-repair-workers.htm",
+  "45-2092.00": "https://www.bls.gov/ooh/farming-fishing-and-forestry/agricultural-workers.htm",
+  "49-9021.01": "https://www.bls.gov/ooh/installation-maintenance-and-repair/heating-air-conditioning-and-refrigeration-mechanics-and-installers.htm",
+  "51-4121.06": "https://www.bls.gov/ooh/production/welders-cutters-solderers-and-brazers.htm",
+  "33-2011.00": "https://www.bls.gov/ooh/protective-service/firefighters.htm",
+
+  // Investigative
+  "15-1252.00": "https://www.bls.gov/ooh/computer-and-information-technology/software-developers.htm",
+  "15-1232.00": "https://www.bls.gov/ooh/computer-and-information-technology/computer-support-specialists.htm",
+  "15-1244.00": "https://www.bls.gov/ooh/computer-and-information-technology/network-and-computer-systems-administrators.htm",
+  "29-1141.00": "https://www.bls.gov/ooh/healthcare/registered-nurses.htm",
+  "19-4031.00": "https://www.bls.gov/ooh/life-physical-and-social-science/chemical-technicians.htm",
+  "29-2052.00": "https://www.bls.gov/ooh/healthcare/pharmacy-technicians.htm",
+  "13-2011.00": "https://www.bls.gov/ooh/business-and-financial/accountants-and-auditors.htm",
+  "19-3033.00": "https://www.bls.gov/ooh/life-physical-and-social-science/psychologists.htm",
+  "29-1228.00": "https://www.bls.gov/ooh/healthcare/physicians-and-surgeons.htm",
+
+  // Artistic
+  "27-1024.00": "https://www.bls.gov/ooh/arts-and-design/graphic-designers.htm",
+  "27-3043.05": "https://www.bls.gov/ooh/media-and-communication/writers-and-authors.htm",
+  "27-2042.00": "https://www.bls.gov/ooh/entertainment-and-sports/musicians-and-singers.htm",
+  "27-1014.00": "https://www.bls.gov/ooh/arts-and-design/special-effects-artists-and-animators.htm",
+  "39-5012.00": "https://www.bls.gov/ooh/personal-care-and-service/barbers-hairstylists-and-cosmetologists.htm",
+  "35-1011.00": "https://www.bls.gov/ooh/food-preparation-and-serving/chefs-and-head-cooks.htm",
+
+  // Social
+  "25-2021.00": "https://www.bls.gov/ooh/education-training-and-library/kindergarten-and-elementary-school-teachers.htm",
+  "21-1093.00": "https://www.bls.gov/ooh/community-and-social-service/social-and-human-service-assistants.htm",
+  "31-1131.00": "https://www.bls.gov/ooh/healthcare/nursing-assistants.htm",
+  "29-2061.00": "https://www.bls.gov/ooh/healthcare/licensed-practical-and-licensed-vocational-nurses.htm",
+  "21-1014.00": "https://www.bls.gov/ooh/community-and-social-service/substance-abuse-behavioral-disorder-and-mental-health-counselors.htm",
+  "21-1015.00": "https://www.bls.gov/ooh/community-and-social-service/rehabilitation-counselors.htm",
+  "39-9011.00": "https://www.bls.gov/ooh/personal-care-and-service/childcare-workers.htm",
+  "31-9092.00": "https://www.bls.gov/ooh/healthcare/medical-assistants.htm",
+  "21-2011.00": "https://www.bls.gov/ooh/community-and-social-service/clergy.htm",
+
+  // Enterprising
+  "41-2031.00": "https://www.bls.gov/ooh/sales/retail-sales-workers.htm",
+  "11-9051.00": "https://www.bls.gov/ooh/management/food-service-managers.htm",
+  "41-9022.00": "https://www.bls.gov/ooh/sales/real-estate-brokers-and-sales-agents.htm",
+  "11-3031.00": "https://www.bls.gov/ooh/management/financial-managers.htm",
+  "13-1161.00": "https://www.bls.gov/ooh/business-and-financial/market-research-analysts.htm",
+  "33-3051.00": "https://www.bls.gov/ooh/protective-service/police-and-detectives.htm",
+  "13-1071.00": "https://www.bls.gov/ooh/business-and-financial/human-resources-specialists.htm",
+  "11-1011.00": "https://www.bls.gov/ooh/management/top-executives.htm",
+
+  // Conventional
+  "43-3031.00": "https://www.bls.gov/ooh/office-and-administrative-support/bookkeeping-accounting-and-auditing-clerks.htm",
+  "43-4051.00": "https://www.bls.gov/ooh/office-and-administrative-support/customer-service-representatives.htm",
+  "43-6014.00": "https://www.bls.gov/ooh/office-and-administrative-support/secretaries-and-administrative-assistants.htm",
+  "43-9021.00": "https://www.bls.gov/ooh/office-and-administrative-support/data-entry-and-information-processing-workers.htm",
+  "13-2082.00": "https://www.bls.gov/ooh/business-and-financial/tax-examiners-and-collectors-and-revenue-agents.htm",
+  "53-3033.00": "https://www.bls.gov/ooh/transportation-and-material-moving/delivery-truck-drivers-and-driver-sales-workers.htm",
+  "43-5071.00": "https://www.bls.gov/ooh/office-and-administrative-support/material-recording-clerks.htm",
+
+  // Cross-type
+  "29-2041.00": "https://www.bls.gov/ooh/healthcare/emts-and-paramedics.htm",
+  "21-1018.00": "https://www.bls.gov/ooh/community-and-social-service/substance-abuse-behavioral-disorder-and-mental-health-counselors.htm",
+  "31-2021.00": "https://www.bls.gov/ooh/healthcare/physical-therapist-assistants-and-aides.htm",
+  "49-3031.00": "https://www.bls.gov/ooh/installation-maintenance-and-repair/diesel-service-technicians-and-mechanics.htm",
+  "11-9111.00": "https://www.bls.gov/ooh/management/medical-and-health-services-managers.htm",
+  "15-1212.00": "https://www.bls.gov/ooh/computer-and-information-technology/information-security-analysts.htm",
+};
+
+export function getOohUrl(occ: Occupation): string {
+  return (
+    oohProfileUrls[occ.socCode] ||
+    `https://www.bls.gov/ooh/search/all.htm?q=${encodeURIComponent(occ.title)}`
+  );
+}
