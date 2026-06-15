@@ -48,6 +48,8 @@ export function AppHeader() {
     { href: "/portal", label: "Home" },
     { href: "/intake", label: "Find My Path" },
     { href: "/results", label: "My Matches" },
+    { href: "/transferable-skills", label: "My Skills" },
+    { href: "/resume", label: "Resume" },
     { href: "/ipe", label: "My IPE Plan" },
     { href: "/resources/client", label: "Resources" },
     { href: "/coach", label: "Coach" },

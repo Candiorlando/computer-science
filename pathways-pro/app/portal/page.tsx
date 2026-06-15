@@ -87,7 +87,27 @@ export default function PortalHome() {
             icon="💬"
             title="Talk to a Coach"
             desc="Chat with an AI career coach about applications, accommodations, training, and next steps."
-            badge="Claude Opus 4.7"
+            badge="Claude Opus 4.8"
+          />
+          <QuickStart
+            href="/transferable-skills"
+            icon="🧰"
+            title="Find My Transferable Skills"
+            desc="Tell us about your work, volunteering, hobbies, or caregiving — we'll find the skills employers want."
+            badge="AI analysis"
+          />
+          <QuickStart
+            href="/resume"
+            icon="📄"
+            title="Build My Resume"
+            desc="Generate a one-page resume tailored to a specific job, ready to print or save as PDF."
+            badge="AI-generated"
+          />
+          <QuickStart
+            href="/ipe"
+            icon="📋"
+            title="My IPE Plan"
+            desc="View, review, and digitally sign your Individualized Plan for Employment."
           />
         </div>
       </section>
