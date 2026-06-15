@@ -241,9 +241,11 @@ function OccupationCard({
   const onetUrl = `https://www.onetonline.org/link/summary/${occ.socCode}`;
   const apprUrl = `https://www.apprenticeship.gov/apprenticeship-job-finder?keyword=${encodeURIComponent(occ.title)}&location=${encodeURIComponent(loc)}`;
   const oohUrl = getOohUrl(occ);
-  // Funding: CareerOneStop financial aid finder — scholarships, grants, loans
-  // filtered by occupation and (where available) state.
-  const fundingUrl = `https://www.careeronestop.org/Toolkit/Training/find-financial-aid.aspx?keyword=${encodeURIComponent(occ.title)}&location=${encodeURIComponent(loc)}`;
+  // Funding: send users to FAFSA (the federal gatekeeper for most aid).
+  // Pair with /funding for the curated list of other trusted sources.
+  // (CareerOneStop's find-financial-aid.aspx 404s as of June 2026.)
+  const fafsaUrl = "https://studentaid.gov/h/apply-for-aid/fafsa";
+  const moreFundingUrl = `/funding?for=${encodeURIComponent(occ.title)}`;
   // WIOA programs: American Job Centers (Title I — Adult, Dislocated Worker,
   // Youth) located by zip/city.
   const wioaUrl = `https://www.careeronestop.org/LocalHelp/AmericanJobCenters/find-american-job-centers.aspx?location=${encodeURIComponent(loc)}&radius=25`;
@@ -300,8 +302,11 @@ function OccupationCard({
         Pay for training {loc && <span className="text-accent">· {loc}</span>}
       </div>
       <div className="flex flex-wrap gap-2 text-sm mb-3">
-        <a className="link-btn link-btn-money" href={fundingUrl} target="_blank" rel="noreferrer">
-          💰 Funding & financial aid ↗
+        <a className="link-btn link-btn-money" href={fafsaUrl} target="_blank" rel="noreferrer">
+          📋 Apply for FAFSA (federal aid) ↗
+        </a>
+        <a className="link-btn link-btn-money" href={moreFundingUrl}>
+          💰 More funding sources →
         </a>
         <a className="link-btn link-btn-money" href={wioaUrl} target="_blank" rel="noreferrer">
           🏛️ WIOA programs {loc ? `near ${loc}` : "near you"} ↗

@@ -51,6 +51,7 @@ export function AppHeader() {
     { href: "/results", label: "My Matches" },
     { href: "/transferable-skills", label: "My Skills" },
     { href: "/resume", label: "Resume" },
+    { href: "/funding", label: "Funding" },
     { href: "/report", label: "My Report" },
     { href: "/ipe", label: "My IPE Plan" },
     { href: "/resources/client", label: "Resources" },
