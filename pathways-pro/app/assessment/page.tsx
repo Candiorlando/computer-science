@@ -6,7 +6,7 @@ import {
   bigFiveItems, riasecItems,
   scoreBigFive, scoreRiasec, hollandCode,
 } from "@/lib/assessments";
-import { loadProfile, patchProfile } from "@/lib/storage";
+import { isValidZip, loadProfile, patchProfile } from "@/lib/storage";
 import { Disclaimer } from "@/components/Disclaimer";
 import { loadSession } from "@/lib/session";
 import { patchClientReport } from "@/lib/client-report";
@@ -33,12 +33,26 @@ export default function AssessmentPage() {
   const [phase, setPhase] = useState<"intro" | "bigfive" | "riasec" | "done">("intro");
   const [bigFiveAnswers, setBigFive] = useState<Record<string, number>>({});
   const [riasecAnswers, setRiasec] = useState<Record<string, number>>({});
+  const [zip, setZip] = useState("");
+  const [zipError, setZipError] = useState("");
 
   useEffect(() => {
     // If they've already done it, skip ahead and offer to retake.
     const p = loadProfile();
+    if (p.intake?.zipCode) setZip(p.intake.zipCode);
     if (p.bigFive && p.riasec) setPhase("done");
   }, []);
+
+  function saveZipAndBegin() {
+    if (!isValidZip(zip)) {
+      setZipError("Enter a valid 5-digit ZIP code (e.g., 60652).");
+      return;
+    }
+    setZipError("");
+    const p = loadProfile();
+    patchProfile({ intake: { ...(p.intake || {}), zipCode: zip.trim() } });
+    setPhase("bigfive");
+  }
 
   function finish() {
     const bf = scoreBigFive(bigFiveAnswers);
@@ -101,7 +115,41 @@ export default function AssessmentPage() {
           (trademarked) MBTI, DISC, Enneagram, or StrengthsFinder — those have
           weaker scientific support and are not used by the US Department of Labor.
         </p>
-        <button className="btn-primary" onClick={() => setPhase("bigfive")}>
+
+        <div className="border border-accent/40 bg-accent/5 rounded-lg p-5">
+          <h2 className="text-lg font-semibold mb-2">
+            One quick thing — your ZIP code
+          </h2>
+          <p className="text-sm text-ink/80 mb-3">
+            Before we start, share your ZIP code. We&apos;ll use it on the
+            results page so every link — jobs, training programs, WIOA
+            American Job Centers, funding — finds opportunities near you
+            instead of generic nationwide results.
+          </p>
+          <label className="block max-w-xs">
+            <span className="block text-xs uppercase tracking-wider text-ink/60 mb-1">
+              Your ZIP code
+            </span>
+            <input
+              type="text"
+              inputMode="numeric"
+              pattern="\d{5}(-\d{4})?"
+              maxLength={10}
+              value={zip}
+              onChange={(e) => {
+                setZip(e.target.value.replace(/[^\d-]/g, "").slice(0, 10));
+                setZipError("");
+              }}
+              placeholder="60652"
+              className="input"
+            />
+          </label>
+          {zipError && (
+            <p className="text-xs text-accent mt-2">{zipError}</p>
+          )}
+        </div>
+
+        <button className="btn-primary" onClick={saveZipAndBegin}>
           Begin Big Five →
         </button>
         <Styles />

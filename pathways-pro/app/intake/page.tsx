@@ -67,13 +67,29 @@ export default function IntakePage() {
           />
         </Field>
 
-        <Field label="Where do you live? (city + state, or ZIP)" required>
+        <Field label="ZIP code" required>
           <input
             className="input"
             required
+            value={intake.zipCode ?? ""}
+            onChange={(e) => update("zipCode", e.target.value.replace(/[^\d-]/g, "").slice(0, 10))}
+            placeholder="e.g., 60652"
+            inputMode="numeric"
+            pattern="\d{5}(-\d{4})?"
+            maxLength={10}
+          />
+          <p className="text-xs text-ink/50 mt-1">
+            We use your ZIP to find jobs, training programs, American Job
+            Centers, and funding programs near you. 5 digits.
+          </p>
+        </Field>
+
+        <Field label="City, state (optional)">
+          <input
+            className="input"
             value={intake.location ?? ""}
             onChange={(e) => update("location", e.target.value)}
-            placeholder="e.g., Akron, OH"
+            placeholder="e.g., Chicago, IL"
           />
         </Field>
 

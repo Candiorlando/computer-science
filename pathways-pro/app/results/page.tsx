@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { loadProfile, type UserProfile } from "@/lib/storage";
+import { isValidZip, loadProfile, patchProfile, searchLocation, type UserProfile } from "@/lib/storage";
 import {
   rankOccupations, jobZoneDescription, wageBandDescription, getOohUrl, type Occupation,
 } from "@/lib/onet-data";
@@ -49,6 +49,9 @@ export default function ResultsPage() {
     ? educationCeilingMap[profile.intake.educationLevel] ?? 5
     : 5;
 
+  const searchLoc = searchLocation(profile);
+  const hasZip = isValidZip(profile.intake?.zipCode);
+
   return (
     <div className="space-y-8">
       <section>
@@ -56,8 +59,25 @@ export default function ResultsPage() {
         <p className="text-ink/70">
           Holland code <strong className="text-accent">{profile.hollandCode}</strong> ·
           based on your interests and the O*NET occupation database.
+          {hasZip && (
+            <>
+              {" "}Results are localized to ZIP{" "}
+              <strong className="text-accent">{profile.intake?.zipCode}</strong>.
+            </>
+          )}
         </p>
       </section>
+
+      {!hasZip && (
+        <ZipPrompt
+          onSaved={(zip) => {
+            patchProfile({
+              intake: { ...(profile.intake || {}), zipCode: zip },
+            });
+            setProfile(loadProfile());
+          }}
+        />
+      )}
 
       <ScoreSummary profile={profile} />
 
@@ -77,7 +97,7 @@ export default function ResultsPage() {
               occ={occ}
               fit={fit}
               rank={idx + 1}
-              userLocation={profile.intake?.location}
+              userLocation={searchLoc}
               userEducationCeiling={userEducationCeiling}
             />
           ))}
@@ -134,6 +154,58 @@ function ScoreSummary({ profile }: { profile: UserProfile }) {
           Scores are percentile-style 0–100 relative to the response scale, not the population.
         </p>
       </div>
+    </section>
+  );
+}
+
+function ZipPrompt({ onSaved }: { onSaved: (zip: string) => void }) {
+  const [zip, setZip] = useState("");
+  const [err, setErr] = useState("");
+
+  function save() {
+    if (!isValidZip(zip)) {
+      setErr("Enter a valid 5-digit ZIP code.");
+      return;
+    }
+    setErr("");
+    onSaved(zip.trim());
+  }
+
+  return (
+    <section className="border border-accent/40 bg-accent/5 rounded-lg p-5">
+      <h2 className="text-lg font-semibold mb-1">
+        📍 Add your ZIP code for local results
+      </h2>
+      <p className="text-sm text-ink/80 mb-3">
+        Without a ZIP code, the buttons below open generic nationwide
+        searches. Add yours to find jobs, training programs, American Job
+        Centers, and funding programs right where you live.
+      </p>
+      <div className="flex gap-2 items-start max-w-md">
+        <input
+          type="text"
+          inputMode="numeric"
+          pattern="\d{5}(-\d{4})?"
+          maxLength={10}
+          value={zip}
+          onChange={(e) => {
+            setZip(e.target.value.replace(/[^\d-]/g, "").slice(0, 10));
+            setErr("");
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") save();
+          }}
+          placeholder="60652"
+          className="flex-1 bg-white border border-ink/20 rounded px-3 py-2 text-sm focus:outline-none focus:border-accent"
+        />
+        <button
+          onClick={save}
+          className="bg-accent text-white px-4 py-2 rounded font-semibold text-sm"
+        >
+          Save ZIP
+        </button>
+      </div>
+      {err && <p className="text-xs text-accent mt-2">{err}</p>}
     </section>
   );
 }
@@ -208,31 +280,31 @@ function OccupationCard({
       </div>
 
       <div className="text-xs uppercase tracking-wider text-ink/50 mb-2 mt-1">
-        Find work
+        Find work {loc && <span className="text-accent">· {loc}</span>}
       </div>
       <div className="flex flex-wrap gap-2 text-sm mb-3">
         <a className="link-btn" href={careerOneStop} target="_blank" rel="noreferrer">
-          Find openings near {userLocation || "you"} ↗
+          Find openings {loc ? `near ${loc}` : "near you"} ↗
         </a>
         {occ.apprenticeshipPath && (
           <a className="link-btn" href={apprUrl} target="_blank" rel="noreferrer">
-            Apprenticeships ↗
+            Apprenticeships {loc ? `near ${loc}` : ""} ↗
           </a>
         )}
       </div>
 
       <div className="text-xs uppercase tracking-wider text-ink/50 mb-2">
-        Pay for training
+        Pay for training {loc && <span className="text-accent">· {loc}</span>}
       </div>
       <div className="flex flex-wrap gap-2 text-sm mb-3">
         <a className="link-btn link-btn-money" href={fundingUrl} target="_blank" rel="noreferrer">
           💰 Funding & financial aid ↗
         </a>
         <a className="link-btn link-btn-money" href={wioaUrl} target="_blank" rel="noreferrer">
-          🏛️ WIOA programs near {userLocation || "you"} ↗
+          🏛️ WIOA programs {loc ? `near ${loc}` : "near you"} ↗
         </a>
         <a className="link-btn link-btn-money" href={trainingUrl} target="_blank" rel="noreferrer">
-          🎓 Training programs ↗
+          🎓 Training programs {loc ? `near ${loc}` : ""} ↗
         </a>
       </div>
 

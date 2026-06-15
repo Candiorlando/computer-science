@@ -7,7 +7,8 @@ const KEY = "career-compass:profile-v1";
 export interface UserProfile {
   intake?: {
     age?: string;
-    location?: string;        // city, state OR zip
+    location?: string;        // city, state (free-form, for display)
+    zipCode?: string;         // 5-digit ZIP — drives every location-aware link
     educationLevel?: string;  // e.g., "Some high school", "HS diploma", "Some college", "Associate", "Bachelor's", "Graduate"
     workHistory?: string;     // free-form
     constraints?: string;     // disability, transportation, childcare, schedule, etc.
@@ -18,6 +19,16 @@ export interface UserProfile {
   riasec?: RiasecScores;
   hollandCode?: string;
   completedAt?: string;
+}
+
+// The single source of truth for "where should we search?" — prefer ZIP,
+// fall back to free-form location, then empty.
+export function searchLocation(profile: UserProfile): string {
+  return (profile.intake?.zipCode || profile.intake?.location || "").trim();
+}
+
+export function isValidZip(z?: string | null): boolean {
+  return !!z && /^\d{5}(-\d{4})?$/.test(z.trim());
 }
 
 export function loadProfile(): UserProfile {
