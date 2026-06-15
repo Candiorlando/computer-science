@@ -21,10 +21,25 @@ export interface UserProfile {
   completedAt?: string;
 }
 
-// The single source of truth for "where should we search?" — prefer ZIP,
-// fall back to free-form location, then empty.
+// The single source of truth for "where should we search?".
+// Returns ONLY the 5-digit ZIP — CareerOneStop and apprenticeship.gov both
+// give clean radius-search results when the location parameter is a ZIP
+// and noisy results when it includes city + state + ZIP together.
+//
+// 1. If the dedicated zipCode field has a valid ZIP, use it.
+// 2. Else if the free-form location field contains a 5-digit ZIP anywhere
+//    (e.g. legacy "Chicago, IL 60652"), extract just the ZIP.
+// 3. Else fall back to the trimmed free-form location string (best we can
+//    do — the user hasn't given us a ZIP).
 export function searchLocation(profile: UserProfile): string {
-  return (profile.intake?.zipCode || profile.intake?.location || "").trim();
+  const zip = profile.intake?.zipCode?.trim();
+  if (zip && isValidZip(zip)) return zip;
+
+  const loc = profile.intake?.location?.trim() ?? "";
+  const embedded = loc.match(/\b(\d{5})(?:-\d{4})?\b/);
+  if (embedded) return embedded[1];
+
+  return loc;
 }
 
 export function isValidZip(z?: string | null): boolean {
