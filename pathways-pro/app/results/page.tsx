@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { isValidZip, loadProfile, patchProfile, searchLocation, type UserProfile } from "@/lib/storage";
+import { extractZip, isValidZip, loadProfile, patchProfile, searchLocation, type UserProfile } from "@/lib/storage";
 import {
   rankOccupations, jobZoneDescription, wageBandDescription, getOohUrl, type Occupation,
 } from "@/lib/onet-data";
@@ -233,7 +233,10 @@ function OccupationCard({
   userEducationCeiling: number;
 }) {
   const meetsEducation = occ.jobZone <= userEducationCeiling;
-  const loc = userLocation ?? "";
+  // Defense in depth: even if a free-form 'Chicago, IL 60608' slips through,
+  // we hand CareerOneStop / apprenticeship.gov ONLY the 5-digit ZIP. Their
+  // radius search returns 'location not found' when given the full address.
+  const loc = extractZip(userLocation);
   const careerOneStop = `https://www.careeronestop.org/Toolkit/Jobs/find-jobs-results.aspx?keyword=${encodeURIComponent(occ.title)}&location=${encodeURIComponent(loc)}&radius=25`;
   const onetUrl = `https://www.onetonline.org/link/summary/${occ.socCode}`;
   const apprUrl = `https://www.apprenticeship.gov/apprenticeship-job-finder?keyword=${encodeURIComponent(occ.title)}&location=${encodeURIComponent(loc)}`;

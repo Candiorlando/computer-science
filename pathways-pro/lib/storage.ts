@@ -46,6 +46,15 @@ export function isValidZip(z?: string | null): boolean {
   return !!z && /^\d{5}(-\d{4})?$/.test(z.trim());
 }
 
+// Pull a ZIP out of any string. Defensive — every URL builder calls this
+// on whatever location it has, so even if a free-form 'Chicago, IL 60608'
+// slips through, the location query param ends up as just '60608'.
+export function extractZip(s?: string | null): string {
+  if (!s) return "";
+  const m = s.match(/\b(\d{5})(?:-\d{4})?\b/);
+  return m ? m[1] : s.trim();
+}
+
 export function loadProfile(): UserProfile {
   if (typeof window === "undefined") return {};
   try {
