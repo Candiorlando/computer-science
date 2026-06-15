@@ -145,21 +145,35 @@ export async function POST(req: Request) {
     ...body.messages,
   ];
 
-  const stream = await client.messages.create({
-    model: "claude-opus-4-7",
-    max_tokens: 4096,
-    system: [
-      {
-        type: "text",
-        text: SYSTEM_PROMPT,
-        cache_control: { type: "ephemeral" },
-      },
-    ],
-    thinking: { type: "adaptive" },
-    output_config: { effort: "medium" },
-    messages,
-    stream: true,
-  });
+  let stream;
+  try {
+    stream = await client.messages.create({
+      model: "claude-opus-4-8",
+      max_tokens: 4096,
+      system: [
+        {
+          type: "text",
+          text: SYSTEM_PROMPT,
+          cache_control: { type: "ephemeral" },
+        },
+      ],
+      thinking: { type: "adaptive" },
+      messages,
+      stream: true,
+    });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    const status =
+      err && typeof err === "object" && "status" in err
+        ? (err as { status?: number }).status ?? 500
+        : 500;
+    return new Response(
+      JSON.stringify({
+        error: `Anthropic API error (${status}): ${message}`,
+      }),
+      { status: 500, headers: { "Content-Type": "application/json" } },
+    );
+  }
 
   const encoder = new TextEncoder();
   const readable = new ReadableStream({
