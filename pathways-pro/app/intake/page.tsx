@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Disclaimer } from "@/components/Disclaimer";
 import { loadProfile, patchProfile, type UserProfile } from "@/lib/storage";
+import { loadSession } from "@/lib/session";
+import { patchClientReport } from "@/lib/client-report";
 
 const educationLevels = [
   "Still in high school",
@@ -34,6 +36,14 @@ export default function IntakePage() {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     patchProfile({ intake });
+    const s = loadSession();
+    if (s && s.role === "client") {
+      patchClientReport(s.caseId, s.name, {
+        clientDob: s.dob,
+        counselorName: s.counselorName,
+        intake,
+      });
+    }
     router.push("/assessment");
   }
 

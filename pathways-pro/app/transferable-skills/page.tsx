@@ -16,6 +16,8 @@ import {
   type ExperienceType,
   type TSAResult,
 } from "@/lib/tsa-storage";
+import { patchClientReport } from "@/lib/client-report";
+import type { ClientUser } from "@/lib/users";
 
 export default function TSAPage() {
   const router = useRouter();
@@ -75,6 +77,15 @@ export default function TSAPage() {
       const r: TSAResult = { ...data, generatedAt: new Date().toISOString() };
       saveTSA(r);
       setResult(r);
+      const s = loadSession();
+      if (s && s.role === "client") {
+        const c = s as ClientUser;
+        patchClientReport(c.caseId, c.name, {
+          clientDob: c.dob,
+          counselorName: c.counselorName,
+          tsa: r,
+        });
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Network error");
     } finally {

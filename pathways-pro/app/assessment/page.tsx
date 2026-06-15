@@ -8,6 +8,9 @@ import {
 } from "@/lib/assessments";
 import { loadProfile, patchProfile } from "@/lib/storage";
 import { Disclaimer } from "@/components/Disclaimer";
+import { loadSession } from "@/lib/session";
+import { patchClientReport } from "@/lib/client-report";
+import { rankOccupations } from "@/lib/onet-data";
 
 const likert = [
   { value: 1, label: "Very inaccurate" },
@@ -41,12 +44,33 @@ export default function AssessmentPage() {
     const bf = scoreBigFive(bigFiveAnswers);
     const ri = scoreRiasec(riasecAnswers);
     const code = hollandCode(ri);
+    const completedAt = new Date().toISOString();
     patchProfile({
       bigFive: bf,
       riasec: ri,
       hollandCode: code,
-      completedAt: new Date().toISOString(),
+      completedAt,
     });
+    const s = loadSession();
+    if (s && s.role === "client") {
+      const matches = rankOccupations(ri)
+        .slice(0, 10)
+        .map((m) => ({
+          title: m.occ.title,
+          socCode: m.occ.socCode,
+          fit: Math.round(m.fit * 33),
+          riasec: m.occ.riasec.join(""),
+        }));
+      patchClientReport(s.caseId, s.name, {
+        clientDob: s.dob,
+        counselorName: s.counselorName,
+        bigFive: bf,
+        riasec: ri,
+        hollandCode: code,
+        assessmentCompletedAt: completedAt,
+        topMatches: matches,
+      });
+    }
     router.push("/results");
   }
 

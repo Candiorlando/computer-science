@@ -16,6 +16,7 @@ import {
   type IPE,
   type IPEStatus,
 } from "@/lib/ipe";
+import { patchClientReport } from "@/lib/client-report";
 import { Disclaimer } from "@/components/Disclaimer";
 
 export default function IPEPage() {
@@ -225,6 +226,12 @@ function IPEBuilder({
     setIpe((cur) => {
       const next = { ...cur, ...patch };
       saveIPE(next);
+      patchClientReport(client.caseId, client.name, {
+        clientDob: client.dob,
+        counselorName: ipe.counselorName,
+        ipeStatus: next.status,
+        ipeUpdatedAt: next.updatedAt,
+      });
       return next;
     });
   }
@@ -236,7 +243,26 @@ function IPEBuilder({
         signedAt: new Date().toISOString(),
         signedBy: counselor.name + ", " + counselor.credentials,
       },
-      status: "pending-client-signature",
+      status: ipe.clientSignature.signed
+        ? "signed"
+        : "pending-client-signature",
+    });
+  }
+
+  function clientSignByCounselor() {
+    if (
+      !confirm(
+        `Confirm: ${client.name} is present and authorizing this IPE in person. This will record their digital signature.`,
+      )
+    )
+      return;
+    persist({
+      clientSignature: {
+        signed: true,
+        signedAt: new Date().toISOString(),
+        signedBy: client.name,
+      },
+      status: ipe.counselorSignature.signed ? "signed" : "draft",
     });
   }
 
@@ -410,26 +436,36 @@ function IPEBuilder({
             </div>
           </Section>
 
-          <Section title="9. Counselor signature">
-            {ipe.counselorSignature.signed ? (
-              <div className="border border-green-300 bg-green-50 rounded p-4 text-sm">
-                <strong className="text-green-800">✓ Signed by</strong>{" "}
-                {ipe.counselorSignature.signedBy} on{" "}
-                {new Date(ipe.counselorSignature.signedAt!).toLocaleString()}
-              </div>
-            ) : (
-              <button
-                onClick={counselorSign}
-                className="px-5 py-2.5 bg-accent text-cream rounded font-semibold"
-              >
-                Sign and send to client for signature
-              </button>
-            )}
+          <Section title="9. Signatures">
+            <p className="text-sm text-ink/70 mb-4">
+              Both signatures are required under WIOA Title IV § 102(b). The
+              client may sign on their own device by logging into their
+              portal, or — if they&apos;re here in person — you can capture
+              their signature directly using the button below.
+            </p>
+            <div className="grid md:grid-cols-2 gap-4">
+              <SignatureCard
+                label="Counselor"
+                role={counselor.credentials}
+                name={counselor.name}
+                signature={ipe.counselorSignature}
+                onSign={counselorSign}
+                buttonLabel="Sign as counselor"
+              />
+              <SignatureCard
+                label="Client"
+                role={client.caseId}
+                name={client.name}
+                signature={ipe.clientSignature}
+                onSign={clientSignByCounselor}
+                buttonLabel={`Sign as ${client.name.split(" ")[0]} (present in person)`}
+                accent
+              />
+            </div>
             {ipe.status === "signed" && (
-              <div className="mt-3 border border-green-300 bg-green-50 rounded p-4 text-sm">
-                <strong className="text-green-800">✓ Client signed</strong>{" "}
-                {ipe.clientSignature.signedBy} on{" "}
-                {new Date(ipe.clientSignature.signedAt!).toLocaleString()}
+              <div className="mt-4 border border-green-300 bg-green-50 rounded p-4 text-sm">
+                <strong className="text-green-800">✓ IPE fully executed.</strong>{" "}
+                Both signatures recorded. This plan is active under WIOA Title IV.
               </div>
             )}
           </Section>
@@ -493,6 +529,12 @@ function ClientView({ user }: { user: ClientUser }) {
     };
     saveIPE(next);
     setIpe(next);
+    patchClientReport(user.caseId, user.name, {
+      clientDob: user.dob,
+      counselorName: ipe.counselorName,
+      ipeStatus: next.status,
+      ipeUpdatedAt: next.updatedAt,
+    });
   }
 
   return (
@@ -731,6 +773,73 @@ function BulletList({ items }: { items: string[] }) {
         </li>
       ))}
     </ul>
+  );
+}
+
+function SignatureCard({
+  label,
+  role,
+  name,
+  signature,
+  onSign,
+  buttonLabel,
+  accent,
+}: {
+  label: string;
+  role: string;
+  name: string;
+  signature: import("@/lib/ipe").IPESignature;
+  onSign: () => void;
+  buttonLabel: string;
+  accent?: boolean;
+}) {
+  if (signature.signed) {
+    return (
+      <div className="border border-green-300 bg-green-50 rounded-lg p-4">
+        <div className="text-xs uppercase tracking-wider text-green-800 mb-2">
+          {label} ✓ Signed
+        </div>
+        <div
+          className="text-xl font-semibold text-green-900 mb-2"
+          style={{
+            fontFamily: "'Brush Script MT', cursive",
+            fontStyle: "italic",
+          }}
+        >
+          {signature.signedBy}
+        </div>
+        <div className="text-xs text-green-900/70 border-t border-green-300 pt-2 mt-2">
+          Digitally signed{" "}
+          {new Date(signature.signedAt!).toLocaleString()}
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div
+      className={`border rounded-lg p-4 ${
+        accent ? "border-accent/40 bg-accent/5" : "border-ink/20 bg-cream"
+      }`}
+    >
+      <div className="text-xs uppercase tracking-wider text-ink/60 mb-2">
+        {label} signature required
+      </div>
+      <div className="text-sm text-ink/80 mb-1">{name}</div>
+      <div className="text-xs text-ink/50 mb-4">{role}</div>
+      <div className="border-b-2 border-dashed border-ink/30 h-10 mb-3 flex items-end pb-1 text-xs text-ink/40 italic">
+        ✍️ Awaiting signature
+      </div>
+      <button
+        onClick={onSign}
+        className={`w-full px-4 py-2.5 rounded font-semibold text-sm ${
+          accent
+            ? "bg-accent text-cream"
+            : "bg-ink text-cream"
+        }`}
+      >
+        {buttonLabel}
+      </button>
+    </div>
   );
 }
 
