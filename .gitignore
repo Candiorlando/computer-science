@@ -1,3 +1,6 @@
 .idea
 *.swp
 *.swo
+.next
+node_modules
+tsconfig.tsbuildinfo
