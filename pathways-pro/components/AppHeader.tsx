@@ -37,8 +37,10 @@ export function AppHeader() {
 
   const counselorTabs = [
     { href: "/dashboard", label: "Dashboard" },
-    { href: "/resources/counselor", label: "Resource Library" },
     { href: "/caseload", label: "Caseload" },
+    { href: "/ipe", label: "IPE Builder" },
+    { href: "/ce", label: "CE Tracker" },
+    { href: "/resources/counselor", label: "Resource Library" },
     { href: "/assessment", label: "Interest Profiler" },
   ];
 
@@ -46,6 +48,7 @@ export function AppHeader() {
     { href: "/portal", label: "Home" },
     { href: "/intake", label: "Find My Path" },
     { href: "/results", label: "My Matches" },
+    { href: "/ipe", label: "My IPE Plan" },
     { href: "/resources/client", label: "Resources" },
     { href: "/coach", label: "Coach" },
   ];

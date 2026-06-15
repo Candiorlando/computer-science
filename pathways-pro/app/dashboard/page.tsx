@@ -102,10 +102,10 @@ export default function DashboardPage() {
           <div className="border border-ink/10 rounded-lg p-6 bg-cream">
             <h2 className="text-xl mb-3">Quick actions</h2>
             <div className="grid grid-cols-2 gap-2">
-              <QuickAction href="/resources/counselor" icon="📚" label="Resource Library" />
-              <QuickAction href="/assessment" icon="🧠" label="Interest Profiler" />
-              <QuickAction href="/coach" icon="💬" label="AI Coach" />
+              <QuickAction href="/ipe" icon="✍️" label="IPE Builder" />
+              <QuickAction href="/ce" icon="🎓" label="CE Tracker" />
               <QuickAction href="/caseload" icon="📋" label="Caseload" />
+              <QuickAction href="/resources/counselor" icon="📚" label="Resources" />
             </div>
           </div>
         </div>
