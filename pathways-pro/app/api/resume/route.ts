@@ -58,9 +58,11 @@ Return ONLY valid JSON matching the requested schema. No prose around it.`;
 
 const RESUME_SCHEMA = {
   type: "object",
+  additionalProperties: false,
   properties: {
     header: {
       type: "object",
+      additionalProperties: false,
       properties: {
         name: { type: "string" },
         location: { type: "string" },
@@ -82,6 +84,7 @@ const RESUME_SCHEMA = {
       type: "array",
       items: {
         type: "object",
+        additionalProperties: false,
         properties: {
           title: { type: "string" },
           organization: { type: "string" },
@@ -96,6 +99,7 @@ const RESUME_SCHEMA = {
       type: "array",
       items: {
         type: "object",
+        additionalProperties: false,
         properties: {
           credential: { type: "string" },
           institution: { type: "string" },

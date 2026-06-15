@@ -47,6 +47,7 @@ Return ONLY valid JSON matching the requested schema. No prose around it.`;
 
 const IPE_SCHEMA = {
   type: "object",
+  additionalProperties: false,
   properties: {
     functionalLimitations: {
       type: "array",
@@ -64,6 +65,7 @@ const IPE_SCHEMA = {
     },
     accommodations: {
       type: "object",
+      additionalProperties: false,
       properties: {
         workplace: {
           type: "array",

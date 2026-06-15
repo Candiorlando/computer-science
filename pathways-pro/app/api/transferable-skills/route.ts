@@ -42,11 +42,13 @@ Return ONLY valid JSON matching the requested schema. No prose around it.`;
 
 const TSA_SCHEMA = {
   type: "object",
+  additionalProperties: false,
   properties: {
     coreSkills: {
       type: "array",
       items: {
         type: "object",
+        additionalProperties: false,
         properties: {
           skill: {
             type: "string",
@@ -80,6 +82,7 @@ const TSA_SCHEMA = {
       type: "array",
       items: {
         type: "object",
+        additionalProperties: false,
         properties: {
           title: { type: "string" },
           whyItFits: { type: "string", description: "1-2 sentences" },
