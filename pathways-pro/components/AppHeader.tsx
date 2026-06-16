@@ -41,6 +41,7 @@ export function AppHeader() {
     { href: "/ipe", label: "IPE Builder" },
     { href: "/report", label: "Assessment Reports" },
     { href: "/clinical-assessments", label: "Assessment Library" },
+    { href: "/practitioner-hub", label: "Practitioner Hub" },
     { href: "/ce", label: "CE Tracker" },
     { href: "/resources/counselor", label: "Resource Library" },
     { href: "/assessment", label: "Interest Profiler" },
