@@ -179,28 +179,6 @@ function CounselorReportPicker({
         </p>
       </header>
 
-      <Link
-        href="/clinical-assessments"
-        className="block border border-accent/40 bg-accent/5 rounded-lg p-5 hover:bg-accent/10 transition"
-      >
-        <div className="flex items-baseline justify-between gap-3 flex-wrap">
-          <div>
-            <h2 className="text-lg font-semibold mb-1">
-              📚 Clinical Assessment Library →
-            </h2>
-            <p className="text-sm text-ink/80">
-              Browse the VR assessment instruments by purpose — vocational
-              interests, aptitudes, achievement, personality, adjustment to
-              disability, mental health, transferable skills, dexterity, and
-              Pre-ETS. Filterable by free / proprietary and by who administers.
-            </p>
-          </div>
-          <span className="text-sm text-accent font-semibold whitespace-nowrap">
-            Open library →
-          </span>
-        </div>
-      </Link>
-
       <div className="grid md:grid-cols-2 gap-3">
         {clients.map((c) => {
           const r = allReports.find((x) => x.caseId === c.caseId);
