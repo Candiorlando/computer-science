@@ -231,6 +231,7 @@ function IPEBuilder({
         counselorName: ipe.counselorName,
         ipeStatus: next.status,
         ipeUpdatedAt: next.updatedAt,
+        ipe: next,
       });
       return next;
     });
@@ -534,6 +535,7 @@ function ClientView({ user }: { user: ClientUser }) {
       counselorName: ipe.counselorName,
       ipeStatus: next.status,
       ipeUpdatedAt: next.updatedAt,
+      ipe: next,
     });
   }
 

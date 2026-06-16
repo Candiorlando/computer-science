@@ -20,6 +20,8 @@ import { loadProfile } from "@/lib/storage";
 import { loadTSA } from "@/lib/tsa-storage";
 import { rankOccupations } from "@/lib/onet-data";
 import { riasecNames, traitNames } from "@/lib/assessments";
+import { analyzeHollandCode } from "@/lib/holland-analysis";
+import type { IPE } from "@/lib/ipe";
 
 export default function ReportPage() {
   return (
@@ -227,6 +229,12 @@ function ReportDocument({
   }
 
   const hasAssessment = !!report.hollandCode && !!report.bigFive && !!report.riasec;
+  const ipeFullySigned =
+    report.ipe?.counselorSignature.signed &&
+    report.ipe?.clientSignature.signed;
+  const hollandAnalysis = hasAssessment
+    ? analyzeHollandCode(report.hollandCode!)
+    : null;
 
   return (
     <div className="space-y-5">
@@ -260,8 +268,25 @@ function ReportDocument({
         </div>
       </div>
 
+      {ipeFullySigned && (
+        <section className="border border-emerald-300 bg-emerald-50 rounded-lg p-5 print:hidden">
+          <h2 className="text-lg font-semibold text-emerald-900 mb-1">
+            ✓ Comprehensive IPE Report is ready
+          </h2>
+          <p className="text-sm text-emerald-900/80">
+            Both signatures are in. This report now includes the full signed
+            IPE plan, assessment results with analysis, transferable skills,
+            and a career-personality match section. Use{" "}
+            <strong>Print / Save as PDF</strong> above for a single PDF.
+          </p>
+        </section>
+      )}
+
       <article className="report-page bg-white shadow-sm border border-ink/15 rounded-sm">
-        <ReportHeader report={report} />
+        <ReportHeader
+          report={report}
+          comprehensive={!!ipeFullySigned}
+        />
 
         {report.intake && <IntakeBlock intake={report.intake} />}
 
@@ -274,13 +299,19 @@ function ReportDocument({
           />
         )}
 
+        {hollandAnalysis && (
+          <HollandAnalysisBlock analysis={hollandAnalysis} />
+        )}
+
         {report.topMatches && report.topMatches.length > 0 && (
           <MatchesBlock matches={report.topMatches} />
         )}
 
         {report.tsa && <TSABlock tsa={report.tsa} />}
 
-        {report.ipeStatus && (
+        {ipeFullySigned && report.ipe && <IPEPlanBlock ipe={report.ipe} />}
+
+        {report.ipeStatus && !ipeFullySigned && (
           <IPEBlock status={report.ipeStatus} updatedAt={report.ipeUpdatedAt} />
         )}
 
@@ -460,12 +491,19 @@ function ReportDocument({
   );
 }
 
-function ReportHeader({ report }: { report: ClientReport }) {
+function ReportHeader({
+  report,
+  comprehensive,
+}: {
+  report: ClientReport;
+  comprehensive?: boolean;
+}) {
   return (
     <header className="r-head">
       <h1 className="r-name">{report.clientName}</h1>
       <p className="r-meta">
-        Pathways Pro Assessment Report · Case {report.caseId}
+        Pathways Pro {comprehensive ? "Comprehensive IPE Report" : "Assessment Report"} · Case{" "}
+        {report.caseId}
         {report.clientDob && ` · DOB ${report.clientDob}`}
         {report.counselorName && ` · Counselor: ${report.counselorName}`}
       </p>
@@ -473,6 +511,251 @@ function ReportHeader({ report }: { report: ClientReport }) {
         Last updated {new Date(report.lastUpdated).toLocaleString()}
       </p>
     </header>
+  );
+}
+
+function HollandAnalysisBlock({
+  analysis,
+}: {
+  analysis: NonNullable<ReturnType<typeof analyzeHollandCode>>;
+}) {
+  return (
+    <section>
+      <h2>Career Personality Profile</h2>
+      <p>{analysis.combinedSummary}</p>
+
+      <h3>Day-to-day work style</h3>
+      <p>{analysis.workStyleNarrative}</p>
+
+      <h3>Where you tend to do your best work</h3>
+      <ul>
+        {analysis.primary.preferredEnvironments.map((e, i) => (
+          <li key={i}>{e}</li>
+        ))}
+      </ul>
+
+      <h3>Strengths you bring to a job</h3>
+      <ul>
+        {analysis.primary.strengthsAtWork.slice(0, 3).map((s, i) => (
+          <li key={`p${i}`}>{s}</li>
+        ))}
+        {analysis.secondary.strengthsAtWork.slice(0, 2).map((s, i) => (
+          <li key={`s${i}`}>{s}</li>
+        ))}
+      </ul>
+
+      <h3>Things to keep an eye on</h3>
+      <ul>
+        {analysis.primary.watchOuts.map((w, i) => (
+          <li key={`pw${i}`}>{w}</li>
+        ))}
+        {analysis.secondary.watchOuts.slice(0, 1).map((w, i) => (
+          <li key={`sw${i}`}>{w}</li>
+        ))}
+      </ul>
+
+      <h3>Job categories where {analysis.code} types thrive</h3>
+      <ul>
+        {analysis.topJobCategories.map((c, i) => (
+          <li key={i}>{c}</li>
+        ))}
+      </ul>
+      <p style={{ fontSize: "9pt", color: "#666", marginTop: "6px" }}>
+        Based on Holland&apos;s Theory of Vocational Choice and O*NET Interest
+        Profiler interpretive materials.
+      </p>
+    </section>
+  );
+}
+
+function IPEPlanBlock({ ipe }: { ipe: IPE }) {
+  return (
+    <section style={{ pageBreakBefore: "always" }}>
+      <h2>Signed Individualized Plan for Employment</h2>
+      <p style={{ fontSize: "10pt", color: "#555" }}>
+        WIOA Title IV § 102(b) · {ipe.wioaSection}
+      </p>
+
+      <h3>Employment goal</h3>
+      <p>
+        <strong>{ipe.employmentGoal}</strong>
+        {ipe.goalSocCode && (
+          <span style={{ color: "#666" }}> (O*NET {ipe.goalSocCode})</span>
+        )}
+      </p>
+      {ipe.goalRationale && <p>{ipe.goalRationale}</p>}
+      {(ipe.expectedWage || ipe.expectedOutlook) && (
+        <p style={{ fontSize: "10pt", color: "#555" }}>
+          {ipe.expectedWage && <>Median wage: {ipe.expectedWage}. </>}
+          {ipe.expectedOutlook && <>Outlook: {ipe.expectedOutlook}.</>}
+        </p>
+      )}
+
+      <h3>Primary disability</h3>
+      <p>{ipe.primaryDisability}</p>
+      {ipe.secondaryConditions && (
+        <p>
+          <em>Secondary conditions:</em> {ipe.secondaryConditions}
+        </p>
+      )}
+
+      {ipe.functionalLimitations.length > 0 && (
+        <>
+          <h3>Functional limitations</h3>
+          <ul>
+            {ipe.functionalLimitations.map((f, i) => (
+              <li key={i}>{f}</li>
+            ))}
+          </ul>
+        </>
+      )}
+
+      {ipe.vrServices.length > 0 && (
+        <>
+          <h3>VR services authorized</h3>
+          <ul>
+            {ipe.vrServices.map((s, i) => (
+              <li key={i}>{s}</li>
+            ))}
+          </ul>
+        </>
+      )}
+
+      {ipe.accommodations.workplace.length > 0 && (
+        <>
+          <h3>Workplace accommodations</h3>
+          <ul>
+            {ipe.accommodations.workplace.map((a, i) => (
+              <li key={i}>{a}</li>
+            ))}
+          </ul>
+        </>
+      )}
+
+      {ipe.accommodations.training.length > 0 && (
+        <>
+          <h3>Training accommodations</h3>
+          <ul>
+            {ipe.accommodations.training.map((a, i) => (
+              <li key={i}>{a}</li>
+            ))}
+          </ul>
+        </>
+      )}
+
+      {ipe.accommodations.assistiveTech.length > 0 && (
+        <>
+          <h3>Assistive technology</h3>
+          <ul>
+            {ipe.accommodations.assistiveTech.map((a, i) => (
+              <li key={i}>{a}</li>
+            ))}
+          </ul>
+        </>
+      )}
+
+      {ipe.disabilityBarriers.length > 0 && (
+        <>
+          <h3>Disability-related barriers</h3>
+          <ul>
+            {ipe.disabilityBarriers.map((b, i) => (
+              <li key={i}>{b}</li>
+            ))}
+          </ul>
+        </>
+      )}
+
+      {ipe.supports.length > 0 && (
+        <>
+          <h3>Natural supports</h3>
+          <ul>
+            {ipe.supports.map((s, i) => (
+              <li key={i}>{s}</li>
+            ))}
+          </ul>
+        </>
+      )}
+
+      <h3>Timeline & review</h3>
+      <p>
+        Time to employment: <strong>{ipe.timelineMonths} months</strong>.
+        Annual review on{" "}
+        <strong>{new Date(ipe.reviewDate).toLocaleDateString()}</strong>.
+      </p>
+
+      <h3>Signatures</h3>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: "16px",
+          marginTop: "8px",
+        }}
+      >
+        <div
+          style={{
+            border: "0.5pt solid #999",
+            padding: "10px",
+            borderRadius: "3px",
+          }}
+        >
+          <div
+            style={{
+              fontSize: "9pt",
+              textTransform: "uppercase",
+              color: "#666",
+              marginBottom: "4px",
+            }}
+          >
+            Counselor
+          </div>
+          <div
+            style={{
+              fontFamily: "'Brush Script MT', cursive",
+              fontStyle: "italic",
+              fontSize: "14pt",
+            }}
+          >
+            {ipe.counselorSignature.signedBy}
+          </div>
+          <div style={{ fontSize: "9pt", color: "#666", marginTop: "4px" }}>
+            Digitally signed{" "}
+            {new Date(ipe.counselorSignature.signedAt!).toLocaleString()}
+          </div>
+        </div>
+        <div
+          style={{
+            border: "0.5pt solid #999",
+            padding: "10px",
+            borderRadius: "3px",
+          }}
+        >
+          <div
+            style={{
+              fontSize: "9pt",
+              textTransform: "uppercase",
+              color: "#666",
+              marginBottom: "4px",
+            }}
+          >
+            Client
+          </div>
+          <div
+            style={{
+              fontFamily: "'Brush Script MT', cursive",
+              fontStyle: "italic",
+              fontSize: "14pt",
+            }}
+          >
+            {ipe.clientSignature.signedBy}
+          </div>
+          <div style={{ fontSize: "9pt", color: "#666", marginTop: "4px" }}>
+            Digitally signed{" "}
+            {new Date(ipe.clientSignature.signedAt!).toLocaleString()}
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }
 
