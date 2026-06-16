@@ -45,12 +45,12 @@ export function AppHeader() {
     { href: "/practitioner-hub", label: "Practitioner Hub" },
     { href: "/ce", label: "CE Tracker" },
     { href: "/resources/counselor", label: "Resource Library" },
-    { href: "/assessment", label: "Interest Profiler" },
   ];
 
   const clientTabs = [
     { href: "/portal", label: "Home" },
     { href: "/intake", label: "Find My Path" },
+    { href: "/assessment", label: "Interest Profiler" },
     { href: "/results", label: "My Matches" },
     { href: "/my-assessments", label: "My Assessments" },
     { href: "/transferable-skills", label: "My Skills" },

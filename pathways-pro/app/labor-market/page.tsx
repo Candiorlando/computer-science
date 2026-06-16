@@ -14,6 +14,7 @@ import {
   type Occupation,
 } from "@/lib/onet-data";
 import { analyzeHollandCode } from "@/lib/holland-analysis";
+import { riasecNames, type RiasecType } from "@/lib/assessments";
 import { extractZip } from "@/lib/storage";
 
 export default function LaborMarketPage() {
@@ -78,17 +79,20 @@ function Inner() {
     <div className="space-y-6">
       <header>
         <p className="text-xs uppercase tracking-widest text-ink/50 mb-1">
-          Labor Market Analysis
+          Labor Market Analysis · Driven by Interest Profiler
         </p>
         <h1 className="text-4xl mb-2">
           Wage, growth, and entry pathways for client matches
         </h1>
         <p className="text-ink/70 prose-narrow">
           Pick a client to see local labor market data for every occupation
-          their RIASEC profile matches. Each row links to BLS Occupational
-          Outlook Handbook, CareerOneStop wage data by ZIP, registered
-          apprenticeships, WIOA-eligible training providers, and live job
-          openings.
+          their{" "}
+          <Link href="/assessment" className="text-accent underline">
+            Interest Profiler
+          </Link>{" "}
+          RIASEC scores match. Each row links to BLS Occupational Outlook
+          Handbook, CareerOneStop wage data by ZIP, registered apprenticeships,
+          WIOA-eligible training providers, and live job openings.
         </p>
       </header>
 
@@ -128,6 +132,8 @@ function Inner() {
             report={clientReport}
             hollandAnalysis={hollandAnalysis}
           />
+
+          <InterestProfilerPanel report={clientReport} />
 
           <MarketDistribution ranked={ranked} />
 
@@ -258,6 +264,86 @@ function ProfileSummary({
               "Not on file"}
           </div>
         </div>
+      </div>
+    </section>
+  );
+}
+
+function InterestProfilerPanel({ report }: { report: ClientReport }) {
+  const riasec = report.riasec!;
+  const sorted = (Object.entries(riasec) as [RiasecType, number][]).sort(
+    (a, b) => b[1] - a[1],
+  );
+  const top3 = sorted.slice(0, 3);
+  const completedAt = report.assessmentCompletedAt
+    ? new Date(report.assessmentCompletedAt)
+    : null;
+
+  return (
+    <section className="border-2 border-accent/30 bg-accent/5 rounded-lg p-5">
+      <div className="flex items-baseline justify-between gap-3 flex-wrap mb-3">
+        <div>
+          <p className="text-xs uppercase tracking-widest text-accent font-semibold mb-1">
+            📊 From Interest Profiler
+          </p>
+          <h2 className="text-xl">
+            RIASEC scores driving this analysis
+          </h2>
+        </div>
+        {completedAt && (
+          <div className="text-xs text-ink/60 text-right">
+            Assessment completed
+            <div className="text-ink font-semibold">
+              {completedAt.toLocaleDateString(undefined, {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+              })}
+            </div>
+          </div>
+        )}
+      </div>
+
+      <p className="text-sm text-ink/70 mb-4">
+        These six scores from the client&apos;s Holland RIASEC inventory are
+        what rank every occupation below. Higher scores in a category mean
+        occupations tagged with that letter rise to the top.
+      </p>
+
+      <ul className="space-y-2 mb-4">
+        {sorted.map(([t, v], idx) => (
+          <li key={t} className="flex items-center gap-3 text-sm">
+            <span className="w-6 text-center text-accent font-bold">{t}</span>
+            <span className="w-28 text-ink/80">{riasecNames[t]}</span>
+            <div className="flex-1 h-2.5 bg-ink/10 rounded overflow-hidden">
+              <div
+                className={`h-2.5 rounded ${idx < 3 ? "bg-accent" : "bg-accent/40"}`}
+                style={{ width: `${v}%` }}
+              />
+            </div>
+            <span className="w-10 text-right tabular-nums text-ink/80">
+              {v}
+            </span>
+          </li>
+        ))}
+      </ul>
+
+      <div className="border-t border-accent/20 pt-3 flex items-baseline justify-between gap-3 flex-wrap text-sm">
+        <div>
+          <span className="text-ink/60">Top 3 driving rankings: </span>
+          {top3.map(([t], i) => (
+            <span key={t}>
+              {i > 0 && <span className="text-ink/40"> · </span>}
+              <strong className="text-accent">{riasecNames[t]}</strong>
+            </span>
+          ))}
+        </div>
+        <Link
+          href={`/report?case=${report.caseId}`}
+          className="text-xs text-accent underline"
+        >
+          See full client report →
+        </Link>
       </div>
     </section>
   );

@@ -361,6 +361,14 @@ function ReportDocument({
                   : "🧠 Generate Clinical IPE Report"}
             </button>
           )}
+          {!isClient && hasAssessment && (
+            <Link
+              href={`/labor-market?case=${report.caseId}`}
+              className="border border-accent text-accent px-4 py-2 rounded font-semibold text-sm hover:bg-accent/5"
+            >
+              📊 Labor Market Analysis →
+            </Link>
+          )}
           {!isClient && (
             <Link
               href="/clinical-assessments"
