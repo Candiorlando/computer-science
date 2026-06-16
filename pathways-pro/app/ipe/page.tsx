@@ -200,6 +200,9 @@ function IPEBuilder({
         return;
       }
       const data = await resp.json();
+      const timelineMonths = data.timelineMonths ?? 12;
+      const estimatedDate = new Date();
+      estimatedDate.setMonth(estimatedDate.getMonth() + timelineMonths);
       const next: IPE = {
         ...ipe,
         primaryDisability: intake.primaryDisability,
@@ -207,11 +210,17 @@ function IPEBuilder({
         employmentGoal: intake.employmentGoal,
         functionalLimitations: data.functionalLimitations ?? [],
         goalRationale: data.goalRationale ?? "",
+        laborMarketOutlook: data.laborMarketOutlook ?? "",
         vrServices: data.vrServices ?? [],
+        serviceProviders: data.serviceProviders ?? [],
         accommodations: data.accommodations ?? ipe.accommodations,
         disabilityBarriers: data.disabilityBarriers ?? [],
         supports: data.supports ?? [],
-        timelineMonths: data.timelineMonths ?? 12,
+        agencyResponsibilities: data.agencyResponsibilities ?? [],
+        clientResponsibilities: data.clientResponsibilities ?? [],
+        evaluationCriteria: data.evaluationCriteria ?? [],
+        timelineMonths,
+        estimatedAchievementDate: estimatedDate.toISOString().slice(0, 10),
       };
       setIpe(next);
       saveIPE(next);
@@ -365,10 +374,32 @@ function IPEBuilder({
             />
           </Section>
 
+          <Section title="3a. Local labor market outlook (BLS OOH)">
+            <TextArea
+              value={ipe.laborMarketOutlook}
+              onChange={(v) => persist({ laborMarketOutlook: v })}
+              rows={3}
+            />
+            <p className="text-xs text-ink/50 mt-1">
+              Median wage band · 10-year projected growth · typical entry pathway.
+            </p>
+          </Section>
+
           <Section title="4. VR services authorized">
             <ListEditor
               items={ipe.vrServices}
               onChange={(items) => persist({ vrServices: items })}
+            />
+          </Section>
+
+          <Section title="4a. Service providers & settings">
+            <p className="text-sm text-ink/70 mb-3">
+              Who delivers each service, and whether the setting is
+              integrated competitive employment (WIOA standard).
+            </p>
+            <ServiceProvidersEditor
+              providers={ipe.serviceProviders}
+              onChange={(p) => persist({ serviceProviders: p })}
             />
           </Section>
 
@@ -422,12 +453,60 @@ function IPEBuilder({
             />
           </Section>
 
+          <Section title="7a. Agency responsibilities">
+            <p className="text-sm text-ink/70 mb-3">
+              What the VR agency commits to deliver — funding, services,
+              coordination, communication. Forms one half of the WIOA
+              client–agency contract.
+            </p>
+            <ListEditor
+              items={ipe.agencyResponsibilities}
+              onChange={(items) => persist({ agencyResponsibilities: items })}
+            />
+          </Section>
+
+          <Section title="7b. Client responsibilities">
+            <p className="text-sm text-ink/70 mb-3">
+              What the client commits to do — communication cadence, training
+              attendance, treatment participation, reporting changes.
+            </p>
+            <ListEditor
+              items={ipe.clientResponsibilities}
+              onChange={(items) => persist({ clientResponsibilities: items })}
+            />
+          </Section>
+
+          <Section title="7c. Evaluation criteria & milestones">
+            <p className="text-sm text-ink/70 mb-3">
+              Objective, measurable check-in metrics for tracking progress.
+              Each milestone should be SMART: Specific, Measurable, Achievable,
+              Relevant, Time-bound.
+            </p>
+            <ListEditor
+              items={ipe.evaluationCriteria}
+              onChange={(items) => persist({ evaluationCriteria: items })}
+            />
+          </Section>
+
           <Section title="8. Timeline & review">
-            <div className="grid sm:grid-cols-2 gap-4 text-sm">
+            <div className="grid sm:grid-cols-3 gap-4 text-sm">
               <FormField
                 label="Time-to-employment (months)"
                 value={String(ipe.timelineMonths)}
-                onChange={(v) => persist({ timelineMonths: parseInt(v) || 0 })}
+                onChange={(v) => {
+                  const months = parseInt(v) || 0;
+                  const d = new Date();
+                  d.setMonth(d.getMonth() + months);
+                  persist({
+                    timelineMonths: months,
+                    estimatedAchievementDate: d.toISOString().slice(0, 10),
+                  });
+                }}
+              />
+              <FormField
+                label="Estimated achievement date"
+                value={ipe.estimatedAchievementDate}
+                onChange={(v) => persist({ estimatedAchievementDate: v })}
               />
               <FormField
                 label="Annual review date"
@@ -719,6 +798,109 @@ function TextArea({
       rows={rows}
       className="w-full bg-white border border-ink/20 rounded px-3 py-2 focus:outline-none focus:border-accent text-sm"
     />
+  );
+}
+
+function ServiceProvidersEditor({
+  providers,
+  onChange,
+}: {
+  providers: import("@/lib/ipe").ServiceProvider[];
+  onChange: (next: import("@/lib/ipe").ServiceProvider[]) => void;
+}) {
+  const typeLabels: Record<import("@/lib/ipe").ProviderType, string> = {
+    "state-agency": "State VR agency (internal)",
+    "community-rehab-provider": "Community Rehab Provider (CRP)",
+    "training-provider": "Training / educational provider",
+    "employer-partner": "Employer partner",
+    vendor: "Vendor",
+  };
+
+  function update(
+    idx: number,
+    patch: Partial<import("@/lib/ipe").ServiceProvider>,
+  ) {
+    const next = [...providers];
+    next[idx] = { ...next[idx], ...patch };
+    onChange(next);
+  }
+
+  function add() {
+    onChange([
+      ...providers,
+      {
+        name: "",
+        type: "state-agency",
+        services: "",
+        integratedSetting: true,
+      },
+    ]);
+  }
+
+  return (
+    <div className="space-y-3">
+      {providers.map((p, idx) => (
+        <div key={idx} className="border border-ink/10 rounded p-3 bg-white/60">
+          <div className="grid sm:grid-cols-2 gap-2 mb-2">
+            <input
+              type="text"
+              value={p.name}
+              onChange={(e) => update(idx, { name: e.target.value })}
+              placeholder="Provider name (e.g. IDHS-DRS Ford City Office)"
+              className="bg-white border border-ink/20 rounded px-3 py-2 text-sm focus:outline-none focus:border-accent"
+            />
+            <select
+              value={p.type}
+              onChange={(e) =>
+                update(idx, {
+                  type: e.target.value as import("@/lib/ipe").ProviderType,
+                })
+              }
+              className="bg-white border border-ink/20 rounded px-3 py-2 text-sm focus:outline-none focus:border-accent"
+            >
+              {(Object.keys(typeLabels) as import("@/lib/ipe").ProviderType[]).map(
+                (k) => (
+                  <option key={k} value={k}>
+                    {typeLabels[k]}
+                  </option>
+                ),
+              )}
+            </select>
+          </div>
+          <textarea
+            value={p.services}
+            onChange={(e) => update(idx, { services: e.target.value })}
+            placeholder="Services delivered by this provider…"
+            rows={2}
+            className="w-full bg-white border border-ink/20 rounded px-3 py-2 text-sm focus:outline-none focus:border-accent"
+          />
+          <div className="flex items-center justify-between mt-2">
+            <label className="flex items-center gap-2 text-xs">
+              <input
+                type="checkbox"
+                checked={p.integratedSetting}
+                onChange={(e) =>
+                  update(idx, { integratedSetting: e.target.checked })
+                }
+              />
+              Integrated competitive setting (WIOA standard)
+            </label>
+            <button
+              onClick={() => onChange(providers.filter((_, i) => i !== idx))}
+              className="text-xs text-ink/40 hover:text-accent"
+            >
+              ✕ Remove
+            </button>
+          </div>
+        </div>
+      ))}
+      <button
+        onClick={add}
+        className="text-sm text-accent hover:underline"
+      >
+        + Add provider
+      </button>
+    </div>
   );
 }
 

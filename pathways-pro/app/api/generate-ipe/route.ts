@@ -58,10 +58,44 @@ const IPE_SCHEMA = {
       type: "string",
       description: "2-3 sentences explaining why this employment goal fits the client's strengths, interests, and accommodation needs",
     },
+    laborMarketOutlook: {
+      type: "string",
+      description: "2-3 sentences summarizing local labor market outlook for the target occupation using BLS OOH data (median wage band, 10-year projected growth, typical entry pathway).",
+    },
     vrServices: {
       type: "array",
       items: { type: "string" },
       description: "Specific VR services authorized — e.g. 'Vocational training in [program] at [provider]', 'Job coaching 4 hrs/week × 90 days post-placement', 'Adaptive equipment evaluation by certified ATP'",
+    },
+    serviceProviders: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        properties: {
+          name: { type: "string", description: "Provider name (e.g. 'IDHS-DRS Ford City Office', 'Goodwill Industries Job Coaching Program', 'City Colleges of Chicago — Truman College')" },
+          type: {
+            type: "string",
+            enum: [
+              "state-agency",
+              "community-rehab-provider",
+              "training-provider",
+              "employer-partner",
+              "vendor",
+            ],
+          },
+          services: {
+            type: "string",
+            description: "1-2 sentence summary of what this provider delivers",
+          },
+          integratedSetting: {
+            type: "boolean",
+            description: "True when services are delivered in an integrated competitive setting (WIOA standard)",
+          },
+        },
+        required: ["name", "type", "services", "integratedSetting"],
+      },
+      description: "2-5 providers who deliver the VR services. Identify the state VR agency, contracted community rehabilitation providers (CRPs), training providers, and any employer partners.",
     },
     accommodations: {
       type: "object",
@@ -95,6 +129,21 @@ const IPE_SCHEMA = {
       items: { type: "string" },
       description: "Natural supports and resources the client can leverage (family, mentors, community programs)",
     },
+    agencyResponsibilities: {
+      type: "array",
+      items: { type: "string" },
+      description: "4-6 specific commitments the VR agency makes — e.g. 'Authorize tuition + books for [program] up to $[amount]', 'Provide vocational counseling at 2-week intervals', 'Coordinate WIPA benefits counseling referral within 30 days', 'Fund EPA Section 608 certification exam fee'.",
+    },
+    clientResponsibilities: {
+      type: "array",
+      items: { type: "string" },
+      description: "4-6 specific commitments the client agrees to — e.g. 'Maintain communication with counselor every 2 weeks', 'Attend all scheduled vendor meetings', 'Complete training program with minimum 80% attendance', 'Report any change in disability status, address, or income within 5 business days'.",
+    },
+    evaluationCriteria: {
+      type: "array",
+      items: { type: "string" },
+      description: "3-5 objective, measurable milestones with time markers — e.g. 'Enroll in approved training program by [date]', 'Complete 90 days of stable employment in target occupation', 'Achieve passing score on certification exam by [month]'. Each milestone must be SMART (Specific, Measurable, Achievable, Relevant, Time-bound).",
+    },
     timelineMonths: {
       type: "integer",
       description: "Realistic time-to-employment in months given training requirements and accommodation needs",
@@ -103,10 +152,15 @@ const IPE_SCHEMA = {
   required: [
     "functionalLimitations",
     "goalRationale",
+    "laborMarketOutlook",
     "vrServices",
+    "serviceProviders",
     "accommodations",
     "disabilityBarriers",
     "supports",
+    "agencyResponsibilities",
+    "clientResponsibilities",
+    "evaluationCriteria",
     "timelineMonths",
   ],
 };

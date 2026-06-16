@@ -8,6 +8,21 @@ export interface IPEAccommodations {
   assistiveTech: string[];
 }
 
+export type ProviderType =
+  | "state-agency"
+  | "community-rehab-provider"
+  | "training-provider"
+  | "employer-partner"
+  | "vendor";
+
+export interface ServiceProvider {
+  name: string;
+  type: ProviderType;
+  services: string;
+  integratedSetting: boolean;
+  contactInfo?: string;
+}
+
 export interface IPESignature {
   signed: boolean;
   signedAt?: string;
@@ -41,9 +56,21 @@ export interface IPE {
   expectedOutlook: string;
   timelineMonths: number;
 
+  // Labor market context for the employment goal
+  laborMarketOutlook: string;
+
   // Services authorized
   vrServices: string[];
   trainingProvider: string;
+
+  // WIOA Title IV § 102(b) requires identifying who delivers each service
+  // and whether the setting is integrated competitive employment.
+  serviceProviders: ServiceProvider[];
+
+  // Estimated date the employment goal will be achieved (ISO date string).
+  // Calculated from createdAt + timelineMonths but stored explicitly so
+  // the counselor can override.
+  estimatedAchievementDate: string;
 
   // Accommodations
   accommodations: IPEAccommodations;
@@ -51,6 +78,11 @@ export interface IPE {
   // Barriers and supports
   disabilityBarriers: string[];
   supports: string[];
+
+  // WIOA-required IPE contract sections
+  agencyResponsibilities: string[];
+  clientResponsibilities: string[];
+  evaluationCriteria: string[];
 
   // Compliance
   wioaSection: string;
@@ -121,11 +153,19 @@ export function emptyIPE(
     expectedWage: "",
     expectedOutlook: "",
     timelineMonths: 12,
+    laborMarketOutlook: "",
     vrServices: [],
     trainingProvider: "",
+    serviceProviders: [],
+    estimatedAchievementDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .slice(0, 10),
     accommodations: { workplace: [], training: [], assistiveTech: [] },
     disabilityBarriers: [],
     supports: [],
+    agencyResponsibilities: [],
+    clientResponsibilities: [],
+    evaluationCriteria: [],
     wioaSection: "WIOA Title IV § 102(b)",
     reviewDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
       .toISOString()

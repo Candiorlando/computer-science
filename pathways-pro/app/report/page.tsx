@@ -1104,6 +1104,17 @@ function HollandAnalysisBlock({
   );
 }
 
+function providerTypeLabel(type: string): string {
+  const labels: Record<string, string> = {
+    "state-agency": "State VR agency",
+    "community-rehab-provider": "Community Rehab Provider (CRP)",
+    "training-provider": "Training provider",
+    "employer-partner": "Employer partner",
+    vendor: "Vendor",
+  };
+  return labels[type] ?? type;
+}
+
 function IPEPlanBlock({ ipe }: { ipe: IPE }) {
   return (
     <section style={{ pageBreakBefore: "always" }}>
@@ -1116,7 +1127,7 @@ function IPEPlanBlock({ ipe }: { ipe: IPE }) {
       <p>
         <strong>{ipe.employmentGoal}</strong>
         {ipe.goalSocCode && (
-          <span style={{ color: "#666" }}> (O*NET {ipe.goalSocCode})</span>
+          <span style={{ color: "#666" }}> (O*NET-SOC {ipe.goalSocCode})</span>
         )}
       </p>
       {ipe.goalRationale && <p>{ipe.goalRationale}</p>}
@@ -1125,6 +1136,12 @@ function IPEPlanBlock({ ipe }: { ipe: IPE }) {
           {ipe.expectedWage && <>Median wage: {ipe.expectedWage}. </>}
           {ipe.expectedOutlook && <>Outlook: {ipe.expectedOutlook}.</>}
         </p>
+      )}
+      {ipe.laborMarketOutlook && (
+        <>
+          <h3>Local labor market outlook (BLS OOH)</h3>
+          <p>{ipe.laborMarketOutlook}</p>
+        </>
       )}
 
       <h3>Primary disability</h3>
@@ -1154,6 +1171,55 @@ function IPEPlanBlock({ ipe }: { ipe: IPE }) {
               <li key={i}>{s}</li>
             ))}
           </ul>
+        </>
+      )}
+
+      {ipe.serviceProviders && ipe.serviceProviders.length > 0 && (
+        <>
+          <h3>Service providers &amp; settings</h3>
+          <table
+            style={{
+              width: "100%",
+              borderCollapse: "collapse",
+              fontSize: "10pt",
+              marginTop: "4px",
+            }}
+          >
+            <thead>
+              <tr style={{ background: "#f5f5f5" }}>
+                <th style={{ textAlign: "left", padding: "4px 8px", border: "0.5pt solid #ccc" }}>
+                  Provider
+                </th>
+                <th style={{ textAlign: "left", padding: "4px 8px", border: "0.5pt solid #ccc" }}>
+                  Type
+                </th>
+                <th style={{ textAlign: "left", padding: "4px 8px", border: "0.5pt solid #ccc" }}>
+                  Services
+                </th>
+                <th style={{ textAlign: "left", padding: "4px 8px", border: "0.5pt solid #ccc" }}>
+                  Integrated
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {ipe.serviceProviders.map((p, i) => (
+                <tr key={i}>
+                  <td style={{ padding: "4px 8px", border: "0.5pt solid #ccc" }}>
+                    <strong>{p.name}</strong>
+                  </td>
+                  <td style={{ padding: "4px 8px", border: "0.5pt solid #ccc" }}>
+                    {providerTypeLabel(p.type)}
+                  </td>
+                  <td style={{ padding: "4px 8px", border: "0.5pt solid #ccc" }}>
+                    {p.services}
+                  </td>
+                  <td style={{ padding: "4px 8px", border: "0.5pt solid #ccc" }}>
+                    {p.integratedSetting ? "Yes" : "No"}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </>
       )}
 
@@ -1212,10 +1278,60 @@ function IPEPlanBlock({ ipe }: { ipe: IPE }) {
         </>
       )}
 
-      <h3>Timeline & review</h3>
+      {ipe.agencyResponsibilities && ipe.agencyResponsibilities.length > 0 && (
+        <>
+          <h3>Agency responsibilities</h3>
+          <p style={{ fontSize: "10pt", color: "#555" }}>
+            What the VR agency commits to deliver as part of this signed
+            contract under WIOA Title IV.
+          </p>
+          <ul>
+            {ipe.agencyResponsibilities.map((a, i) => (
+              <li key={i}>{a}</li>
+            ))}
+          </ul>
+        </>
+      )}
+
+      {ipe.clientResponsibilities && ipe.clientResponsibilities.length > 0 && (
+        <>
+          <h3>Client responsibilities</h3>
+          <p style={{ fontSize: "10pt", color: "#555" }}>
+            What the client commits to do as part of this signed contract.
+          </p>
+          <ul>
+            {ipe.clientResponsibilities.map((c, i) => (
+              <li key={i}>{c}</li>
+            ))}
+          </ul>
+        </>
+      )}
+
+      {ipe.evaluationCriteria && ipe.evaluationCriteria.length > 0 && (
+        <>
+          <h3>Criteria for evaluation &amp; milestones</h3>
+          <p style={{ fontSize: "10pt", color: "#555" }}>
+            Objective check-in metrics for tracking progress toward the
+            employment goal.
+          </p>
+          <ul>
+            {ipe.evaluationCriteria.map((c, i) => (
+              <li key={i}>{c}</li>
+            ))}
+          </ul>
+        </>
+      )}
+
+      <h3>Timeline &amp; review</h3>
       <p>
-        Time to employment: <strong>{ipe.timelineMonths} months</strong>.
-        Annual review on{" "}
+        Estimated time to employment: <strong>{ipe.timelineMonths} months</strong>.
+        Estimated date of achievement:{" "}
+        <strong>
+          {ipe.estimatedAchievementDate
+            ? new Date(ipe.estimatedAchievementDate).toLocaleDateString()
+            : "—"}
+        </strong>
+        . Annual review on{" "}
         <strong>{new Date(ipe.reviewDate).toLocaleDateString()}</strong>.
       </p>
 
