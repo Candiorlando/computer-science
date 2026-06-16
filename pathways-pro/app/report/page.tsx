@@ -22,6 +22,7 @@ import { rankOccupations } from "@/lib/onet-data";
 import { riasecNames, traitNames } from "@/lib/assessments";
 import { analyzeHollandCode } from "@/lib/holland-analysis";
 import type { IPE } from "@/lib/ipe";
+import { loadScreenerResults, SCREENERS, type ScreenerResult } from "@/lib/screeners";
 
 export default function ReportPage() {
   return (
@@ -235,6 +236,8 @@ function ReportDocument({
   const hollandAnalysis = hasAssessment
     ? analyzeHollandCode(report.hollandCode!)
     : null;
+  const screenerResults =
+    typeof window !== "undefined" ? loadScreenerResults() : [];
 
   return (
     <div className="space-y-5">
@@ -288,6 +291,18 @@ function ReportDocument({
           comprehensive={!!ipeFullySigned}
         />
 
+        {ipeFullySigned && report.ipe && (
+          <ExecutiveSummaryBlock
+            report={report}
+            ipe={report.ipe}
+            hollandAnalysis={hollandAnalysis}
+          />
+        )}
+
+        {(report.intake?.goals || report.ipe?.employmentGoal) && (
+          <ClientGoalsBlock report={report} />
+        )}
+
         {report.intake && <IntakeBlock intake={report.intake} />}
 
         {hasAssessment && (
@@ -303,11 +318,20 @@ function ReportDocument({
           <HollandAnalysisBlock analysis={hollandAnalysis} />
         )}
 
+        {screenerResults.length > 0 && (
+          <ScreenerResultsBlock results={screenerResults} />
+        )}
+
         {report.topMatches && report.topMatches.length > 0 && (
           <MatchesBlock matches={report.topMatches} />
         )}
 
-        {report.tsa && <TSABlock tsa={report.tsa} />}
+        {report.tsa && (
+          <>
+            <TSAHighlightBlock tsa={report.tsa} />
+            <TSABlock tsa={report.tsa} />
+          </>
+        )}
 
         {ipeFullySigned && report.ipe && <IPEPlanBlock ipe={report.ipe} />}
 
@@ -511,6 +535,211 @@ function ReportHeader({
         Last updated {new Date(report.lastUpdated).toLocaleString()}
       </p>
     </header>
+  );
+}
+
+function ExecutiveSummaryBlock({
+  report,
+  ipe,
+  hollandAnalysis,
+}: {
+  report: ClientReport;
+  ipe: IPE;
+  hollandAnalysis: NonNullable<ReturnType<typeof analyzeHollandCode>> | null;
+}) {
+  const firstName = report.clientName.split(" ")[0];
+  const topMatch = report.topMatches?.[0]?.title;
+  const topSkill = report.tsa?.coreSkills?.[0]?.skill;
+  return (
+    <section
+      style={{
+        background: "#fafafa",
+        border: "0.5pt solid #ccc",
+        padding: "12px 14px",
+        borderRadius: "3px",
+        marginBottom: "14px",
+      }}
+    >
+      <h2 style={{ marginTop: 0 }}>Executive Summary</h2>
+      <p>
+        This Comprehensive Individualized Plan for Employment (IPE) Report
+        summarizes the assessment, planning, and signed agreement for{" "}
+        <strong>{report.clientName}</strong> (Case {report.caseId}), prepared
+        by <strong>{ipe.counselorName}</strong> under WIOA Title IV § 102(b).
+      </p>
+      <p>
+        {firstName}&apos;s employment goal is{" "}
+        <strong>{ipe.employmentGoal}</strong>
+        {ipe.timelineMonths > 0 && (
+          <>
+            , targeted within <strong>{ipe.timelineMonths} months</strong>
+          </>
+        )}
+        .{" "}
+        {hollandAnalysis && (
+          <>
+            Their personality profile (Holland code{" "}
+            <strong>{hollandAnalysis.code}</strong> —{" "}
+            {hollandAnalysis.primary.shortName} /{" "}
+            {hollandAnalysis.secondary.shortName} /{" "}
+            {hollandAnalysis.tertiary.shortName}) aligns with this goal.{" "}
+          </>
+        )}
+        {topMatch && (
+          <>
+            Their top occupational match is <strong>{topMatch}</strong>.{" "}
+          </>
+        )}
+        {topSkill && (
+          <>
+            A standout transferable skill identified is{" "}
+            <em>&ldquo;{topSkill}&rdquo;</em>.{" "}
+          </>
+        )}
+      </p>
+      <p style={{ fontSize: "10pt", color: "#555" }}>
+        Both counselor and client signatures are recorded at the close of this
+        document. This plan is active and binding under WIOA.
+      </p>
+    </section>
+  );
+}
+
+function ClientGoalsBlock({ report }: { report: ClientReport }) {
+  const intakeGoals = report.intake?.goals;
+  const ipeGoal = report.ipe?.employmentGoal;
+  const ipeRationale = report.ipe?.goalRationale;
+  return (
+    <section>
+      <h2>Client&apos;s Goals</h2>
+      {intakeGoals && (
+        <>
+          <h3>In their own words (from intake)</h3>
+          <p
+            style={{
+              fontStyle: "italic",
+              borderLeft: "3pt solid #b95c3c",
+              paddingLeft: "10px",
+              margin: "6px 0",
+            }}
+          >
+            &ldquo;{intakeGoals}&rdquo;
+          </p>
+        </>
+      )}
+      {ipeGoal && (
+        <>
+          <h3>Employment goal on the IPE</h3>
+          <p>
+            <strong>{ipeGoal}</strong>
+            {report.ipe?.goalSocCode && (
+              <span style={{ color: "#666" }}>
+                {" "}
+                (O*NET {report.ipe.goalSocCode})
+              </span>
+            )}
+          </p>
+          {ipeRationale && (
+            <p style={{ fontSize: "10.5pt" }}>{ipeRationale}</p>
+          )}
+        </>
+      )}
+    </section>
+  );
+}
+
+function ScreenerResultsBlock({ results }: { results: ScreenerResult[] }) {
+  return (
+    <section>
+      <h2>Clinical Screeners Completed</h2>
+      <p style={{ fontSize: "10pt", color: "#555" }}>
+        Public-domain instruments administered through Pathways Pro. Used at
+        intake to inform service planning, not for diagnosis.
+      </p>
+      {results.map((r) => {
+        const config = SCREENERS[r.screenerId];
+        if (!config) return null;
+        return (
+          <div
+            key={r.screenerId + r.completedAt}
+            style={{
+              borderTop: "0.5pt solid #ddd",
+              padding: "8px 0",
+              marginTop: "6px",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "baseline",
+                marginBottom: "4px",
+                flexWrap: "wrap",
+                gap: "8px",
+              }}
+            >
+              <strong>
+                {r.acronym} — {config.domain}
+              </strong>
+              <span style={{ fontSize: "10pt", color: "#666" }}>
+                Score: {r.totalScore}/{r.maxScore} · {r.band.label}
+              </span>
+            </div>
+            <p style={{ fontSize: "10pt", margin: "0 0 4px" }}>
+              {r.band.guidance}
+            </p>
+            {r.safetyFlag && (
+              <p
+                style={{
+                  fontSize: "10pt",
+                  color: "#9b1c1c",
+                  background: "#fee",
+                  padding: "6px 8px",
+                  borderRadius: "2px",
+                  margin: "4px 0",
+                }}
+              >
+                <strong>⚠ Safety flag:</strong> {r.safetyFlag.message}
+              </p>
+            )}
+            <p style={{ fontSize: "9pt", color: "#777", margin: 0 }}>
+              Completed {new Date(r.completedAt).toLocaleString()}
+            </p>
+          </div>
+        );
+      })}
+    </section>
+  );
+}
+
+function TSAHighlightBlock({ tsa }: { tsa: NonNullable<ClientReport["tsa"]> }) {
+  const top = tsa.coreSkills.slice(0, 5);
+  return (
+    <section
+      style={{
+        background: "#fff8f3",
+        border: "0.5pt solid #e9c8b2",
+        padding: "10px 14px",
+        borderRadius: "3px",
+      }}
+    >
+      <h2 style={{ marginTop: 0 }}>Top Transferable Skills</h2>
+      <p style={{ fontSize: "10pt", color: "#555", margin: "0 0 8px" }}>
+        Pulled from work, volunteering, hobbies, and caregiving — and
+        translated into employer-facing language.
+      </p>
+      <ol style={{ paddingLeft: "20px", margin: 0 }}>
+        {top.map((s, i) => (
+          <li key={i} style={{ marginBottom: "6px" }}>
+            <strong>{s.skill}</strong>
+            <br />
+            <span style={{ fontSize: "10pt", color: "#666" }}>
+              <em>Evidence:</em> {s.evidence}
+            </span>
+          </li>
+        ))}
+      </ol>
+    </section>
   );
 }
 
