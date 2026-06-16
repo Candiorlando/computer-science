@@ -103,7 +103,32 @@ export function loadIPE(caseId: string): IPE | null {
   if (typeof window === "undefined") return null;
   try {
     const raw = window.localStorage.getItem(KEY_PREFIX + caseId);
-    return raw ? (JSON.parse(raw) as IPE) : null;
+    if (!raw) return null;
+    const stored = JSON.parse(raw) as Partial<IPE>;
+    // Migrate older IPEs that pre-date the WIOA expansion fields so the
+    // builder UI and report renderers don't crash on undefined arrays.
+    const yearFromNow = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .slice(0, 10);
+    return {
+      ...(stored as IPE),
+      laborMarketOutlook: stored.laborMarketOutlook ?? "",
+      serviceProviders: stored.serviceProviders ?? [],
+      estimatedAchievementDate:
+        stored.estimatedAchievementDate ?? yearFromNow,
+      agencyResponsibilities: stored.agencyResponsibilities ?? [],
+      clientResponsibilities: stored.clientResponsibilities ?? [],
+      evaluationCriteria: stored.evaluationCriteria ?? [],
+      functionalLimitations: stored.functionalLimitations ?? [],
+      vrServices: stored.vrServices ?? [],
+      disabilityBarriers: stored.disabilityBarriers ?? [],
+      supports: stored.supports ?? [],
+      accommodations: stored.accommodations ?? {
+        workplace: [],
+        training: [],
+        assistiveTech: [],
+      },
+    };
   } catch {
     return null;
   }
