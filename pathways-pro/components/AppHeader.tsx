@@ -50,6 +50,7 @@ export function AppHeader() {
     { href: "/portal", label: "Home" },
     { href: "/intake", label: "Find My Path" },
     { href: "/results", label: "My Matches" },
+    { href: "/my-assessments", label: "My Assessments" },
     { href: "/transferable-skills", label: "My Skills" },
     { href: "/resume", label: "Resume" },
     { href: "/funding", label: "Funding" },

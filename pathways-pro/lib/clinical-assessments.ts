@@ -18,10 +18,15 @@ export interface Assessment {
   domain: string;
   time: string;
   cost: AssessmentCost;
+  /** Price/range to show on paid assessments (e.g. "Kit ~$1,200 + scoring fees") */
+  priceTag?: string;
   administration: AdministrationLevel;
   description: string;
   bestFor: string[];
   notes?: string;
+  /** Internal route — if set, the library shows "Take on Pathways Pro" and
+   * the assessment is administered in-app. Otherwise the user is sent to `url`. */
+  inAppPath?: string;
 }
 
 export interface AssessmentCategory {
@@ -43,13 +48,14 @@ export const ASSESSMENT_CATEGORIES: AssessmentCategory[] = [
         acronym: "O*NET IP",
         publisher: "U.S. Department of Labor",
         url: "https://www.mynextmove.org/explore/ip",
+        inAppPath: "/assessment",
         population: "Ages 14+, all literacy levels",
         domain: "RIASEC interest measurement",
         time: "10–15 min",
         cost: "free",
         administration: "self-administered",
         description:
-          "60-item Holland Code measurement. Used internally by Pathways Pro.",
+          "60-item Holland Code measurement. Built into Pathways Pro at the Interest Profiler.",
         bestFor: ["Initial career exploration", "Pre-ETS", "Job goal clarification"],
       },
       {
@@ -78,6 +84,7 @@ export const ASSESSMENT_CATEGORIES: AssessmentCategory[] = [
         domain: "Holland Code",
         time: "30–40 min",
         cost: "proprietary",
+        priceTag: "~$110 starter kit; ~$3–4 per online use",
         administration: "self-administered",
         description:
           "John Holland's original RIASEC instrument. Generates a 3-letter Holland Code with extensive interpretive materials.",
@@ -92,6 +99,7 @@ export const ASSESSMENT_CATEGORIES: AssessmentCategory[] = [
         domain: "Interest measurement with occupational themes",
         time: "35–40 min",
         cost: "proprietary",
+        priceTag: "~$15–25 per online profile",
         administration: "licensed-professional",
         description:
           "291-item assessment with extensive occupational profile matching. Widely used in college career services and rehabilitation.",
@@ -132,6 +140,7 @@ export const ASSESSMENT_CATEGORIES: AssessmentCategory[] = [
         domain: "Cognitive ability / IQ",
         time: "65–90 min",
         cost: "proprietary",
+        priceTag: "~$1,500 starter kit; ~$10–20 per online scoring",
         administration: "licensed-professional",
         description:
           "Gold-standard adult IQ measure. Required by many state agencies to document cognitive disability or learning needs.",
@@ -150,6 +159,7 @@ export const ASSESSMENT_CATEGORIES: AssessmentCategory[] = [
         domain: "Cognitive ability",
         time: "60–90 min",
         cost: "proprietary",
+        priceTag: "~$1,400 starter kit + ~$5–8 per online report",
         administration: "licensed-professional",
         description:
           "Comprehensive cognitive battery with broad CHC theory coverage. Common alternative to WAIS in rehabilitation contexts.",
@@ -202,6 +212,7 @@ export const ASSESSMENT_CATEGORIES: AssessmentCategory[] = [
         domain: "Mechanical reasoning",
         time: "30 min",
         cost: "proprietary",
+        priceTag: "~$200 manual + ~$45 per 25-form pack",
         administration: "counselor-administered",
         description:
           "Industry-standard for mechanical aptitude. Often required for skilled trades hiring and apprenticeship screening.",
@@ -227,6 +238,7 @@ export const ASSESSMENT_CATEGORIES: AssessmentCategory[] = [
         domain: "Reading, math, language",
         time: "1.5–4 hours",
         cost: "varies",
+        priceTag: "Free at WIOA sites; ~$2–6/test if licensed independently",
         administration: "counselor-administered",
         description:
           "Most commonly used adult basic skills assessment in WIOA-funded settings. NRS-compliant for reporting.",
@@ -245,6 +257,7 @@ export const ASSESSMENT_CATEGORIES: AssessmentCategory[] = [
         domain: "Reading, spelling, math computation",
         time: "30–45 min",
         cost: "proprietary",
+        priceTag: "~$400 starter kit; ~$3 per online scoring",
         administration: "licensed-professional",
         description:
           "Brief, individually-administered achievement screener. Quick way to document grade-equivalent skills.",
@@ -262,6 +275,7 @@ export const ASSESSMENT_CATEGORIES: AssessmentCategory[] = [
         domain: "Reading, math, written language",
         time: "60–90 min",
         cost: "proprietary",
+        priceTag: "~$1,400 starter kit + ~$5–8 per online report",
         administration: "licensed-professional",
         description:
           "Comprehensive achievement battery. Pairs with WJ-IV COG for ability-achievement comparison (specific learning disability documentation).",
@@ -282,13 +296,14 @@ export const ASSESSMENT_CATEGORIES: AssessmentCategory[] = [
         acronym: "Mini-IPIP",
         publisher: "Public domain (Donnellan et al., 2006)",
         url: "https://ipip.ori.org/MiniIPIP.htm",
+        inAppPath: "/assessment",
         population: "Ages 14+",
         domain: "5 personality factors",
         time: "5 min",
         cost: "free",
         administration: "self-administered",
         description:
-          "20-item public-domain Big Five. Used internally by Pathways Pro.",
+          "20-item public-domain Big Five. Built into Pathways Pro at the Interest Profiler.",
         bestFor: ["Quick personality screen", "Discussion of work style"],
       },
       {
@@ -300,6 +315,7 @@ export const ASSESSMENT_CATEGORIES: AssessmentCategory[] = [
         domain: "16 primary personality factors",
         time: "35–50 min",
         cost: "proprietary",
+        priceTag: "~$30–60 per online administration",
         administration: "licensed-professional",
         description:
           "Well-validated personality measure with deep career-counseling interpretive support.",
@@ -314,6 +330,7 @@ export const ASSESSMENT_CATEGORIES: AssessmentCategory[] = [
         domain: "Clinical personality",
         time: "35–50 min",
         cost: "proprietary",
+        priceTag: "~$15–40 per online administration; manual ~$120",
         administration: "licensed-professional",
         description:
           "Clinical personality assessment. Used in cases where psychopathology may affect employability.",
@@ -370,13 +387,14 @@ export const ASSESSMENT_CATEGORIES: AssessmentCategory[] = [
         acronym: "WHODAS 2.0",
         publisher: "World Health Organization",
         url: "https://www.who.int/standards/classifications/international-classification-of-functioning-disability-and-health/who-disability-assessment-schedule",
+        inAppPath: "/clinical-assessments/whodas12",
         population: "Ages 18+",
         domain: "Functional disability across 6 domains",
-        time: "5–20 min (multiple versions)",
+        time: "5 min (12-item) — built in",
         cost: "free",
-        administration: "counselor-administered",
+        administration: "self-administered",
         description:
-          "ICF-aligned functional measurement: cognition, mobility, self-care, getting along, life activities, participation.",
+          "ICF-aligned functional measurement: cognition, mobility, self-care, getting along, life activities, participation. The 12-item self-administered version is built into Pathways Pro.",
         bestFor: [
           "ICF-consistent disability documentation",
           "RSA-911 functional measures",
@@ -396,13 +414,14 @@ export const ASSESSMENT_CATEGORIES: AssessmentCategory[] = [
         acronym: "PHQ-9",
         publisher: "Pfizer (public domain)",
         url: "https://www.phqscreeners.com/",
+        inAppPath: "/clinical-assessments/phq9",
         population: "Ages 13+",
         domain: "Depression severity",
-        time: "3 min",
+        time: "3 min — built in",
         cost: "free",
         administration: "self-administered",
         description:
-          "9-item DSM-5-aligned depression screener. Industry standard in primary care and behavioral health.",
+          "9-item DSM-5-aligned depression screener with automatic severity banding and suicidal-ideation safety flag. Industry standard in primary care and behavioral health.",
         bestFor: [
           "Routine intake screening",
           "Monitoring change over time",
@@ -414,13 +433,14 @@ export const ASSESSMENT_CATEGORIES: AssessmentCategory[] = [
         acronym: "GAD-7",
         publisher: "Pfizer (public domain)",
         url: "https://www.phqscreeners.com/",
+        inAppPath: "/clinical-assessments/gad7",
         population: "Ages 13+",
         domain: "Anxiety severity",
-        time: "2 min",
+        time: "2 min — built in",
         cost: "free",
         administration: "self-administered",
         description:
-          "7-item brief anxiety screener. Pairs with PHQ-9 as a standard combined intake.",
+          "7-item brief anxiety screener with automatic severity banding. Pairs with PHQ-9 as a standard combined intake.",
         bestFor: ["Routine intake screening", "Tracking anxiety symptom change"],
       },
       {
@@ -434,7 +454,7 @@ export const ASSESSMENT_CATEGORIES: AssessmentCategory[] = [
         cost: "free",
         administration: "self-administered",
         description:
-          "20-item DSM-5 PTSD symptom checklist. Free from the National Center for PTSD.",
+          "20-item DSM-5 PTSD symptom checklist. Free from the National Center for PTSD; download the PDF version. (In-app version planned for next release.)",
         bestFor: ["Veterans", "Trauma-impacted clients", "TBI follow-up"],
       },
       {
@@ -446,6 +466,7 @@ export const ASSESSMENT_CATEGORIES: AssessmentCategory[] = [
         domain: "Depression severity",
         time: "5–10 min",
         cost: "proprietary",
+        priceTag: "~$135 starter kit; ~$3 per form",
         administration: "licensed-professional",
         description:
           "Long-standard depression measure. Often used when PHQ-9 isn't sufficient or when comparing to historical scores.",
@@ -464,13 +485,14 @@ export const ASSESSMENT_CATEGORIES: AssessmentCategory[] = [
         acronym: "AUDIT",
         publisher: "World Health Organization (public domain)",
         url: "https://www.who.int/publications/i/item/audit-the-alcohol-use-disorders-identification-test-guidelines-for-use-in-primary-health-care",
+        inAppPath: "/clinical-assessments/audit",
         population: "Adults",
         domain: "Hazardous and harmful alcohol use",
-        time: "2–3 min",
+        time: "2–3 min — built in",
         cost: "free",
         administration: "self-administered",
         description:
-          "10-item screener. AUDIT-C (3-item) commonly used as brief alternative.",
+          "10-item WHO screener with automatic risk-zone interpretation (low risk → possible dependence).",
         bestFor: ["Routine intake", "Pre-referral to behavioral health"],
       },
       {
@@ -478,13 +500,14 @@ export const ASSESSMENT_CATEGORIES: AssessmentCategory[] = [
         acronym: "DAST-10",
         publisher: "Public domain (Skinner)",
         url: "https://cde.nida.nih.gov/instrument/e9053390-ee9c-9140-e040-bb89ad433d69",
+        inAppPath: "/clinical-assessments/dast10",
         population: "Adolescents and adults",
         domain: "Drug use other than alcohol",
-        time: "5 min",
+        time: "5 min — built in",
         cost: "free",
         administration: "self-administered",
         description:
-          "Free brief screener for non-alcohol substance use. NIH-distributed.",
+          "Free brief screener for non-alcohol substance use with automatic severity banding (none → severe).",
         bestFor: ["Routine intake", "Detection without specifying substance"],
       },
       {
@@ -492,12 +515,13 @@ export const ASSESSMENT_CATEGORIES: AssessmentCategory[] = [
         acronym: "CAGE",
         publisher: "Public domain (Ewing)",
         url: "https://nida.nih.gov/research-topics/screening-tools-resources",
+        inAppPath: "/clinical-assessments/cage",
         population: "Adults",
         domain: "Alcohol use brief screen",
-        time: "1 min",
+        time: "1 min — built in",
         cost: "free",
         administration: "counselor-administered",
-        description: "4-item ultra-brief alcohol screener.",
+        description: "4-item ultra-brief alcohol screener with automatic positive/negative interpretation.",
         bestFor: ["Time-limited intake", "Initial screening"],
       },
     ],
@@ -517,6 +541,7 @@ export const ASSESSMENT_CATEGORIES: AssessmentCategory[] = [
         domain: "Adaptive behavior across 4 domains",
         time: "30–60 min",
         cost: "proprietary",
+        priceTag: "~$600 starter kit + ~$5 per form",
         administration: "licensed-professional",
         description:
           "Gold-standard adaptive behavior measure. Required by most states for I/DD eligibility.",
@@ -534,6 +559,7 @@ export const ASSESSMENT_CATEGORIES: AssessmentCategory[] = [
         domain: "Support needs across life activities",
         time: "2–3 hours",
         cost: "proprietary",
+        priceTag: "Training ~$1,200; ~$30 per administration",
         administration: "licensed-professional",
         description:
           "Measures intensity of supports needed (rather than what the person can/can't do). Used by many state I/DD agencies for resource allocation.",
@@ -551,6 +577,7 @@ export const ASSESSMENT_CATEGORIES: AssessmentCategory[] = [
         domain: "Adaptive behavior (DSM-5 aligned)",
         time: "15–20 min",
         cost: "proprietary",
+        priceTag: "~$400 starter kit; ~$3 per form",
         administration: "licensed-professional",
         description:
           "DSM-5-aligned adaptive behavior measure with strong psychometrics. Alternative to Vineland-3.",
@@ -573,6 +600,7 @@ export const ASSESSMENT_CATEGORIES: AssessmentCategory[] = [
         domain: "Transition needs across 9 domains",
         time: "20–30 min",
         cost: "proprietary",
+        priceTag: "~$200 starter kit + ~$50 per 25-form pack",
         administration: "counselor-administered",
         description:
           "Aligns with IDEA transition planning requirements. Commonly used in joint IEP/IPE planning.",
@@ -626,9 +654,10 @@ export const ASSESSMENT_CATEGORIES: AssessmentCategory[] = [
         acronym: "Pathways TSA",
         publisher: "Pathways Pro",
         url: "/transferable-skills",
+        inAppPath: "/transferable-skills",
         population: "Adolescents and adults",
         domain: "Skills from work, volunteering, hobbies, caregiving",
-        time: "15–20 min",
+        time: "15–20 min — built in",
         cost: "free",
         administration: "self-administered",
         description:
@@ -648,6 +677,7 @@ export const ASSESSMENT_CATEGORIES: AssessmentCategory[] = [
         domain: "Aptitudes + interests",
         time: "60 min",
         cost: "proprietary",
+        priceTag: "~$200 examiner's kit + ~$60 per 25-form pack",
         administration: "counselor-administered",
         description:
           "Pairs aptitude testing with interest survey. Common in transition-age VR.",
@@ -662,6 +692,7 @@ export const ASSESSMENT_CATEGORIES: AssessmentCategory[] = [
         domain: "Neuropsychological + vocational",
         time: "Variable (multi-day)",
         cost: "proprietary",
+        priceTag: "Full system $2,000+; training required",
         administration: "licensed-professional",
         description:
           "Comprehensive neuropsychological battery built for VR. Strong for clients with TBI or significant cognitive disability.",
@@ -676,6 +707,7 @@ export const ASSESSMENT_CATEGORIES: AssessmentCategory[] = [
         domain: "Performance-based work samples",
         time: "Variable (per sample)",
         cost: "proprietary",
+        priceTag: "Individual work samples ~$1,500–$4,000 each",
         administration: "counselor-administered",
         description:
           "Standardized work samples replicating job tasks (small parts assembly, clerical, sorting, etc.). Direct performance measurement.",
@@ -701,6 +733,7 @@ export const ASSESSMENT_CATEGORIES: AssessmentCategory[] = [
         domain: "Finger and hand dexterity",
         time: "10–15 min",
         cost: "proprietary",
+        priceTag: "~$350 apparatus (one-time purchase)",
         administration: "counselor-administered",
         description:
           "Quick fine motor + bilateral coordination measure. Standard in industrial selection.",
@@ -718,6 +751,7 @@ export const ASSESSMENT_CATEGORIES: AssessmentCategory[] = [
         domain: "Fine motor + tool use",
         time: "10–15 min",
         cost: "proprietary",
+        priceTag: "~$300 apparatus (one-time purchase)",
         administration: "counselor-administered",
         description:
           "Tweezers and screwdriver work sample. Strong predictor of fine assembly job performance.",
@@ -732,6 +766,7 @@ export const ASSESSMENT_CATEGORIES: AssessmentCategory[] = [
         domain: "Gross hand and arm dexterity",
         time: "10 min",
         cost: "proprietary",
+        priceTag: "~$400 apparatus (one-time purchase)",
         administration: "counselor-administered",
         description:
           "Block-placing and turning tasks for arm/hand dexterity.",
@@ -768,6 +803,7 @@ export const ASSESSMENT_CATEGORIES: AssessmentCategory[] = [
         domain: "Independent living competencies",
         time: "45 min",
         cost: "proprietary",
+        priceTag: "~$300 starter kit + ~$3 per form",
         administration: "licensed-professional",
         description:
           "Measures memory, money management, transportation, health and safety, social adjustment.",

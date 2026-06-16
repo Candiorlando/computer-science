@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense } from "react";
+import Link from "next/link";
 import { loadSession } from "@/lib/session";
 import {
   ASSESSMENT_CATEGORIES,
@@ -9,13 +11,41 @@ import {
   type Assessment,
   type AssessmentCost,
 } from "@/lib/clinical-assessments";
+import {
+  CLIENTS,
+  type ClientUser,
+  type CounselorUser,
+} from "@/lib/users";
+import {
+  addAssignment,
+  isAssigned,
+  loadAssignments,
+  removeAssignment,
+  type Assignment,
+} from "@/lib/assignments";
 
 export default function ClinicalAssessmentsPage() {
+  return (
+    <Suspense fallback={<p className="text-ink/50">Loading…</p>}>
+      <Inner />
+    </Suspense>
+  );
+}
+
+function Inner() {
   const router = useRouter();
-  const [authorized, setAuthorized] = useState(false);
+  const search = useSearchParams();
+  const [user, setUser] = useState<CounselorUser | null>(null);
+  const [selectedCaseId, setSelectedCaseId] = useState<string | null>(
+    search.get("case"),
+  );
+  const [assignmentsBump, setAssignmentsBump] = useState(0);
   const [query, setQuery] = useState("");
   const [costFilter, setCostFilter] = useState<AssessmentCost | "all">("all");
   const [adminFilter, setAdminFilter] = useState<AdministrationLevel | "all">(
+    "all",
+  );
+  const [hostingFilter, setHostingFilter] = useState<"all" | "in-app" | "external">(
     "all",
   );
 
@@ -23,8 +53,32 @@ export default function ClinicalAssessmentsPage() {
     const s = loadSession();
     if (!s) return router.replace("/");
     if (s.role !== "counselor") return router.replace("/portal");
-    setAuthorized(true);
+    setUser(s);
   }, [router]);
+
+  const clients = useMemo(
+    () =>
+      user
+        ? user.clientKeys
+            .map((k) => CLIENTS[k])
+            .filter((c): c is ClientUser => Boolean(c))
+        : [],
+    [user],
+  );
+
+  const selectedClient = useMemo(
+    () => clients.find((c) => c.caseId === selectedCaseId) ?? null,
+    [clients, selectedCaseId],
+  );
+
+  const assignedNames = useMemo(() => {
+    if (!selectedCaseId) return new Set<string>();
+    return new Set(
+      loadAssignments(selectedCaseId).map((a) => a.assessmentName),
+    );
+    // bump dep
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedCaseId, assignmentsBump]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -34,6 +88,8 @@ export default function ClinicalAssessmentsPage() {
         if (costFilter !== "all" && a.cost !== costFilter) return false;
         if (adminFilter !== "all" && a.administration !== adminFilter)
           return false;
+        if (hostingFilter === "in-app" && !a.inAppPath) return false;
+        if (hostingFilter === "external" && a.inAppPath) return false;
         if (!q) return true;
         const hay = [
           a.name,
@@ -50,11 +106,35 @@ export default function ClinicalAssessmentsPage() {
         return hay.includes(q);
       }),
     })).filter((cat) => cat.assessments.length > 0);
-  }, [query, costFilter, adminFilter]);
+  }, [query, costFilter, adminFilter, hostingFilter]);
 
   const totalCount = filtered.reduce((s, c) => s + c.assessments.length, 0);
 
-  if (!authorized) return null;
+  if (!user) return null;
+
+  function assign(a: Assignment["assessmentName"], asmt: Assessment) {
+    if (!selectedCaseId) return;
+    addAssignment(selectedCaseId, {
+      assessmentName: asmt.name,
+      acronym: asmt.acronym,
+      inAppPath: asmt.inAppPath,
+      externalUrl: asmt.url,
+      cost: asmt.cost,
+      priceTag: asmt.priceTag,
+      domain: asmt.domain,
+      time: asmt.time,
+      assignedBy: `${user!.name}, ${user!.credentials}`,
+      assignedAt: new Date().toISOString(),
+      isComplete: false,
+    });
+    setAssignmentsBump((n) => n + 1);
+  }
+
+  function unassign(name: string) {
+    if (!selectedCaseId) return;
+    removeAssignment(selectedCaseId, name);
+    setAssignmentsBump((n) => n + 1);
+  }
 
   return (
     <div className="space-y-6">
@@ -64,12 +144,23 @@ export default function ClinicalAssessmentsPage() {
         </p>
         <h1 className="text-4xl mb-2">VR Assessments by Purpose</h1>
         <p className="text-ink/70 prose-narrow">
-          Instruments used by Certified Rehabilitation Counselors. Organized
-          by domain, with explicit cost and administration-level flags so you
-          know whether to administer in-office, refer to a psychologist, or
-          send the client to take it themselves.
+          Instruments used by Certified Rehabilitation Counselors. Free
+          instruments built directly into Pathways Pro are marked{" "}
+          <span className="text-green-700 font-semibold">In-app</span>;
+          proprietary instruments show publisher pricing. Pick a client below
+          to assign assessments to their case — only what you assign will show
+          up on their portal.
         </p>
       </header>
+
+      <ClientPicker
+        clients={clients}
+        selected={selectedClient}
+        onSelect={(id) => {
+          setSelectedCaseId(id);
+          router.replace(id ? `/clinical-assessments?case=${id}` : "/clinical-assessments");
+        }}
+      />
 
       <section className="border border-ink/15 rounded-lg p-4 bg-cream space-y-3">
         <input
@@ -80,10 +171,27 @@ export default function ClinicalAssessmentsPage() {
           className="w-full bg-white border border-ink/15 rounded px-3 py-2 focus:outline-none focus:border-accent text-sm"
         />
         <div className="flex flex-wrap gap-3 text-sm">
-          <div>
-            <span className="text-xs uppercase tracking-wider text-ink/60 mr-2">
-              Cost
-            </span>
+          <FilterGroup label="Hosting">
+            <FilterChip
+              active={hostingFilter === "all"}
+              onClick={() => setHostingFilter("all")}
+            >
+              All
+            </FilterChip>
+            <FilterChip
+              active={hostingFilter === "in-app"}
+              onClick={() => setHostingFilter("in-app")}
+            >
+              In-app only
+            </FilterChip>
+            <FilterChip
+              active={hostingFilter === "external"}
+              onClick={() => setHostingFilter("external")}
+            >
+              External
+            </FilterChip>
+          </FilterGroup>
+          <FilterGroup label="Cost">
             <FilterChip
               active={costFilter === "all"}
               onClick={() => setCostFilter("all")}
@@ -102,11 +210,8 @@ export default function ClinicalAssessmentsPage() {
             >
               Proprietary
             </FilterChip>
-          </div>
-          <div>
-            <span className="text-xs uppercase tracking-wider text-ink/60 mr-2">
-              Administered by
-            </span>
+          </FilterGroup>
+          <FilterGroup label="Administered by">
             <FilterChip
               active={adminFilter === "all"}
               onClick={() => setAdminFilter("all")}
@@ -123,15 +228,15 @@ export default function ClinicalAssessmentsPage() {
               active={adminFilter === "counselor-administered"}
               onClick={() => setAdminFilter("counselor-administered")}
             >
-              Counselor (you)
+              Counselor
             </FilterChip>
             <FilterChip
               active={adminFilter === "licensed-professional"}
               onClick={() => setAdminFilter("licensed-professional")}
             >
-              Licensed professional
+              Licensed prof.
             </FilterChip>
-          </div>
+          </FilterGroup>
         </div>
         <p className="text-xs text-ink/60">
           {totalCount} assessment{totalCount === 1 ? "" : "s"} match
@@ -148,7 +253,14 @@ export default function ClinicalAssessmentsPage() {
           </div>
           <div className="grid md:grid-cols-2 gap-3">
             {cat.assessments.map((a) => (
-              <AssessmentCard key={a.name} assessment={a} />
+              <AssessmentCard
+                key={a.name}
+                assessment={a}
+                selectedClient={selectedClient}
+                isAssigned={assignedNames.has(a.name)}
+                onAssign={() => assign(a.name, a)}
+                onUnassign={() => unassign(a.name)}
+              />
             ))}
           </div>
         </section>
@@ -187,6 +299,65 @@ export default function ClinicalAssessmentsPage() {
   );
 }
 
+function ClientPicker({
+  clients,
+  selected,
+  onSelect,
+}: {
+  clients: ClientUser[];
+  selected: ClientUser | null;
+  onSelect: (caseId: string | null) => void;
+}) {
+  return (
+    <section className="border border-accent/30 bg-accent/5 rounded-lg p-4">
+      <div className="flex items-baseline gap-3 flex-wrap">
+        <span className="text-xs uppercase tracking-wider text-ink/60">
+          Assigning for client:
+        </span>
+        <select
+          value={selected?.caseId ?? ""}
+          onChange={(e) => onSelect(e.target.value || null)}
+          className="bg-white border border-ink/20 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-accent"
+        >
+          <option value="">— Pick a client to enable assigning —</option>
+          {clients.map((c) => (
+            <option key={c.caseId} value={c.caseId}>
+              {c.name} ({c.caseId})
+            </option>
+          ))}
+        </select>
+        {selected && (
+          <span className="text-xs text-ink/60">
+            {loadAssignments(selected.caseId).length} currently assigned
+          </span>
+        )}
+      </div>
+      <p className="text-xs text-ink/60 mt-2">
+        The client will see these on their portal under{" "}
+        <strong>My Assessments</strong>. Free in-app assessments they can take
+        right there; external/paid ones link out with your instructions.
+      </p>
+    </section>
+  );
+}
+
+function FilterGroup({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <span className="text-xs uppercase tracking-wider text-ink/60 mr-2">
+        {label}
+      </span>
+      {children}
+    </div>
+  );
+}
+
 function FilterChip({
   active,
   onClick,
@@ -210,7 +381,19 @@ function FilterChip({
   );
 }
 
-function AssessmentCard({ assessment: a }: { assessment: Assessment }) {
+function AssessmentCard({
+  assessment: a,
+  selectedClient,
+  isAssigned,
+  onAssign,
+  onUnassign,
+}: {
+  assessment: Assessment;
+  selectedClient: ClientUser | null;
+  isAssigned: boolean;
+  onAssign: () => void;
+  onUnassign: () => void;
+}) {
   const costStyles = {
     free: "bg-green-100 text-green-800",
     proprietary: "bg-amber-100 text-amber-800",
@@ -223,7 +406,13 @@ function AssessmentCard({ assessment: a }: { assessment: Assessment }) {
   } as const;
 
   return (
-    <article className="border border-ink/15 rounded-lg p-4 bg-cream flex flex-col gap-2">
+    <article
+      className={`border rounded-lg p-4 flex flex-col gap-2 ${
+        isAssigned
+          ? "border-accent/50 bg-accent/5"
+          : "border-ink/15 bg-cream"
+      }`}
+    >
       <div className="flex items-baseline justify-between gap-2">
         <div className="flex-1">
           <h3 className="font-semibold text-base">
@@ -236,12 +425,25 @@ function AssessmentCard({ assessment: a }: { assessment: Assessment }) {
           </h3>
           <p className="text-xs text-ink/60">{a.publisher}</p>
         </div>
-        <span
-          className={`text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded-full ${costStyles[a.cost]}`}
-        >
-          {a.cost === "free" ? "Free" : a.cost === "proprietary" ? "Paid" : "Varies"}
-        </span>
+        <div className="flex flex-col gap-1 items-end">
+          {a.inAppPath && (
+            <span className="text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 whitespace-nowrap">
+              ✓ In-app
+            </span>
+          )}
+          <span
+            className={`text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded-full ${costStyles[a.cost]} whitespace-nowrap`}
+          >
+            {a.cost === "free" ? "Free" : a.cost === "proprietary" ? "Paid" : "Varies"}
+          </span>
+        </div>
       </div>
+
+      {a.cost !== "free" && a.priceTag && (
+        <p className="text-xs text-amber-900 bg-amber-50 border border-amber-200 rounded px-2 py-1">
+          💰 <strong>Cost:</strong> {a.priceTag}
+        </p>
+      )}
 
       <p className="text-sm text-ink/80">{a.description}</p>
 
@@ -273,14 +475,47 @@ function AssessmentCard({ assessment: a }: { assessment: Assessment }) {
         </p>
       )}
 
-      <a
-        href={a.url}
-        target="_blank"
-        rel="noreferrer"
-        className="mt-auto inline-block border border-ink/20 px-3 py-1.5 rounded hover:border-accent hover:bg-accent/5 text-sm self-start"
-      >
-        Open {a.acronym || a.name} ↗
-      </a>
+      <div className="mt-auto pt-2 flex flex-wrap gap-2">
+        {a.inAppPath ? (
+          <Link
+            href={a.inAppPath}
+            className="bg-emerald-700 text-white px-3 py-1.5 rounded text-sm font-semibold hover:bg-emerald-800"
+          >
+            Preview in app →
+          </Link>
+        ) : (
+          <a
+            href={a.url}
+            target="_blank"
+            rel="noreferrer"
+            className="border border-ink/20 px-3 py-1.5 rounded text-sm hover:border-accent hover:bg-accent/5"
+          >
+            Open publisher ↗
+          </a>
+        )}
+
+        {selectedClient &&
+          (isAssigned ? (
+            <button
+              onClick={onUnassign}
+              className="border border-accent/50 text-accent bg-white px-3 py-1.5 rounded text-sm font-semibold"
+            >
+              ✓ Assigned to {selectedClient.name.split(" ")[0]} (click to unassign)
+            </button>
+          ) : (
+            <button
+              onClick={onAssign}
+              className="bg-accent text-cream px-3 py-1.5 rounded text-sm font-semibold hover:bg-accent/90"
+            >
+              + Assign to {selectedClient.name.split(" ")[0]}
+            </button>
+          ))}
+        {!selectedClient && (
+          <span className="text-xs text-ink/50 self-center">
+            Pick a client above to assign
+          </span>
+        )}
+      </div>
     </article>
   );
 }
