@@ -24,6 +24,59 @@ import { analyzeHollandCode } from "@/lib/holland-analysis";
 import type { IPE } from "@/lib/ipe";
 import { loadScreenerResults, SCREENERS, type ScreenerResult } from "@/lib/screeners";
 
+// ─── Clinical IPE Report (CRC formal structure) ─────────────────────────
+interface ClinicalReport {
+  clientProfile: string;
+  disabilityAndFunctionalLimitations: {
+    primaryDisability: string;
+    secondaryConditions: string;
+    functionalLimitations: string[];
+    impedimentNarrative: string;
+  };
+  vocationalAssessmentSummary: {
+    transferableSkills: string[];
+    aptitudes: string[];
+    careerInterests: string[];
+    summaryNarrative: string;
+  };
+  proposedEmploymentGoal: {
+    goal: string;
+    socCode: string;
+    justification: string;
+  };
+  barrierMitigationAndServices: {
+    assistiveTechAndAccommodations: string[];
+    placementServices: string[];
+    trainingAndEducation: string[];
+  };
+  clientResponsibilitiesAndMilestones: {
+    immediateActions: string[];
+    shortTermMilestones: string[];
+    longTermMilestones: string[];
+  };
+  generatedAt: string;
+}
+
+const CLINICAL_KEY_PREFIX = "pathways-pro:clinical-report-v1:";
+
+function loadClinicalReport(caseId: string): ClinicalReport | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(CLINICAL_KEY_PREFIX + caseId);
+    return raw ? (JSON.parse(raw) as ClinicalReport) : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveClinicalReport(caseId: string, report: ClinicalReport) {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem(
+    CLINICAL_KEY_PREFIX + caseId,
+    JSON.stringify(report),
+  );
+}
+
 export default function ReportPage() {
   return (
     <Suspense fallback={<p className="text-ink/50">Loading…</p>}>
@@ -201,10 +254,73 @@ function ReportDocument({
   onBack?: () => void;
 }) {
   const [report, setReport] = useState<ClientReport | null>(null);
+  const [clinical, setClinical] = useState<ClinicalReport | null>(null);
+  const [generating, setGenerating] = useState(false);
+  const [genError, setGenError] = useState<string | null>(null);
 
   useEffect(() => {
     setReport(loadClientReport(caseId));
+    setClinical(loadClinicalReport(caseId));
   }, [caseId]);
+
+  async function generateClinical() {
+    if (!report) return;
+    setGenError(null);
+    setGenerating(true);
+    try {
+      const age = report.intake?.age;
+      const isYouth =
+        !!age &&
+        (parseInt(age) <= 21 ||
+          /youth|hs|high school|teen/i.test(age));
+      const resp = await fetch("/api/generate-clinical-report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          clientName: report.clientName,
+          caseId: report.caseId,
+          clientDob: report.clientDob,
+          counselorName: report.counselorName,
+          isTransitionYouth: isYouth,
+          intake: report.intake,
+          bigFive: report.bigFive,
+          riasec: report.riasec,
+          hollandCode: report.hollandCode,
+          topMatches: report.topMatches,
+          tsa: report.tsa,
+          ipe: report.ipe,
+          screenerResults: (typeof window !== "undefined"
+            ? loadScreenerResults()
+            : []
+          ).map((r) => ({
+            acronym: r.acronym,
+            domain: SCREENERS[r.screenerId]?.domain ?? "",
+            totalScore: r.totalScore,
+            maxScore: r.maxScore,
+            bandLabel: r.band.label,
+            bandGuidance: r.band.guidance,
+          })),
+        }),
+      });
+      if (!resp.ok) {
+        const body = await resp.json().catch(() => ({ error: "Request failed" }));
+        setGenError(body.error ?? "Generation failed.");
+        setGenerating(false);
+        return;
+      }
+      const data = (await resp.json()) as Omit<ClinicalReport, "generatedAt">;
+      const cr: ClinicalReport = {
+        ...data,
+        generatedAt: new Date().toISOString(),
+      };
+      saveClinicalReport(caseId, cr);
+      setClinical(cr);
+    } catch (e) {
+      setGenError(e instanceof Error ? e.message : "Network error");
+    } finally {
+      setGenerating(false);
+    }
+  }
 
   if (!report) {
     return (
@@ -253,7 +369,20 @@ function ReportDocument({
           )}
           <h1 className="text-2xl">Assessment Report</h1>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
+          {!isClient && ipeFullySigned && (
+            <button
+              onClick={generateClinical}
+              disabled={generating}
+              className="bg-emerald-700 text-white px-4 py-2 rounded font-semibold text-sm disabled:opacity-50"
+            >
+              {generating
+                ? "Synthesizing with Claude Opus 4.8…"
+                : clinical
+                  ? "Re-generate Clinical IPE Report ↻"
+                  : "🧠 Generate Clinical IPE Report"}
+            </button>
+          )}
           {!isClient && (
             <Link
               href="/clinical-assessments"
@@ -270,6 +399,11 @@ function ReportDocument({
           </button>
         </div>
       </div>
+      {genError && (
+        <div className="text-sm border border-accent/40 bg-accent/10 text-accent p-3 rounded print:hidden">
+          {genError}
+        </div>
+      )}
 
       {ipeFullySigned && (
         <section className="border border-emerald-300 bg-emerald-50 rounded-lg p-5 print:hidden">
@@ -298,6 +432,8 @@ function ReportDocument({
             hollandAnalysis={hollandAnalysis}
           />
         )}
+
+        {clinical && <ClinicalReportBlock report={clinical} />}
 
         {(report.intake?.goals || report.ipe?.employmentGoal) && (
           <ClientGoalsBlock report={report} />
@@ -535,6 +671,199 @@ function ReportHeader({
         Last updated {new Date(report.lastUpdated).toLocaleString()}
       </p>
     </header>
+  );
+}
+
+function ClinicalReportBlock({ report }: { report: ClinicalReport }) {
+  const dl = report.disabilityAndFunctionalLimitations;
+  const va = report.vocationalAssessmentSummary;
+  const eg = report.proposedEmploymentGoal;
+  const bm = report.barrierMitigationAndServices;
+  const cr = report.clientResponsibilitiesAndMilestones;
+
+  return (
+    <section style={{ pageBreakBefore: "always" }}>
+      <h2 style={{ textAlign: "center", letterSpacing: "0.04em" }}>
+        Clinical Individualized Plan for Employment Report
+      </h2>
+      <p
+        style={{
+          textAlign: "center",
+          fontSize: "10pt",
+          color: "#666",
+          marginTop: "-4px",
+        }}
+      >
+        Prepared per WIOA Title IV § 102(b) · CRCC ethical standards · AI-synthesized
+        from source data, counselor-reviewed
+      </p>
+
+      <h3>1. Client Profile &amp; Background</h3>
+      <p>{report.clientProfile}</p>
+
+      <h3>2. Disability &amp; Functional Limitations</h3>
+      <p>
+        <strong>Primary disability:</strong> {dl.primaryDisability}
+      </p>
+      {dl.secondaryConditions && (
+        <p>
+          <strong>Secondary conditions:</strong> {dl.secondaryConditions}
+        </p>
+      )}
+      {dl.functionalLimitations.length > 0 && (
+        <>
+          <p style={{ marginBottom: "2px" }}>
+            <strong>Functional limitations:</strong>
+          </p>
+          <ul>
+            {dl.functionalLimitations.map((f, i) => (
+              <li key={i}>{f}</li>
+            ))}
+          </ul>
+        </>
+      )}
+      <p>
+        <em>Substantial impediment to employment:</em> {dl.impedimentNarrative}
+      </p>
+
+      <h3>3. Vocational Assessment Summary</h3>
+      {va.transferableSkills.length > 0 && (
+        <>
+          <p style={{ marginBottom: "2px" }}>
+            <strong>Transferable skills:</strong>
+          </p>
+          <ul>
+            {va.transferableSkills.map((s, i) => (
+              <li key={i}>{s}</li>
+            ))}
+          </ul>
+        </>
+      )}
+      {va.aptitudes.length > 0 && (
+        <>
+          <p style={{ marginBottom: "2px" }}>
+            <strong>Aptitudes:</strong>
+          </p>
+          <ul>
+            {va.aptitudes.map((a, i) => (
+              <li key={i}>{a}</li>
+            ))}
+          </ul>
+        </>
+      )}
+      {va.careerInterests.length > 0 && (
+        <>
+          <p style={{ marginBottom: "2px" }}>
+            <strong>Career interests:</strong>
+          </p>
+          <ul>
+            {va.careerInterests.map((c, i) => (
+              <li key={i}>{c}</li>
+            ))}
+          </ul>
+        </>
+      )}
+      <p>{va.summaryNarrative}</p>
+
+      <h3>4. Proposed Employment Goal</h3>
+      <p>
+        <strong>{eg.goal}</strong>{" "}
+        <span style={{ color: "#555" }}>(O*NET {eg.socCode})</span>
+      </p>
+      <p>{eg.justification}</p>
+
+      <h3>5. Barrier Mitigation &amp; Required Services</h3>
+      {bm.assistiveTechAndAccommodations.length > 0 && (
+        <>
+          <p style={{ marginBottom: "2px", marginTop: "8px" }}>
+            <strong>Assistive technology &amp; workplace accommodations:</strong>
+          </p>
+          <ul>
+            {bm.assistiveTechAndAccommodations.map((a, i) => (
+              <li key={i}>{a}</li>
+            ))}
+          </ul>
+        </>
+      )}
+      {bm.placementServices.length > 0 && (
+        <>
+          <p style={{ marginBottom: "2px", marginTop: "8px" }}>
+            <strong>Job placement &amp; supported employment services:</strong>
+          </p>
+          <ul>
+            {bm.placementServices.map((p, i) => (
+              <li key={i}>{p}</li>
+            ))}
+          </ul>
+        </>
+      )}
+      {bm.trainingAndEducation.length > 0 && (
+        <>
+          <p style={{ marginBottom: "2px", marginTop: "8px" }}>
+            <strong>Training &amp; educational programs:</strong>
+          </p>
+          <ul>
+            {bm.trainingAndEducation.map((t, i) => (
+              <li key={i}>{t}</li>
+            ))}
+          </ul>
+        </>
+      )}
+
+      <h3>6. Client Responsibilities &amp; Milestones</h3>
+      {cr.immediateActions.length > 0 && (
+        <>
+          <p style={{ marginBottom: "2px", marginTop: "8px" }}>
+            <strong>Immediate actions (0–30 days):</strong>
+          </p>
+          <ul>
+            {cr.immediateActions.map((a, i) => (
+              <li key={i}>{a}</li>
+            ))}
+          </ul>
+        </>
+      )}
+      {cr.shortTermMilestones.length > 0 && (
+        <>
+          <p style={{ marginBottom: "2px", marginTop: "8px" }}>
+            <strong>Short-term milestones (1–6 months):</strong>
+          </p>
+          <ul>
+            {cr.shortTermMilestones.map((m, i) => (
+              <li key={i}>{m}</li>
+            ))}
+          </ul>
+        </>
+      )}
+      {cr.longTermMilestones.length > 0 && (
+        <>
+          <p style={{ marginBottom: "2px", marginTop: "8px" }}>
+            <strong>Long-term milestones (6+ months):</strong>
+          </p>
+          <ul>
+            {cr.longTermMilestones.map((m, i) => (
+              <li key={i}>{m}</li>
+            ))}
+          </ul>
+        </>
+      )}
+
+      <p
+        style={{
+          fontSize: "9pt",
+          color: "#666",
+          marginTop: "16px",
+          borderTop: "0.5pt solid #ccc",
+          paddingTop: "6px",
+        }}
+      >
+        Synthesized by Claude Opus 4.8 on{" "}
+        {new Date(report.generatedAt).toLocaleString()}. This narrative is a
+        counselor-reviewed clinical synthesis of source data. It does not
+        replace the counselor&apos;s professional judgment or the signed IPE
+        instrument.
+      </p>
+    </section>
   );
 }
 
