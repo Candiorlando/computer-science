@@ -34,7 +34,61 @@ interface Resume {
   additionalQualifications?: string[];
 }
 
+interface SavedResume {
+  id: string;
+  targetJob: string;
+  targetSocCode?: string;
+  resume: Resume;
+  createdAt: string;
+  updatedAt: string;
+  label?: string; // optional user-given nickname
+}
+
+// Legacy single-resume key — auto-migrated to the new list on first load.
 const RESUME_KEY = "pathways-pro:resume-v1";
+const RESUME_LIST_KEY = "pathways-pro:resume-list-v1";
+
+function loadResumeList(): SavedResume[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(RESUME_LIST_KEY);
+    return raw ? (JSON.parse(raw) as SavedResume[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveResumeList(list: SavedResume[]) {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem(RESUME_LIST_KEY, JSON.stringify(list));
+}
+
+function migrateLegacyResume(): SavedResume[] {
+  if (typeof window === "undefined") return [];
+  const list = loadResumeList();
+  if (list.length > 0) return list;
+  try {
+    const raw = window.localStorage.getItem(RESUME_KEY);
+    if (!raw) return [];
+    const r = JSON.parse(raw) as Resume;
+    const migrated: SavedResume = {
+      id: "legacy-" + Date.now(),
+      targetJob: r.summary.slice(0, 50) || "Previous resume",
+      resume: r,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      label: "Earlier draft",
+    };
+    saveResumeList([migrated]);
+    return [migrated];
+  } catch {
+    return [];
+  }
+}
+
+function newResumeId(): string {
+  return Math.random().toString(36).slice(2, 10);
+}
 
 export default function ResumePage() {
   const router = useRouter();
@@ -47,7 +101,8 @@ export default function ResumePage() {
   const [contactPhone, setContactPhone] = useState("");
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [resume, setResume] = useState<Resume | null>(null);
+  const [resumes, setResumes] = useState<SavedResume[]>([]);
+  const [activeId, setActiveId] = useState<string | null>(null);
 
   useEffect(() => {
     const s = loadSession();
@@ -59,11 +114,16 @@ export default function ResumePage() {
     }
     const profile = loadProfile();
     if (profile.intake?.location) setContactCity(profile.intake.location);
-    try {
-      const raw = localStorage.getItem(RESUME_KEY);
-      if (raw) setResume(JSON.parse(raw));
-    } catch {}
+    const list = migrateLegacyResume();
+    setResumes(list);
+    if (list.length > 0) setActiveId(list[0].id);
   }, [router]);
+
+  const active = useMemo(
+    () => resumes.find((r) => r.id === activeId) ?? null,
+    [resumes, activeId],
+  );
+  const resume = active?.resume ?? null;
 
   const profile = useMemo(
     () => (authorized ? loadProfile() : { intake: undefined, hollandCode: undefined, riasec: undefined }),
@@ -112,10 +172,18 @@ export default function ResumePage() {
         return;
       }
       const data = (await resp.json()) as Resume;
-      setResume(data);
-      try {
-        localStorage.setItem(RESUME_KEY, JSON.stringify(data));
-      } catch {}
+      const saved: SavedResume = {
+        id: newResumeId(),
+        targetJob,
+        targetSocCode: targetSocCode || undefined,
+        resume: data,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      const nextList = [saved, ...resumes];
+      setResumes(nextList);
+      setActiveId(saved.id);
+      saveResumeList(nextList);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Network error");
     } finally {
@@ -142,6 +210,77 @@ export default function ResumePage() {
       <div className="print:hidden">
         <Disclaimer kind="general" />
       </div>
+
+      {resumes.length > 0 && (
+        <section className="border border-accent/30 bg-accent/5 rounded-lg p-5 print:hidden">
+          <div className="flex items-baseline justify-between gap-3 mb-3 flex-wrap">
+            <h2 className="text-xl">
+              Past resumes ({resumes.length})
+            </h2>
+            <button
+              onClick={() => {
+                setActiveId(null);
+                if (typeof window !== "undefined") {
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }
+              }}
+              className="text-sm text-accent hover:underline"
+            >
+              + Generate a new one
+            </button>
+          </div>
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3">
+            {resumes.map((r) => (
+              <button
+                key={r.id}
+                onClick={() => setActiveId(r.id)}
+                className={`text-left border rounded-lg p-3 transition ${
+                  activeId === r.id
+                    ? "border-accent bg-cream shadow-sm"
+                    : "border-ink/15 bg-cream hover:border-accent"
+                }`}
+              >
+                <div className="font-semibold text-sm">{r.targetJob}</div>
+                {r.targetSocCode && (
+                  <div className="text-xs text-ink/50">
+                    O*NET {r.targetSocCode}
+                  </div>
+                )}
+                <div className="text-xs text-ink/60 mt-1">
+                  {new Date(r.createdAt).toLocaleString()}
+                </div>
+                <div className="flex gap-2 mt-2 text-xs">
+                  {activeId === r.id && (
+                    <span className="text-accent font-semibold">
+                      ✓ Showing now
+                    </span>
+                  )}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (
+                        !confirm(
+                          `Delete the resume for "${r.targetJob}"? This can't be undone.`,
+                        )
+                      )
+                        return;
+                      const nextList = resumes.filter((x) => x.id !== r.id);
+                      setResumes(nextList);
+                      saveResumeList(nextList);
+                      if (activeId === r.id) {
+                        setActiveId(nextList[0]?.id ?? null);
+                      }
+                    }}
+                    className="ml-auto text-ink/40 hover:text-accent"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section className="border border-ink/15 rounded-lg p-5 bg-cream print:hidden">
         <h2 className="text-xl mb-3">1. Pick a target job</h2>
@@ -241,10 +380,16 @@ export default function ResumePage() {
         >
           {generating
             ? "Drafting your resume with Claude Opus 4.8…"
-            : resume
-              ? "Regenerate ↻"
+            : resumes.length > 0
+              ? "Generate another resume ✨"
               : "Generate one-page resume ✨"}
         </button>
+        {resumes.length > 0 && !generating && (
+          <p className="text-xs text-ink/60 mt-2">
+            Each generation is saved to your history above — you can switch
+            back to any past resume to print or use it again.
+          </p>
+        )}
         {error && (
           <div className="mt-3 text-sm border border-accent/40 bg-accent/10 text-accent p-3 rounded">
             {error}
