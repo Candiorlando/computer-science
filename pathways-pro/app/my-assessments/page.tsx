@@ -71,14 +71,6 @@ export default function MyAssessmentsPage() {
 
   return (
     <div className="space-y-6">
-      {role === "counselor" && counselor && (
-        <CounselorPreviewBanner
-          counselor={counselor}
-          selectedCaseId={counselorPickedCaseId}
-          onChange={(id) => setCounselorPickedCaseId(id)}
-        />
-      )}
-
       <header>
         <p className="text-xs uppercase tracking-widest text-ink/50 mb-1">
           My Assessments
@@ -101,21 +93,12 @@ export default function MyAssessmentsPage() {
           {!previewClient ? (
             <p>Pick a client above to preview their assigned assessments.</p>
           ) : (
-            <>
-              <p>
-                Nothing assigned yet.{" "}
-                {previewClient.counselorName ?? "Your counselor"} hasn&apos;t
-                added any assessments for {role === "client" ? "you" : previewClient.name.split(" ")[0]} to take.
-              </p>
-              {role === "counselor" && (
-                <Link
-                  href={`/clinical-assessments?case=${previewClient.caseId}`}
-                  className="inline-block mt-3 text-sm text-accent hover:underline"
-                >
-                  → Assign assessments from the Clinical Library
-                </Link>
-              )}
-            </>
+            <p>
+              Nothing assigned yet.{" "}
+              {previewClient.counselorName ?? "Your counselor"} hasn&apos;t
+              added any assessments for you to take. Bring it up at your next
+              appointment.
+            </p>
           )}
         </section>
       )}
@@ -151,48 +134,6 @@ export default function MyAssessmentsPage() {
         </section>
       )}
     </div>
-  );
-}
-
-function CounselorPreviewBanner({
-  counselor,
-  selectedCaseId,
-  onChange,
-}: {
-  counselor: CounselorUser;
-  selectedCaseId: string | null;
-  onChange: (caseId: string) => void;
-}) {
-  const clients = counselor.clientKeys
-    .map((k) => CLIENTS[k])
-    .filter((c): c is ClientUser => Boolean(c));
-
-  return (
-    <section className="border border-accent/30 bg-accent/5 rounded-lg p-3">
-      <div className="flex items-baseline gap-3 flex-wrap text-sm">
-        <span className="text-xs uppercase tracking-wider text-accent font-semibold">
-          👁 Counselor preview
-        </span>
-        <span className="text-ink/70">Viewing as client:</span>
-        <select
-          value={selectedCaseId ?? ""}
-          onChange={(e) => onChange(e.target.value)}
-          className="bg-white border border-ink/20 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-accent"
-        >
-          {clients.map((c) => (
-            <option key={c.caseId} value={c.caseId}>
-              {c.name} ({c.caseId})
-            </option>
-          ))}
-        </select>
-        <Link
-          href={`/clinical-assessments${selectedCaseId ? `?case=${selectedCaseId}` : ""}`}
-          className="ml-auto text-xs text-accent hover:underline"
-        >
-          → Assign more from library
-        </Link>
-      </div>
-    </section>
   );
 }
 
