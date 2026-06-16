@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { loadSession } from "@/lib/session";
-import type { ClientUser } from "@/lib/users";
+import { CLIENTS, type ClientUser, type CounselorUser } from "@/lib/users";
 import {
   loadAssignments,
   markComplete,
@@ -13,22 +13,56 @@ import {
 
 export default function MyAssessmentsPage() {
   const router = useRouter();
-  const [user, setUser] = useState<ClientUser | null>(null);
+  const [role, setRole] = useState<"client" | "counselor" | null>(null);
+  const [client, setClient] = useState<ClientUser | null>(null);
+  const [counselor, setCounselor] = useState<CounselorUser | null>(null);
+  const [counselorPickedCaseId, setCounselorPickedCaseId] = useState<string | null>(null);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [bump, setBump] = useState(0);
 
   useEffect(() => {
     const s = loadSession();
     if (!s) return router.replace("/");
-    if (s.role !== "client") return router.replace("/dashboard");
-    setUser(s);
-    setAssignments(loadAssignments(s.caseId));
+    setRole(s.role);
+    if (s.role === "client") {
+      setClient(s);
+      setAssignments(loadAssignments(s.caseId));
+    } else {
+      setCounselor(s);
+      // Default to the first client on the counselor's caseload
+      const firstKey = s.clientKeys[0];
+      const first = firstKey ? CLIENTS[firstKey] : null;
+      if (first) {
+        setCounselorPickedCaseId(first.caseId);
+      }
+    }
   }, [router, bump]);
 
-  if (!user) return null;
+  // Reload assignments when counselor switches between clients in preview mode
+  useEffect(() => {
+    if (role === "counselor" && counselorPickedCaseId) {
+      setAssignments(loadAssignments(counselorPickedCaseId));
+    }
+  }, [role, counselorPickedCaseId, bump]);
+
+  const previewClient = useMemo(() => {
+    if (role === "client") return client;
+    if (!counselor || !counselorPickedCaseId) return null;
+    return (
+      counselor.clientKeys
+        .map((k) => CLIENTS[k])
+        .find((c) => c && c.caseId === counselorPickedCaseId) ?? null
+    );
+  }, [role, client, counselor, counselorPickedCaseId]);
+
+  if (!role) return null;
 
   function complete(name: string) {
-    markComplete(user!.caseId, name);
+    if (role === "client" && client) {
+      markComplete(client.caseId, name);
+    } else if (role === "counselor" && counselorPickedCaseId) {
+      markComplete(counselorPickedCaseId, name);
+    }
     setBump((n) => n + 1);
   }
 
@@ -37,26 +71,52 @@ export default function MyAssessmentsPage() {
 
   return (
     <div className="space-y-6">
+      {role === "counselor" && counselor && (
+        <CounselorPreviewBanner
+          counselor={counselor}
+          selectedCaseId={counselorPickedCaseId}
+          onChange={(id) => setCounselorPickedCaseId(id)}
+        />
+      )}
+
       <header>
         <p className="text-xs uppercase tracking-widest text-ink/50 mb-1">
           My Assessments
         </p>
-        <h1 className="text-4xl mb-2">Assessments your counselor assigned</h1>
-        <p className="text-ink/70 prose-narrow">
-          These are picked specifically for you by{" "}
-          <strong>{user.counselorName}</strong>. Some you can take right here
-          on Pathways Pro. Others link out to the official site — bring the
-          results back to your next session.
-        </p>
+        <h1 className="text-4xl mb-2">
+          Assessments {previewClient ? `for ${previewClient.name.split(" ")[0]}` : "assigned to you"}
+        </h1>
+        {previewClient && (
+          <p className="text-ink/70 prose-narrow">
+            These are picked specifically by{" "}
+            <strong>{previewClient.counselorName}</strong>. Some can be taken
+            right here on Pathways Pro. Others link out to the official site —
+            bring the results back to your next session.
+          </p>
+        )}
       </header>
 
-      {assignments.length === 0 && (
+      {(!previewClient || assignments.length === 0) && (
         <section className="border border-dashed border-ink/20 rounded-lg p-8 text-center text-ink/60">
-          <p>
-            Nothing assigned yet. {user.counselorName} hasn&apos;t added any
-            assessments for you to take. Your next appointment is{" "}
-            <strong>{user.nextAppt}</strong> — bring it up then.
-          </p>
+          {!previewClient ? (
+            <p>Pick a client above to preview their assigned assessments.</p>
+          ) : (
+            <>
+              <p>
+                Nothing assigned yet.{" "}
+                {previewClient.counselorName ?? "Your counselor"} hasn&apos;t
+                added any assessments for {role === "client" ? "you" : previewClient.name.split(" ")[0]} to take.
+              </p>
+              {role === "counselor" && (
+                <Link
+                  href={`/clinical-assessments?case=${previewClient.caseId}`}
+                  className="inline-block mt-3 text-sm text-accent hover:underline"
+                >
+                  → Assign assessments from the Clinical Library
+                </Link>
+              )}
+            </>
+          )}
         </section>
       )}
 
@@ -91,6 +151,48 @@ export default function MyAssessmentsPage() {
         </section>
       )}
     </div>
+  );
+}
+
+function CounselorPreviewBanner({
+  counselor,
+  selectedCaseId,
+  onChange,
+}: {
+  counselor: CounselorUser;
+  selectedCaseId: string | null;
+  onChange: (caseId: string) => void;
+}) {
+  const clients = counselor.clientKeys
+    .map((k) => CLIENTS[k])
+    .filter((c): c is ClientUser => Boolean(c));
+
+  return (
+    <section className="border border-accent/30 bg-accent/5 rounded-lg p-3">
+      <div className="flex items-baseline gap-3 flex-wrap text-sm">
+        <span className="text-xs uppercase tracking-wider text-accent font-semibold">
+          👁 Counselor preview
+        </span>
+        <span className="text-ink/70">Viewing as client:</span>
+        <select
+          value={selectedCaseId ?? ""}
+          onChange={(e) => onChange(e.target.value)}
+          className="bg-white border border-ink/20 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-accent"
+        >
+          {clients.map((c) => (
+            <option key={c.caseId} value={c.caseId}>
+              {c.name} ({c.caseId})
+            </option>
+          ))}
+        </select>
+        <Link
+          href={`/clinical-assessments${selectedCaseId ? `?case=${selectedCaseId}` : ""}`}
+          className="ml-auto text-xs text-accent hover:underline"
+        >
+          → Assign more from library
+        </Link>
+      </div>
+    </section>
   );
 }
 
