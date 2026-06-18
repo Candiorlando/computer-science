@@ -10,9 +10,15 @@ export interface UserProfile {
     location?: string;        // city, state (free-form, for display)
     zipCode?: string;         // 5-digit ZIP — drives every location-aware link
     educationLevel?: string;  // e.g., "Some high school", "HS diploma", "Some college", "Associate", "Bachelor's", "Graduate"
-    workHistory?: string;     // free-form
+    workHistory?: string;     // free-form — non-paid experience (volunteering, caretaking, hobbies)
+    pastJobs?: string;        // specific paid jobs held
+    dreamJob?: string;        // aspirational — what they'd pick with no constraints
+    employmentGoal?: string;  // concrete near-term VR employment goal
     constraints?: string;     // disability, transportation, childcare, schedule, etc.
-    goals?: string;           // what they want from the next job
+    goals?: string;           // what they want from a career generally
+    schedulePreference?: string;  // FT/PT, hours, remote/onsite
+    supportRequests?: string[];   // checklist of VR services requested
+    supportOther?: string;        // free-form "other support" detail
     openToApprenticeship?: boolean;
   };
   bigFive?: BigFiveScores;

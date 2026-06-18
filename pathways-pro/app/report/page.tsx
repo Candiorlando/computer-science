@@ -23,6 +23,7 @@ import { rankOccupations } from "@/lib/onet-data";
 import { riasecNames, traitNames } from "@/lib/assessments";
 import { analyzeHollandCode } from "@/lib/holland-analysis";
 import { nameWithInitial } from "@/lib/document-id";
+import { supportLabel } from "@/lib/intake-supports";
 import type { IPE } from "@/lib/ipe";
 import { loadScreenerResults, SCREENERS, type ScreenerResult } from "@/lib/screeners";
 
@@ -1449,9 +1450,27 @@ function IntakeBlock({
             <dd>{intake.educationLevel}</dd>
           </>
         )}
+        {intake.dreamJob && (
+          <>
+            <dt>Dream Job</dt>
+            <dd>{intake.dreamJob}</dd>
+          </>
+        )}
+        {intake.employmentGoal && (
+          <>
+            <dt>Employment Goal</dt>
+            <dd>{intake.employmentGoal}</dd>
+          </>
+        )}
+        {intake.pastJobs && (
+          <>
+            <dt>Jobs Held</dt>
+            <dd>{intake.pastJobs}</dd>
+          </>
+        )}
         {intake.workHistory && (
           <>
-            <dt>Work History</dt>
+            <dt>Other Experience</dt>
             <dd>{intake.workHistory}</dd>
           </>
         )}
@@ -1463,14 +1482,38 @@ function IntakeBlock({
         )}
         {intake.goals && (
           <>
-            <dt>Goals</dt>
+            <dt>What They Want</dt>
             <dd>{intake.goals}</dd>
+          </>
+        )}
+        {intake.schedulePreference && (
+          <>
+            <dt>Schedule</dt>
+            <dd>{intake.schedulePreference}</dd>
           </>
         )}
         {intake.openToApprenticeship !== undefined && (
           <>
             <dt>Apprenticeship?</dt>
             <dd>{intake.openToApprenticeship ? "Yes" : "No"}</dd>
+          </>
+        )}
+        {intake.supportRequests && intake.supportRequests.length > 0 && (
+          <>
+            <dt>Support Requested</dt>
+            <dd>
+              <ul style={{ margin: 0, paddingLeft: 18 }}>
+                {intake.supportRequests.map((s) => (
+                  <li key={s}>{supportLabel(s)}</li>
+                ))}
+              </ul>
+            </dd>
+          </>
+        )}
+        {intake.supportOther && (
+          <>
+            <dt>Other Support Needs</dt>
+            <dd>{intake.supportOther}</dd>
           </>
         )}
       </dl>
