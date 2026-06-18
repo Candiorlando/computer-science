@@ -3,6 +3,7 @@
 import type { UserProfile } from "./storage";
 import type { TSAResult } from "./tsa-storage";
 import type { IPE, IPEStatus } from "./ipe";
+import type { AccommodationLetter } from "./accommodation-letters";
 
 // Aggregated per-case client report, populated whenever the client completes
 // any assessment. Lives in localStorage in the demo; in production this would
@@ -22,6 +23,7 @@ export interface ClientReport {
   ipeStatus?: IPEStatus;
   ipeUpdatedAt?: string;
   ipe?: IPE; // full IPE document (services, accommodations, signatures, ...)
+  lastAccommodationLetter?: AccommodationLetter; // most recent self-advocacy letter
   lastUpdated: string;
 }
 
