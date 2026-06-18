@@ -23,11 +23,12 @@ export default function MyAssessmentsPage() {
   useEffect(() => {
     const s = loadSession();
     if (!s) return router.replace("/");
-    setRole(s.role);
     if (s.role === "client") {
+      setRole("client");
       setClient(s);
       setAssignments(loadAssignments(s.caseId));
-    } else {
+    } else if (s.role === "counselor") {
+      setRole("counselor");
       setCounselor(s);
       // Default to the first client on the counselor's caseload
       const firstKey = s.clientKeys[0];
@@ -35,6 +36,11 @@ export default function MyAssessmentsPage() {
       if (first) {
         setCounselorPickedCaseId(first.caseId);
       }
+    } else {
+      // Business / vendor users — bounce to their own portal.
+      const dest =
+        s.role === "business" ? "/business-portal" : "/vendor-portal";
+      return router.replace(dest);
     }
   }, [router, bump]);
 

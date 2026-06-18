@@ -2,7 +2,7 @@
 // In production this would be a real auth backend (Auth0, Supabase, etc.).
 // Source: pathways-pro-v3.jsx (Google Drive — Pathways Pro project folder).
 
-export type Role = "counselor" | "client";
+export type Role = "counselor" | "client" | "business" | "vendor";
 
 export interface CounselorUser {
   email: string;
@@ -31,7 +31,38 @@ export interface ClientUser {
   nextAppt: string;
 }
 
-export type AnyUser = CounselorUser | ClientUser;
+export type BusinessScopeRole = "hr_director" | "risk_manager" | "adjuster" | "attorney";
+
+export interface BusinessUser {
+  email: string;
+  password: string;
+  name: string;
+  title: string;
+  scopeRole: BusinessScopeRole;
+  orgId: string;
+  orgName: string;
+  role: "business";
+}
+
+export type VendorType =
+  | "crp"
+  | "forensic"
+  | "ergonomic"
+  | "legal-consult"
+  | "training";
+
+export interface VendorUser {
+  email: string;
+  password: string;
+  name: string;
+  credentials: string;
+  vendorOrgId: string;
+  vendorOrgName: string;
+  vendorType: VendorType;
+  role: "vendor";
+}
+
+export type AnyUser = CounselorUser | ClientUser | BusinessUser | VendorUser;
 
 export const COUNSELORS: Record<string, CounselorUser> = {
   "candace.metcalf@idhs.illinois.gov": {
@@ -156,15 +187,202 @@ export function authenticate(
   password: string,
   role: Role,
 ): AnyUser | null {
+  const key = email.toLowerCase().trim();
   if (role === "counselor") {
-    const record = COUNSELORS[email.toLowerCase().trim()];
+    const record = COUNSELORS[key];
+    if (record && record.password === password) return record;
+    return null;
+  }
+  if (role === "business") {
+    const record = getAllBusinessUsers()[key];
+    if (record && record.password === password) return record;
+    return null;
+  }
+  if (role === "vendor") {
+    const record = getAllVendorUsers()[key];
     if (record && record.password === password) return record;
     return null;
   }
   const all = getAllClients();
-  const record = all[email.toLowerCase().trim()];
+  const record = all[key];
   if (record && record.password === password) return record;
   return null;
+}
+
+// ── Business & vendor signups ───────────────────────────────────────────
+// Seeded with two demo accounts each so a fresh browser can land on
+// /business and sign in immediately. New signups via /business persist
+// to localStorage and merge on top of the seed.
+
+export const BUSINESS_USERS_SEED: Record<string, BusinessUser> = {
+  "aisha.hassan@acmelogistics.com": {
+    email: "aisha.hassan@acmelogistics.com",
+    password: "demo1234",
+    name: "Aisha Hassan",
+    title: "Director of HR",
+    scopeRole: "hr_director",
+    orgId: "org-acme",
+    orgName: "Acme Logistics",
+    role: "business",
+  },
+  "j.fontaine@meridianclaims.com": {
+    email: "j.fontaine@meridianclaims.com",
+    password: "demo1234",
+    name: "Jules Fontaine",
+    title: "Senior Workers' Comp Adjuster",
+    scopeRole: "adjuster",
+    orgId: "org-meridian",
+    orgName: "Meridian Claims",
+    role: "business",
+  },
+};
+
+export const VENDOR_USERS_SEED: Record<string, VendorUser> = {
+  "damon.r@vocconnections.org": {
+    email: "damon.r@vocconnections.org",
+    password: "demo1234",
+    name: "Damon Reyes",
+    credentials: "CESP",
+    vendorOrgId: "vendor-vocconn",
+    vendorOrgName: "Vocational Connections, Inc.",
+    vendorType: "crp",
+    role: "vendor",
+  },
+  "p.osei@piedmontforensic.com": {
+    email: "p.osei@piedmontforensic.com",
+    password: "demo1234",
+    name: "Priya Osei",
+    credentials: "CRC · CVE · ABVE/D",
+    vendorOrgId: "vendor-piedmont",
+    vendorOrgName: "Piedmont Forensic Vocational",
+    vendorType: "forensic",
+    role: "vendor",
+  },
+};
+
+const BUSINESS_SIGNUP_KEY = "pathways-pro:business-signups-v1";
+const VENDOR_SIGNUP_KEY = "pathways-pro:vendor-signups-v1";
+
+function loadBusinessSignups(): Record<string, BusinessUser> {
+  if (typeof window === "undefined") return {};
+  try {
+    const raw = window.localStorage.getItem(BUSINESS_SIGNUP_KEY);
+    return raw ? (JSON.parse(raw) as Record<string, BusinessUser>) : {};
+  } catch {
+    return {};
+  }
+}
+
+function loadVendorSignups(): Record<string, VendorUser> {
+  if (typeof window === "undefined") return {};
+  try {
+    const raw = window.localStorage.getItem(VENDOR_SIGNUP_KEY);
+    return raw ? (JSON.parse(raw) as Record<string, VendorUser>) : {};
+  } catch {
+    return {};
+  }
+}
+
+export function getAllBusinessUsers(): Record<string, BusinessUser> {
+  return { ...BUSINESS_USERS_SEED, ...loadBusinessSignups() };
+}
+
+export function getAllVendorUsers(): Record<string, VendorUser> {
+  return { ...VENDOR_USERS_SEED, ...loadVendorSignups() };
+}
+
+export interface BusinessSignupInput {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  title: string;
+  scopeRole: BusinessScopeRole;
+  orgName: string;
+}
+
+export function registerBusinessUser(
+  input: BusinessSignupInput,
+):
+  | { ok: true; user: BusinessUser }
+  | { ok: false; error: string } {
+  const email = input.email.toLowerCase().trim();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+    return { ok: false, error: "Enter a valid work email." };
+  if (input.password.length < 6)
+    return { ok: false, error: "Password must be at least 6 characters." };
+  if (!input.orgName.trim())
+    return { ok: false, error: "Organization name is required." };
+  if (getAllBusinessUsers()[email])
+    return { ok: false, error: "An account with this email already exists." };
+
+  const user: BusinessUser = {
+    email,
+    password: input.password,
+    name: `${input.firstName.trim()} ${input.lastName.trim()}`,
+    title: input.title.trim() || "—",
+    scopeRole: input.scopeRole,
+    orgId: "org-" + slugify(input.orgName),
+    orgName: input.orgName.trim(),
+    role: "business",
+  };
+  const all = loadBusinessSignups();
+  all[email] = user;
+  if (typeof window !== "undefined") {
+    window.localStorage.setItem(BUSINESS_SIGNUP_KEY, JSON.stringify(all));
+  }
+  return { ok: true, user };
+}
+
+export interface VendorSignupInput {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  credentials: string;
+  vendorOrgName: string;
+  vendorType: VendorType;
+}
+
+export function registerVendorUser(
+  input: VendorSignupInput,
+):
+  | { ok: true; user: VendorUser }
+  | { ok: false; error: string } {
+  const email = input.email.toLowerCase().trim();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+    return { ok: false, error: "Enter a valid work email." };
+  if (input.password.length < 6)
+    return { ok: false, error: "Password must be at least 6 characters." };
+  if (!input.vendorOrgName.trim())
+    return { ok: false, error: "Vendor organization name is required." };
+  if (getAllVendorUsers()[email])
+    return { ok: false, error: "An account with this email already exists." };
+
+  const user: VendorUser = {
+    email,
+    password: input.password,
+    name: `${input.firstName.trim()} ${input.lastName.trim()}`,
+    credentials: input.credentials.trim() || "—",
+    vendorOrgId: "vendor-" + slugify(input.vendorOrgName),
+    vendorOrgName: input.vendorOrgName.trim(),
+    vendorType: input.vendorType,
+    role: "vendor",
+  };
+  const all = loadVendorSignups();
+  all[email] = user;
+  if (typeof window !== "undefined") {
+    window.localStorage.setItem(VENDOR_SIGNUP_KEY, JSON.stringify(all));
+  }
+  return { ok: true, user };
+}
+
+function slugify(s: string): string {
+  return s
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 32);
 }
 
 // ── Self-service client signups ─────────────────────────────────────────

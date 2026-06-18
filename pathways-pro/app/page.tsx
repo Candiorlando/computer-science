@@ -591,7 +591,7 @@ function SignInPanel() {
       return;
     }
     saveSession(u);
-    saveMode(u.role);
+    if (u.role === "counselor" || u.role === "client") saveMode(u.role);
     router.push(u.role === "counselor" ? "/dashboard" : "/portal");
   }
 
@@ -603,7 +603,7 @@ function SignInPanel() {
     const u = authenticate(demoEmail, "demo1234", role);
     if (u) {
       saveSession(u);
-      saveMode(u.role);
+      if (u.role === "counselor" || u.role === "client") saveMode(u.role);
       router.push(u.role === "counselor" ? "/dashboard" : "/portal");
     }
   }

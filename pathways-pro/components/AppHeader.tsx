@@ -4,7 +4,13 @@ import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { clearSession, loadMode, loadSession, saveMode, type ViewMode } from "@/lib/session";
-import type { AnyUser, ClientUser, CounselorUser } from "@/lib/users";
+import type {
+  AnyUser,
+  BusinessUser,
+  ClientUser,
+  CounselorUser,
+  VendorUser,
+} from "@/lib/users";
 
 export function AppHeader() {
   const router = useRouter();
@@ -17,13 +23,20 @@ export function AppHeader() {
     setMounted(true);
     const u = loadSession();
     setUser(u);
-    if (u) setMode(loadMode(u.role));
+    if (u && (u.role === "counselor" || u.role === "client")) {
+      setMode(loadMode(u.role));
+    }
   }, [pathname]);
+
+  const isCounselor = user?.role === "counselor";
+  const isBusiness = user?.role === "business";
+  const isVendor = user?.role === "vendor";
+  const isExternal = isBusiness || isVendor;
 
   function handleLogout() {
     clearSession();
     setUser(null);
-    router.push("/");
+    router.push(isExternal ? "/business" : "/");
   }
 
   function switchMode(next: ViewMode) {
@@ -32,8 +45,12 @@ export function AppHeader() {
     router.push(next === "counselor" ? "/dashboard" : "/portal");
   }
 
-  // While not mounted, render a static header to avoid hydration mismatch.
-  const isCounselor = user?.role === "counselor";
+  function homeHref(): string {
+    if (!user) return "/";
+    if (user.role === "business") return "/business-portal";
+    if (user.role === "vendor") return "/vendor-portal";
+    return mode === "counselor" ? "/dashboard" : "/portal";
+  }
 
   const counselorTabs = [
     { href: "/dashboard", label: "Dashboard" },
@@ -41,6 +58,7 @@ export function AppHeader() {
     { href: "/ipe", label: "IPE Builder" },
     { href: "/report", label: "Assessment Reports" },
     { href: "/labor-market", label: "Labor Market" },
+    { href: "/dashboard/business", label: "Business View" },
     { href: "/clinical-assessments", label: "Assessment Library" },
     { href: "/practitioner-hub", label: "Practitioner Hub" },
     { href: "/ce", label: "CE Tracker" },
@@ -62,14 +80,29 @@ export function AppHeader() {
     { href: "/coach", label: "Coach" },
   ];
 
-  const tabs = mounted && user ? (mode === "counselor" ? counselorTabs : clientTabs) : [];
+  const businessTabs = [
+    { href: "/business-portal", label: "Dashboard" },
+  ];
+
+  const vendorTabs = [
+    { href: "/vendor-portal", label: "Dashboard" },
+  ];
+
+  let tabs: { href: string; label: string }[] = [];
+  if (mounted && user) {
+    if (isBusiness) tabs = businessTabs;
+    else if (isVendor) tabs = vendorTabs;
+    else tabs = mode === "counselor" ? counselorTabs : clientTabs;
+  }
 
   return (
     <header className="border-b border-ink/10 bg-cream">
       <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between gap-4 flex-wrap">
-        <Link href={user ? (mode === "counselor" ? "/dashboard" : "/portal") : "/"} className="flex items-baseline gap-3">
+        <Link href={homeHref()} className="flex items-baseline gap-3">
           <span className="text-2xl tracking-tight">Pathways Pro</span>
-          <span className="text-xs uppercase tracking-widest text-ink/50">VR · WIOA</span>
+          <span className="text-xs uppercase tracking-widest text-ink/50">
+            {isExternal ? "Business · Vendor" : "VR · WIOA"}
+          </span>
         </Link>
 
         {mounted && user && isCounselor && (
@@ -97,11 +130,7 @@ export function AppHeader() {
               </div>
               <div className="text-right text-xs leading-tight">
                 <div className="text-ink">{user.name}</div>
-                <div className="text-ink/50">
-                  {user.role === "counselor"
-                    ? (user as CounselorUser).credentials
-                    : (user as ClientUser).caseId}
-                </div>
+                <div className="text-ink/50">{metaLine(user)}</div>
               </div>
             </div>
             <button
@@ -112,12 +141,20 @@ export function AppHeader() {
             </button>
           </div>
         ) : (
-          <Link
-            href="/"
-            className="text-sm border border-ink/20 px-4 py-2 rounded hover:bg-ink/5"
-          >
-            Sign in
-          </Link>
+          <div className="flex gap-2">
+            <Link
+              href="/business"
+              className="text-sm text-ink/60 hover:text-accent px-3 py-2"
+            >
+              For business
+            </Link>
+            <Link
+              href="/"
+              className="text-sm border border-ink/20 px-4 py-2 rounded hover:bg-ink/5"
+            >
+              Sign in
+            </Link>
+          </div>
         )}
       </div>
 
@@ -145,6 +182,19 @@ export function AppHeader() {
       )}
     </header>
   );
+}
+
+function metaLine(user: AnyUser): string {
+  switch (user.role) {
+    case "counselor":
+      return (user as CounselorUser).credentials;
+    case "client":
+      return (user as ClientUser).caseId;
+    case "business":
+      return (user as BusinessUser).orgName;
+    case "vendor":
+      return (user as VendorUser).vendorOrgName;
+  }
 }
 
 function initials(name: string) {
