@@ -149,7 +149,11 @@ export function deleteEEOCCharge(id: string) {
 
 // ─── OCR / DOJ Civil Rights Complaint ──────────────────────────────────
 
-export type CivilRightsAgency = "OCR-ED" | "OCR-HHS" | "DOJ-DRS";
+// OCR-ED (Department of Education Office for Civil Rights) was removed
+// after the agency's disability rights enforcement capacity was wound
+// down. Education-context complaints now route to DOJ-DRS for ADA
+// Title II violations by public schools.
+export type CivilRightsAgency = "OCR-HHS" | "DOJ-DRS";
 
 export type RespondentType =
   | "federally-funded-program"

@@ -196,10 +196,14 @@ export default function OCRDOJPage() {
           onChange={(e) => setAgency(e.target.value as CivilRightsAgency)}
           className="input max-w-md"
         >
-          <option value="DOJ-DRS">DOJ — Civil Rights Division, Disability Rights Section (state/local government, ADA Title II / III)</option>
-          <option value="OCR-ED">OCR-ED — Department of Education (public schools, K-12, higher ed)</option>
+          <option value="DOJ-DRS">DOJ — Civil Rights Division, Disability Rights Section (state/local government, ADA Title II / III, public schools)</option>
           <option value="OCR-HHS">OCR-HHS — Health &amp; Human Services (healthcare, social services)</option>
         </select>
+        <p className="text-xs text-ink/55 mt-2 italic">
+          Note: the Department of Education Office for Civil Rights is no
+          longer accepting new disability rights complaints. K-12 and higher
+          education ADA Title II complaints now route to DOJ-DRS.
+        </p>
       </FormBlock>
 
       <FormBlock title="Complainant (you)">

@@ -5,7 +5,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const RequestSchema = z.object({
-  agency: z.enum(["OCR-ED", "OCR-HHS", "DOJ-DRS"]),
+  agency: z.enum(["OCR-HHS", "DOJ-DRS"]),
   clientName: z.string(),
   clientAddress: z.string(),
   clientPhone: z.string(),
@@ -22,14 +22,17 @@ const RequestSchema = z.object({
 
 const SYSTEM_PROMPT = `You are an expert AI Legal Assistant drafting a civil
 rights complaint for submission to one of:
-  - OCR-ED  : Department of Education, Office for Civil Rights
-              (public schools, K-12, higher education recipients)
   - OCR-HHS : Department of Health and Human Services, Office for
               Civil Rights (healthcare providers, social-services
               recipients of federal funding)
   - DOJ-DRS : Department of Justice, Civil Rights Division,
               Disability Rights Section (state/local governments,
-              public accommodations, ADA Title II and III)
+              public accommodations, public schools, higher education
+              institutions, ADA Title II and III)
+
+NOTE: The Department of Education Office for Civil Rights (OCR-ED) has
+stopped accepting new disability rights complaints. Education-context
+matters now route to DOJ-DRS under ADA Title II.
 
 NON-NEGOTIABLE RULES:
 
@@ -58,16 +61,16 @@ NON-NEGOTIABLE RULES:
      j) Signature block
 
 4. Cite the right statutes by agency:
-   - OCR-ED  : Section 504 of the Rehabilitation Act of 1973
-               (34 C.F.R. Part 104); ADA Title II if state/local
-               public school; IDEA only if K-12 special-education
-               context applies.
    - OCR-HHS : Section 504 (45 C.F.R. Part 84); ADA Title II if
                state/local public; ACA Section 1557 if healthcare
                financing applies.
    - DOJ-DRS : ADA Title II (28 C.F.R. Part 35) for state/local
-               government; ADA Title III (28 C.F.R. Part 36) for
-               public accommodations; Section 504 if federal funds.
+               government INCLUDING public schools and higher
+               education institutions; ADA Title III (28 C.F.R.
+               Part 36) for public accommodations; Section 504 if
+               federal funds. For K-12 IDEA matters (special
+               education FAPE disputes), cite IDEA alongside ADA
+               Title II.
 
 5. Remedies Sought is a separate list of 3-6 items. Concrete only:
    "policy change [specific]," "training of [staff]," "compensatory

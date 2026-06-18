@@ -149,7 +149,7 @@ export const SERVICE_CATALOG: ServiceCatalogItem[] = [
     audience: ["individuals"],
     category: "free-tool",
     description:
-      "Formal complaint for DOJ-DRS, OCR-ED, or OCR-HHS — schools, healthcare, state/local government, public accommodations.",
+      "Formal complaint for DOJ-DRS or OCR-HHS — schools, healthcare, state/local government, public accommodations.",
     typicalTurnaround: "Instant",
     priceBand: "Free",
     counselorReviewRequired: false,
