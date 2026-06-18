@@ -26,18 +26,31 @@ export default function ScreenerPage() {
   const [result, setResult] = useState<ScreenerResult | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [client, setClient] = useState<ClientUser | null>(null);
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
     const s = loadSession();
     if (!s) return router.replace("/");
     setAuthorized(true);
-    if (s.role === "client") setClient(s);
+    if (s.role === "client") {
+      setClient(s);
+      setIsClient(true);
+    }
     const prior = loadLatestResult(id);
     if (prior) {
       setResult(prior);
       setAnswers(prior.itemScores);
     }
   }, [router, id]);
+
+  // Clients reach a screener from /my-assessments (their assigned list),
+  // so "back" should return them there — not to the counselor-side
+  // Assessment Library. Counselors continue to navigate back to the
+  // full library.
+  const backHref = isClient ? "/my-assessments" : "/clinical-assessments";
+  const backLabel = isClient
+    ? "← Back to my assessments"
+    : "← Back to the library";
 
   const allAnswered = useMemo(
     () => (config ? config.items.every((it) => typeof answers[it.id] === "number") : false),
@@ -51,8 +64,8 @@ export default function ScreenerPage() {
         <p className="text-ink/70">
           The screener id <code>{id}</code> isn&apos;t in the registry.
         </p>
-        <Link href="/clinical-assessments" className="text-accent hover:underline">
-          ← Back to the library
+        <Link href={backHref} className="text-accent hover:underline">
+          {backLabel}
         </Link>
       </div>
     );
@@ -80,10 +93,10 @@ export default function ScreenerPage() {
     <div className="space-y-6">
       <div className="print:hidden">
         <Link
-          href="/clinical-assessments"
+          href={backHref}
           className="text-sm text-accent hover:underline"
         >
-          ← Back to the library
+          {backLabel}
         </Link>
       </div>
 
