@@ -11,6 +11,8 @@ const RequestSchema = z.object({
   contactCity: z.string().optional(),
   contactEmail: z.string().optional(),
   contactPhone: z.string().optional(),
+  companyName: z.string().optional(),
+  hiringManager: z.string().optional(),
   educationLevel: z.string().optional(),
   workHistory: z.string().optional(),
   hollandCode: z.string().optional(),
@@ -30,10 +32,11 @@ const RequestSchema = z.object({
 });
 
 const SYSTEM_PROMPT = `You are a senior rehabilitation counselor and resume
-writer drafting a one-page resume tailored to a specific job for a
-vocational-rehabilitation client.
+writer drafting BOTH a one-page resume AND a matching one-page cover
+letter, both tailored to a specific job for a vocational-rehabilitation
+client.
 
-Constraints:
+Resume constraints:
 - ONE PAGE. Lean ruthlessly. Cut anything that doesn't help land THIS job.
 - Lead with the candidate's strongest evidence for THIS specific job.
 - Use verb-led bullets with measurable impact when possible. Real numbers
@@ -45,14 +48,32 @@ Constraints:
 - Honor the candidate's actual experience. Do NOT invent jobs, dates,
   degrees, or certifications.
 
-Format every resume with these sections in this order:
+Resume sections in this order:
 1. Header (name, city/state, email, phone)
 2. Summary (2-3 sentences pitching THIS candidate for THIS job)
 3. Skills (3-6 specific skill items, chosen to match the target job)
 4. Experience (most recent first, 3-5 bullets each)
 5. Education / Training
-6. Additional Qualifications (optional — only if relevant: certifications,
-   volunteer work, hobbies that materially strengthen the application)
+6. Additional Qualifications (optional)
+
+Cover letter constraints:
+- ONE PAGE, 3-4 short paragraphs total, ~250-350 words.
+- Conversational but professional — speak to a hiring manager, not a
+  committee. Active voice.
+- Open with a specific reason the candidate wants THIS job at THIS
+  company (if company name given), not a generic "I am writing to
+  apply…".
+- Middle paragraph(s) must reference 2-3 concrete pieces of evidence
+  from the candidate's actual background that map to the target job.
+  No invented experience.
+- Briefly, honestly address transferable strengths for candidates
+  changing fields or returning to work after a gap — without
+  apologizing or oversharing disability information.
+- Close with a clear next step and gratitude. Avoid "Please find my
+  resume attached" — assume it's attached.
+- Salutation: "Dear [Hiring Manager Name]," if given, otherwise
+  "Dear Hiring Team," — never "To Whom It May Concern."
+- Closing: "Sincerely," then candidate's full name on a new line.
 
 Return ONLY valid JSON matching the requested schema. No prose around it.`;
 
@@ -60,62 +81,102 @@ const RESUME_SCHEMA = {
   type: "object",
   additionalProperties: false,
   properties: {
-    header: {
+    resume: {
       type: "object",
       additionalProperties: false,
       properties: {
-        name: { type: "string" },
-        location: { type: "string" },
-        email: { type: "string" },
-        phone: { type: "string" },
-      },
-      required: ["name"],
-    },
-    summary: {
-      type: "string",
-      description: "2-3 sentences pitching THIS candidate for THE TARGET JOB",
-    },
-    skills: {
-      type: "array",
-      items: { type: "string" },
-      description: "3-6 specific skill phrases tailored to the target job",
-    },
-    experience: {
-      type: "array",
-      items: {
-        type: "object",
-        additionalProperties: false,
-        properties: {
-          title: { type: "string" },
-          organization: { type: "string" },
-          location: { type: "string" },
-          dates: { type: "string" },
-          bullets: { type: "array", items: { type: "string" } },
+        header: {
+          type: "object",
+          additionalProperties: false,
+          properties: {
+            name: { type: "string" },
+            location: { type: "string" },
+            email: { type: "string" },
+            phone: { type: "string" },
+          },
+          required: ["name"],
         },
-        required: ["title", "bullets"],
-      },
-    },
-    education: {
-      type: "array",
-      items: {
-        type: "object",
-        additionalProperties: false,
-        properties: {
-          credential: { type: "string" },
-          institution: { type: "string" },
-          dates: { type: "string" },
-          details: { type: "string" },
+        summary: {
+          type: "string",
+          description: "2-3 sentences pitching THIS candidate for THE TARGET JOB",
         },
-        required: ["credential"],
+        skills: {
+          type: "array",
+          items: { type: "string" },
+          description: "3-6 specific skill phrases tailored to the target job",
+        },
+        experience: {
+          type: "array",
+          items: {
+            type: "object",
+            additionalProperties: false,
+            properties: {
+              title: { type: "string" },
+              organization: { type: "string" },
+              location: { type: "string" },
+              dates: { type: "string" },
+              bullets: { type: "array", items: { type: "string" } },
+            },
+            required: ["title", "bullets"],
+          },
+        },
+        education: {
+          type: "array",
+          items: {
+            type: "object",
+            additionalProperties: false,
+            properties: {
+              credential: { type: "string" },
+              institution: { type: "string" },
+              dates: { type: "string" },
+              details: { type: "string" },
+            },
+            required: ["credential"],
+          },
+        },
+        additionalQualifications: {
+          type: "array",
+          items: { type: "string" },
+          description: "Optional — only include if it materially helps land the target job",
+        },
       },
+      required: ["header", "summary", "skills", "experience"],
     },
-    additionalQualifications: {
-      type: "array",
-      items: { type: "string" },
-      description: "Optional — only include if it materially helps land the target job",
+    coverLetter: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        date: {
+          type: "string",
+          description: "Today's date in 'Month Day, Year' format, e.g. 'June 18, 2026'",
+        },
+        recipient: {
+          type: "object",
+          additionalProperties: false,
+          properties: {
+            name: { type: "string" },
+            title: { type: "string" },
+            company: { type: "string" },
+          },
+        },
+        salutation: {
+          type: "string",
+          description: "e.g. 'Dear Ms. Patel,' or 'Dear Hiring Team,'",
+        },
+        paragraphs: {
+          type: "array",
+          items: { type: "string" },
+          description: "3-4 paragraphs of letter body. Each is one paragraph as a single string.",
+        },
+        closing: {
+          type: "string",
+          description: "Sign-off line, e.g. 'Sincerely,'",
+        },
+      },
+      required: ["date", "salutation", "paragraphs", "closing"],
     },
   },
-  required: ["header", "summary", "skills", "experience"],
+  required: ["resume", "coverLetter"],
 };
 
 export async function POST(req: Request) {
@@ -140,6 +201,8 @@ export async function POST(req: Request) {
 
   const ctx: string[] = [];
   ctx.push(`TARGET JOB: ${body.targetJob}${body.targetSocCode ? ` (O*NET ${body.targetSocCode})` : ""}`);
+  if (body.companyName) ctx.push(`HIRING COMPANY: ${body.companyName}`);
+  if (body.hiringManager) ctx.push(`HIRING MANAGER: ${body.hiringManager}`);
   ctx.push(`CANDIDATE: ${body.fullName}`);
   if (body.contactCity) ctx.push(`Location: ${body.contactCity}`);
   if (body.contactEmail) ctx.push(`Email: ${body.contactEmail}`);
@@ -148,6 +211,7 @@ export async function POST(req: Request) {
   if (body.hollandCode) ctx.push(`Holland code: ${body.hollandCode}`);
   if (body.workHistory) ctx.push(`\nWork history narrative:\n${body.workHistory}`);
   if (body.goals) ctx.push(`\nCareer goals:\n${body.goals}`);
+  ctx.push(`\nToday's date: ${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}`);
   if (body.tsaSkills && body.tsaSkills.length > 0) {
     ctx.push(
       `\nTransferable skills identified from prior TSA:\n- ${body.tsaSkills.join("\n- ")}`,
@@ -188,7 +252,7 @@ export async function POST(req: Request) {
           role: "user",
           content:
             ctx.join("\n") +
-            "\n\nDraft a one-page resume for this candidate targeting the job above. JSON only.",
+            "\n\nDraft BOTH a one-page resume AND a matching one-page cover letter for this candidate targeting the job above. Return a single JSON object with `resume` and `coverLetter` keys per the schema. JSON only.",
         },
       ],
     });

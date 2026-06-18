@@ -34,11 +34,31 @@ interface Resume {
   additionalQualifications?: string[];
 }
 
+interface CoverLetter {
+  date: string;
+  recipient?: {
+    name?: string;
+    title?: string;
+    company?: string;
+  };
+  salutation: string;
+  paragraphs: string[];
+  closing: string;
+}
+
+interface ApiResponse {
+  resume: Resume;
+  coverLetter: CoverLetter;
+}
+
 interface SavedResume {
   id: string;
   targetJob: string;
   targetSocCode?: string;
+  companyName?: string;
+  hiringManager?: string;
   resume: Resume;
+  coverLetter?: CoverLetter;
   createdAt: string;
   updatedAt: string;
   label?: string; // optional user-given nickname
@@ -99,6 +119,8 @@ export default function ResumePage() {
   const [contactCity, setContactCity] = useState("");
   const [contactEmail, setContactEmail] = useState("");
   const [contactPhone, setContactPhone] = useState("");
+  const [companyName, setCompanyName] = useState("");
+  const [hiringManager, setHiringManager] = useState("");
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [resumes, setResumes] = useState<SavedResume[]>([]);
@@ -124,6 +146,7 @@ export default function ResumePage() {
     [resumes, activeId],
   );
   const resume = active?.resume ?? null;
+  const coverLetter = active?.coverLetter ?? null;
 
   const profile = useMemo(
     () => (authorized ? loadProfile() : { intake: undefined, hollandCode: undefined, riasec: undefined }),
@@ -156,6 +179,8 @@ export default function ResumePage() {
           contactCity,
           contactEmail,
           contactPhone,
+          companyName,
+          hiringManager,
           educationLevel: profile.intake?.educationLevel,
           workHistory: profile.intake?.workHistory,
           goals: profile.intake?.goals,
@@ -171,12 +196,15 @@ export default function ResumePage() {
         setGenerating(false);
         return;
       }
-      const data = (await resp.json()) as Resume;
+      const data = (await resp.json()) as ApiResponse;
       const saved: SavedResume = {
         id: newResumeId(),
         targetJob,
         targetSocCode: targetSocCode || undefined,
-        resume: data,
+        companyName: companyName || undefined,
+        hiringManager: hiringManager || undefined,
+        resume: data.resume,
+        coverLetter: data.coverLetter,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
@@ -199,11 +227,14 @@ export default function ResumePage() {
         <p className="text-xs uppercase tracking-widest text-ink/50 mb-1">
           AI Resume Builder
         </p>
-        <h1 className="text-4xl mb-2">Build a resume for one specific job</h1>
+        <h1 className="text-4xl mb-2">
+          Build a resume <em className="italic text-accent">and cover letter</em> for one specific job
+        </h1>
         <p className="text-ink/70 prose-narrow">
           Pick the job you&apos;re going after. We&apos;ll write a one-page
-          resume tailored to it using your intake info, assessment, and any
-          transferable skills already analyzed.
+          resume and a matching one-page cover letter, both tailored to it,
+          using your intake info, assessment, and any transferable skills
+          already analyzed.
         </p>
       </header>
 
@@ -351,7 +382,27 @@ export default function ResumePage() {
       </section>
 
       <section className="border border-ink/15 rounded-lg p-5 bg-cream print:hidden">
-        <h2 className="text-xl mb-3">3. Sources we&apos;ll pull from</h2>
+        <h2 className="text-xl mb-1">3. Cover letter details <span className="text-sm text-ink/50 font-normal">(optional)</span></h2>
+        <p className="text-xs text-ink/60 mb-3">
+          Add the company name and hiring manager if you know them. We&apos;ll
+          personalize the cover letter. Leave blank for a generic version.
+        </p>
+        <div className="grid sm:grid-cols-2 gap-3 text-sm">
+          <Input
+            label="Company / organization"
+            value={companyName}
+            onChange={setCompanyName}
+          />
+          <Input
+            label="Hiring manager name"
+            value={hiringManager}
+            onChange={setHiringManager}
+          />
+        </div>
+      </section>
+
+      <section className="border border-ink/15 rounded-lg p-5 bg-cream print:hidden">
+        <h2 className="text-xl mb-3">4. Sources we&apos;ll pull from</h2>
         <SourceRow
           label="Intake form"
           ok={!!profile.intake?.workHistory || !!profile.intake?.educationLevel}
@@ -379,10 +430,10 @@ export default function ResumePage() {
           className="px-5 py-2.5 bg-accent text-cream rounded font-semibold disabled:opacity-50"
         >
           {generating
-            ? "Drafting your resume with Claude Opus 4.8…"
+            ? "Drafting your resume + cover letter with Claude Opus 4.8…"
             : resumes.length > 0
-              ? "Generate another resume ✨"
-              : "Generate one-page resume ✨"}
+              ? "Generate another resume + cover letter ✨"
+              : "Generate resume + cover letter ✨"}
         </button>
         {resumes.length > 0 && !generating && (
           <p className="text-xs text-ink/60 mt-2">
@@ -397,7 +448,9 @@ export default function ResumePage() {
         )}
       </div>
 
-      {resume && <ResumePreview resume={resume} />}
+      {resume && (
+        <ResumePreview resume={resume} coverLetter={coverLetter} />
+      )}
     </div>
   );
 }
@@ -456,22 +509,59 @@ function SourceRow({
   );
 }
 
-function ResumePreview({ resume }: { resume: Resume }) {
+function ResumePreview({
+  resume,
+  coverLetter,
+}: {
+  resume: Resume;
+  coverLetter: CoverLetter | null;
+}) {
+  const [printMode, setPrintMode] = useState<"both" | "resume" | "cover">(
+    "both",
+  );
+
+  function printWith(mode: "both" | "resume" | "cover") {
+    setPrintMode(mode);
+    // Let the DOM update with the new class before the print dialog opens.
+    setTimeout(() => window.print(), 0);
+  }
+
   return (
     <>
-      <div className="flex items-baseline justify-between gap-4 print:hidden">
-        <h2 className="text-2xl">Your resume — preview</h2>
-        <div className="flex gap-2">
+      <div className="flex items-baseline justify-between gap-4 print:hidden flex-wrap">
+        <h2 className="text-2xl">Your application — preview</h2>
+        <div className="flex gap-2 flex-wrap">
+          {coverLetter && (
+            <>
+              <button
+                onClick={() => printWith("cover")}
+                className="text-sm border border-ink/20 px-4 py-2 rounded hover:bg-ink/5"
+              >
+                🖨️ Cover letter only
+              </button>
+              <button
+                onClick={() => printWith("resume")}
+                className="text-sm border border-ink/20 px-4 py-2 rounded hover:bg-ink/5"
+              >
+                🖨️ Resume only
+              </button>
+            </>
+          )}
           <button
-            onClick={() => window.print()}
-            className="text-sm border border-ink/20 px-4 py-2 rounded hover:bg-ink/5"
+            onClick={() => printWith("both")}
+            className="text-sm bg-accent text-cream px-4 py-2 rounded font-semibold"
           >
-            🖨️ Print / Save as PDF
+            🖨️ {coverLetter ? "Print both / Save as PDF" : "Print / Save as PDF"}
           </button>
         </div>
       </div>
 
-      <article className="resume-page bg-white shadow-sm border border-ink/15 rounded-sm">
+      <div className={`print-stack print-mode-${printMode} space-y-6`}>
+        {coverLetter && (
+          <CoverLetterPage letter={coverLetter} resume={resume} />
+        )}
+
+        <article className="resume-page bg-white shadow-sm border border-ink/15 rounded-sm">
         <header className="resume-header">
           <h1>{resume.header.name}</h1>
           <p>
@@ -544,6 +634,7 @@ function ResumePreview({ resume }: { resume: Resume }) {
             </section>
           )}
       </article>
+      </div>
 
       <style jsx global>{`
         .resume-page {
@@ -608,23 +699,128 @@ function ResumePreview({ resume }: { resume: Resume }) {
         .resume-page .resume-edu {
           margin-bottom: 6px;
         }
+        .cover-letter-page {
+          font-family: Georgia, "Times New Roman", Times, serif;
+          color: #1a1a1a;
+          background: #ffffff;
+          padding: 0.8in 0.85in;
+          max-width: 8.5in;
+          margin: 0 auto;
+          font-size: 11pt;
+          line-height: 1.55;
+        }
+        .cover-letter-page .cl-header {
+          text-align: center;
+          border-bottom: 1.5pt solid #1a1a1a;
+          padding-bottom: 8px;
+          margin-bottom: 24px;
+        }
+        .cover-letter-page .cl-header h1 {
+          font-size: 22pt;
+          margin: 0 0 4px;
+          letter-spacing: 0.02em;
+        }
+        .cover-letter-page .cl-header p {
+          margin: 0;
+          font-size: 10pt;
+          color: #444;
+        }
+        .cover-letter-page .cl-date {
+          margin: 0 0 18px;
+        }
+        .cover-letter-page .cl-recipient {
+          margin: 0 0 18px;
+          line-height: 1.4;
+        }
+        .cover-letter-page .cl-recipient div {
+          margin: 0;
+        }
+        .cover-letter-page .cl-salutation {
+          margin: 0 0 14px;
+        }
+        .cover-letter-page .cl-body p {
+          margin: 0 0 12px;
+          text-align: justify;
+        }
+        .cover-letter-page .cl-closing {
+          margin-top: 22px;
+        }
+        .cover-letter-page .cl-signature {
+          margin-top: 30px;
+          font-weight: 600;
+        }
+
         @media print {
           body * {
             visibility: hidden;
           }
-          .resume-page,
-          .resume-page * {
+          .print-mode-both .resume-page,
+          .print-mode-both .resume-page *,
+          .print-mode-both .cover-letter-page,
+          .print-mode-both .cover-letter-page *,
+          .print-mode-resume .resume-page,
+          .print-mode-resume .resume-page *,
+          .print-mode-cover .cover-letter-page,
+          .print-mode-cover .cover-letter-page * {
             visibility: visible;
           }
-          .resume-page {
-            position: absolute;
-            left: 0;
-            top: 0;
+          .resume-page,
+          .cover-letter-page {
             box-shadow: none;
             border: none;
+          }
+          .print-mode-cover .resume-page,
+          .print-mode-resume .cover-letter-page {
+            display: none;
+          }
+          .print-mode-both .cover-letter-page {
+            page-break-after: always;
           }
         }
       `}</style>
     </>
+  );
+}
+
+function CoverLetterPage({
+  letter,
+  resume,
+}: {
+  letter: CoverLetter;
+  resume: Resume;
+}) {
+  const contactLine = [
+    resume.header.location,
+    resume.header.email,
+    resume.header.phone,
+  ]
+    .filter(Boolean)
+    .join("  ·  ");
+  return (
+    <article className="cover-letter-page bg-white shadow-sm border border-ink/15 rounded-sm">
+      <header className="cl-header">
+        <h1>{resume.header.name}</h1>
+        {contactLine && <p>{contactLine}</p>}
+      </header>
+      <p className="cl-date">{letter.date}</p>
+      {letter.recipient &&
+        (letter.recipient.name ||
+          letter.recipient.title ||
+          letter.recipient.company) && (
+          <div className="cl-recipient">
+            {letter.recipient.name && <div>{letter.recipient.name}</div>}
+            {letter.recipient.title && <div>{letter.recipient.title}</div>}
+            {letter.recipient.company && <div>{letter.recipient.company}</div>}
+          </div>
+        )}
+      <p className="cl-salutation">{letter.salutation}</p>
+      <div className="cl-body">
+        {letter.paragraphs.map((p, i) => (
+          <p key={i}>{p}</p>
+        ))}
+      </div>
+      <p className="cl-closing">{letter.closing}</p>
+      <p className="cl-signature">{resume.header.name}</p>
+    </article>
   );
 }
