@@ -23,6 +23,13 @@ import {
   type VaultDocument,
   type DocumentRoute,
 } from "@/lib/business-portal";
+import {
+  approveRequest,
+  declineRequest,
+  pendingRequestsForCounselor,
+  releaseDocument,
+  type ServiceRequest,
+} from "@/lib/service-requests";
 import { seedBusinessPortal } from "@/lib/business-portal-seed";
 
 export default function CounselorBusinessView() {
@@ -72,6 +79,7 @@ export default function CounselorBusinessView() {
       )
       .slice(0, 20);
     const employerSummary = summarizeEmployers(placements);
+    const pendingServiceRequests = pendingRequestsForCounselor(user.email);
     return {
       placements,
       auths,
@@ -84,6 +92,7 @@ export default function CounselorBusinessView() {
       unackedRoutes,
       activity,
       employerSummary,
+      pendingServiceRequests,
     };
   }, [user, bump]);
 
@@ -133,6 +142,23 @@ export default function CounselorBusinessView() {
           label="Authorizations pending"
           value={String(data.pendingAuths.length)}
           sub="Vendors awaiting your decision"
+        />
+      </section>
+
+      {/* Service Requests Queue (NEW — pre-release counselor review) */}
+      <section>
+        <h2 className="text-2xl mb-3">
+          🔒 Service requests from business clients
+        </h2>
+        <p className="text-sm text-ink/65 mb-3">
+          Business and forensic deliverables route through you BEFORE
+          they reach the requesting org. Approve to begin the engagement;
+          release once the draft is ready for the client to see.
+        </p>
+        <ServiceRequestQueue
+          requests={data.pendingServiceRequests}
+          counselorEmail={user.email}
+          onChange={refresh}
         />
       </section>
 
@@ -538,6 +564,123 @@ function AuthQueue({
             >
               Deny
             </button>
+          </div>
+        </article>
+      ))}
+    </div>
+  );
+}
+
+function ServiceRequestQueue({
+  requests,
+  counselorEmail,
+  onChange,
+}: {
+  requests: ServiceRequest[];
+  counselorEmail: string;
+  onChange: () => void;
+}) {
+  if (requests.length === 0) {
+    return <Empty>No service requests awaiting your review.</Empty>;
+  }
+  return (
+    <div className="space-y-3">
+      {requests.map((r) => (
+        <article
+          key={r.id}
+          className={`border-2 rounded-lg p-4 ${
+            r.status === "pending-counselor-review"
+              ? "border-amber-300 bg-amber-50/40"
+              : "border-purple-300 bg-purple-50/30"
+          }`}
+        >
+          <div className="flex items-baseline justify-between gap-3 flex-wrap mb-1">
+            <h3 className="font-semibold">
+              {r.serviceTitle}{" "}
+              <span className="text-ink/55 font-normal text-sm">
+                · requested by {r.requesterName}, {r.requesterOrgName}
+              </span>
+            </h3>
+            <span
+              className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full font-semibold ${
+                r.status === "pending-counselor-review"
+                  ? "bg-amber-200 text-amber-900"
+                  : "bg-purple-200 text-purple-900"
+              }`}
+            >
+              {r.status === "pending-counselor-review"
+                ? "Awaiting your approval"
+                : "Draft awaiting release"}
+            </span>
+          </div>
+          <div className="text-sm text-ink/75 space-y-0.5">
+            {r.matterCaption && (
+              <div>
+                <strong>Matter:</strong> {r.matterCaption}
+                {r.jurisdiction ? ` · ${r.jurisdiction}` : ""}
+              </div>
+            )}
+            {r.subjectClientName && (
+              <div>
+                <strong>Subject:</strong> {r.subjectClientName}
+                {r.subjectCaseId ? ` · Case ${r.subjectCaseId}` : ""}
+              </div>
+            )}
+            <div>
+              <strong>Urgency:</strong> {r.urgency} ·{" "}
+              <strong>Requested:</strong>{" "}
+              {new Date(r.requestedAt).toLocaleDateString()}
+            </div>
+            {r.notes && (
+              <div className="italic mt-1">
+                &ldquo;{r.notes}&rdquo;
+              </div>
+            )}
+          </div>
+
+          <div className="flex gap-2 flex-wrap mt-3">
+            {r.status === "pending-counselor-review" && (
+              <>
+                <button
+                  onClick={() => {
+                    approveRequest(r.id, counselorEmail);
+                    onChange();
+                  }}
+                  className="bg-accent text-cream px-3 py-1.5 rounded font-semibold text-xs"
+                >
+                  Approve · begin engagement
+                </button>
+                <button
+                  onClick={() => {
+                    const reason = window.prompt("Reason for declining?");
+                    if (reason) {
+                      declineRequest(r.id, counselorEmail, reason);
+                      onChange();
+                    }
+                  }}
+                  className="border border-ink/20 px-3 py-1.5 rounded text-xs hover:bg-ink/5"
+                >
+                  Decline
+                </button>
+              </>
+            )}
+            {r.status === "draft-awaiting-release" && (
+              <button
+                onClick={() => {
+                  if (
+                    window.confirm(
+                      "Release this deliverable to the business client? They will see it in their vault immediately.",
+                    )
+                  ) {
+                    releaseDocument(r.id, counselorEmail);
+                    onChange();
+                  }
+                }}
+                className="bg-purple-700 text-cream px-3 py-1.5 rounded font-semibold text-xs"
+              >
+                ✓ Release to business client
+              </button>
+            )}
           </div>
         </article>
       ))}

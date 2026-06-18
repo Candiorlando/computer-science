@@ -107,6 +107,7 @@ export function AppHeader() {
 
   const businessTabs = [
     { href: "/business-portal", label: "Dashboard" },
+    { href: "/business-portal/services", label: "Services" },
   ];
 
   const vendorTabs = [
