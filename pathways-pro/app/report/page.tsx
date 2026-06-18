@@ -6,6 +6,7 @@ import Link from "next/link";
 import { loadSession } from "@/lib/session";
 import {
   CLIENTS,
+  getCounselorClients,
   type AnyUser,
   type ClientUser,
   type CounselorUser,
@@ -21,6 +22,7 @@ import { loadTSA } from "@/lib/tsa-storage";
 import { rankOccupations } from "@/lib/onet-data";
 import { riasecNames, traitNames } from "@/lib/assessments";
 import { analyzeHollandCode } from "@/lib/holland-analysis";
+import { nameWithInitial } from "@/lib/document-id";
 import type { IPE } from "@/lib/ipe";
 import { loadScreenerResults, SCREENERS, type ScreenerResult } from "@/lib/screeners";
 
@@ -143,9 +145,7 @@ function CounselorReportPicker({
   caseIdParam: string | null;
 }) {
   const router = useRouter();
-  const clients = user.clientKeys
-    .map((k) => CLIENTS[k])
-    .filter((c): c is ClientUser => Boolean(c));
+  const clients = getCounselorClients(user);
 
   const [selected, setSelected] = useState<string | null>(caseIdParam);
   const allReports = useMemo(
@@ -644,9 +644,12 @@ function ReportHeader({
   report: ClientReport;
   comprehensive?: boolean;
 }) {
+  // Printable docs identify the client by case ID + "First L." initial so
+  // shared copies (with employers, vendors, training providers) don't
+  // carry the client's full last name on every page.
   return (
     <header className="r-head">
-      <h1 className="r-name">{report.clientName}</h1>
+      <h1 className="r-name">{nameWithInitial(report.clientName)}</h1>
       <p className="r-meta">
         Pathways Pro {comprehensive ? "Comprehensive IPE Report" : "Assessment Report"} · Case{" "}
         {report.caseId}

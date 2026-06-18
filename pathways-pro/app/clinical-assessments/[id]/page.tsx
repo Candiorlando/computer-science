@@ -12,6 +12,8 @@ import {
   type ScreenerResult,
   type SeverityBand,
 } from "@/lib/screeners";
+import type { ClientUser } from "@/lib/users";
+import { nameWithInitial } from "@/lib/document-id";
 
 export default function ScreenerPage() {
   const router = useRouter();
@@ -23,11 +25,13 @@ export default function ScreenerPage() {
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [result, setResult] = useState<ScreenerResult | null>(null);
   const [showResult, setShowResult] = useState(false);
+  const [client, setClient] = useState<ClientUser | null>(null);
 
   useEffect(() => {
     const s = loadSession();
     if (!s) return router.replace("/");
     setAuthorized(true);
+    if (s.role === "client") setClient(s);
     const prior = loadLatestResult(id);
     if (prior) {
       setResult(prior);
@@ -82,6 +86,18 @@ export default function ScreenerPage() {
           ← Back to the library
         </Link>
       </div>
+
+      {client && (
+        <header className="hidden print:block border-b-2 border-ink pb-2 mb-4">
+          <p className="text-xs uppercase tracking-widest">
+            Pathways Pro · {config.acronym} Assessment
+          </p>
+          <p className="text-sm">
+            Case <strong>{client.caseId}</strong> ·{" "}
+            <strong>{nameWithInitial(client.name)}</strong>
+          </p>
+        </header>
+      )}
 
       <header>
         <p className="text-xs uppercase tracking-widest text-ink/50 mb-1">

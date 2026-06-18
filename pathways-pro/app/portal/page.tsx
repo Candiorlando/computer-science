@@ -31,16 +31,28 @@ export default function PortalHome() {
     <div className="space-y-10">
       <header>
         <p className="text-xs uppercase tracking-widest text-ink/50 mb-1">
-          {isClient ? `Case ${c!.caseId} · ${c!.counselorName}` : "Client Portal Preview"}
+          {isClient ? "My Pathways Pro Account" : "Client Portal Preview"}
         </p>
         <h1 className="text-4xl">
           Welcome, <span className="text-accent">{firstName}</span>.
         </h1>
         {isClient && (
-          <p className="text-ink/70 mt-2 max-w-2xl">
-            Your current goal: <strong>{c!.goal}</strong>. Your next appointment is{" "}
-            <strong>{c!.nextAppt}</strong>.
-          </p>
+          <>
+            <div className="mt-3 inline-flex flex-wrap items-center gap-3 border border-accent/30 bg-accent/5 rounded-lg px-4 py-2.5 text-sm">
+              <span className="text-xs uppercase tracking-wider text-ink/50">
+                Case
+              </span>
+              <strong className="text-accent font-mono">{c!.caseId}</strong>
+              <span className="text-ink/30">·</span>
+              <span className="text-ink/80">{c!.name}</span>
+              <span className="text-ink/30">·</span>
+              <span className="text-ink/70 text-xs">{c!.counselorName}</span>
+            </div>
+            <p className="text-ink/70 mt-3 max-w-2xl">
+              Your current goal: <strong>{c!.goal}</strong>. Your next appointment is{" "}
+              <strong>{c!.nextAppt}</strong>.
+            </p>
+          </>
         )}
       </header>
 
