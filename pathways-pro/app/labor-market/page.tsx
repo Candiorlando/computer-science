@@ -16,6 +16,7 @@ import {
 import { analyzeHollandCode } from "@/lib/holland-analysis";
 import { riasecNames, type RiasecType } from "@/lib/assessments";
 import { extractZip } from "@/lib/storage";
+import { seedDemoClientReports } from "@/lib/demo-seed";
 
 export default function LaborMarketPage() {
   return (
@@ -37,6 +38,7 @@ function Inner() {
     const s = loadSession();
     if (!s) return router.replace("/");
     if (s.role !== "counselor") return router.replace("/portal");
+    seedDemoClientReports();
     setUser(s);
   }, [router]);
 
