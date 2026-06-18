@@ -5,7 +5,7 @@ import type { AnyUser } from "./users";
 const SESSION_KEY = "pathways-pro:session-v1";
 const MODE_KEY = "pathways-pro:mode-v1";
 
-export type ViewMode = "counselor" | "client";
+export type ViewMode = "counselor" | "client" | "business";
 
 export function loadSession(): AnyUser | null {
   if (typeof window === "undefined") return null;
@@ -31,7 +31,9 @@ export function clearSession() {
 export function loadMode(defaultMode: ViewMode): ViewMode {
   if (typeof window === "undefined") return defaultMode;
   const v = window.localStorage.getItem(MODE_KEY);
-  return v === "counselor" || v === "client" ? v : defaultMode;
+  return v === "counselor" || v === "client" || v === "business"
+    ? v
+    : defaultMode;
 }
 
 export function saveMode(mode: ViewMode) {

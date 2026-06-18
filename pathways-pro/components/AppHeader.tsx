@@ -24,7 +24,15 @@ export function AppHeader() {
     const u = loadSession();
     setUser(u);
     if (u && (u.role === "counselor" || u.role === "client")) {
-      setMode(loadMode(u.role));
+      // Sync the pill to whatever page the counselor is actually on,
+      // so navigating directly to /dashboard/business via URL or a deep
+      // link still highlights the Business View pill.
+      if (u.role === "counselor" && pathname.startsWith("/dashboard/business")) {
+        setMode("business");
+        saveMode("business");
+      } else {
+        setMode(loadMode(u.role));
+      }
     }
   }, [pathname]);
 
@@ -42,13 +50,20 @@ export function AppHeader() {
   function switchMode(next: ViewMode) {
     setMode(next);
     saveMode(next);
-    router.push(next === "counselor" ? "/dashboard" : "/portal");
+    const dest =
+      next === "counselor"
+        ? "/dashboard"
+        : next === "client"
+          ? "/portal"
+          : "/dashboard/business";
+    router.push(dest);
   }
 
   function homeHref(): string {
     if (!user) return "/";
     if (user.role === "business") return "/business-portal";
     if (user.role === "vendor") return "/vendor-portal";
+    if (mode === "business") return "/dashboard/business";
     return mode === "counselor" ? "/dashboard" : "/portal";
   }
 
@@ -58,11 +73,17 @@ export function AppHeader() {
     { href: "/ipe", label: "IPE Builder" },
     { href: "/report", label: "Assessment Reports" },
     { href: "/labor-market", label: "Labor Market" },
-    { href: "/dashboard/business", label: "Business View" },
     { href: "/clinical-assessments", label: "Assessment Library" },
     { href: "/practitioner-hub", label: "Practitioner Hub" },
     { href: "/ce", label: "CE Tracker" },
     { href: "/resources/counselor", label: "Resource Library" },
+  ];
+
+  // Counselor's Business View mode — shown when the "Business View" pill
+  // is active. Single-tab nav for now; expands when /dashboard/business
+  // grows sub-routes (employers, vendors, forensic inbox, etc.).
+  const counselorBusinessTabs = [
+    { href: "/dashboard/business", label: "Business Dashboard" },
   ];
 
   const clientTabs = [
@@ -92,6 +113,7 @@ export function AppHeader() {
   if (mounted && user) {
     if (isBusiness) tabs = businessTabs;
     else if (isVendor) tabs = vendorTabs;
+    else if (mode === "business") tabs = counselorBusinessTabs;
     else tabs = mode === "counselor" ? counselorTabs : clientTabs;
   }
 
@@ -106,18 +128,34 @@ export function AppHeader() {
         </Link>
 
         {mounted && user && isCounselor && (
-          <div className="flex bg-ink/5 rounded-md p-1">
+          <div
+            className="flex bg-ink/5 rounded-md p-1"
+            role="tablist"
+            aria-label="Counselor view mode"
+          >
             <button
+              role="tab"
+              aria-selected={mode === "counselor"}
               onClick={() => switchMode("counselor")}
               className={`px-3 py-1.5 text-xs rounded ${mode === "counselor" ? "bg-cream shadow-sm text-accent" : "text-ink/60 hover:text-ink"}`}
             >
               Counselor View
             </button>
             <button
+              role="tab"
+              aria-selected={mode === "client"}
               onClick={() => switchMode("client")}
               className={`px-3 py-1.5 text-xs rounded ${mode === "client" ? "bg-cream shadow-sm text-accent" : "text-ink/60 hover:text-ink"}`}
             >
               Client Portal Preview
+            </button>
+            <button
+              role="tab"
+              aria-selected={mode === "business"}
+              onClick={() => switchMode("business")}
+              className={`px-3 py-1.5 text-xs rounded ${mode === "business" ? "bg-cream shadow-sm text-accent" : "text-ink/60 hover:text-ink"}`}
+            >
+              Business View
             </button>
           </div>
         )}
