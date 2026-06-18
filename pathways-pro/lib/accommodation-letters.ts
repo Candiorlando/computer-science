@@ -35,6 +35,12 @@ export interface PaidSolution {
   estimatedPriceLow: number;
   estimatedPriceHigh: number;
   exampleSources: string[]; // e.g. ["Amazon", "vendor:Humanscale", "askjan.org"]
+  // Whether the price range came from Claude's training knowledge or
+  // from a live retail search (Brave Search). Counselors and HR teams
+  // both want to know how authoritative the number is.
+  priceSource: "ai-estimated" | "live-verified";
+  verifiedAt?: string;          // ISO timestamp when live-verified
+  verifiedSources?: string[];   // URLs used to compute the verified range
 }
 
 export interface AccommodationLetter {

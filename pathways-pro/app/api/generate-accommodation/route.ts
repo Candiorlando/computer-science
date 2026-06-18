@@ -1,5 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
+import { verifyPriceRange } from "@/lib/price-search";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -267,14 +268,71 @@ export async function POST(req: Request) {
     return jsonError("No text response.", 500);
   }
 
+  let data: {
+    paidSolutions: {
+      label: string;
+      estimatedPriceLow: number;
+      estimatedPriceHigh: number;
+      priceSource?: string;
+      verifiedAt?: string;
+      verifiedSources?: string[];
+    }[];
+    totalPaidLow: number;
+    totalPaidHigh: number;
+    [k: string]: unknown;
+  };
   try {
-    const data = JSON.parse(textBlock.text);
-    return new Response(JSON.stringify(data), {
-      headers: { "Content-Type": "application/json" },
-    });
+    data = JSON.parse(textBlock.text);
   } catch {
     return jsonError("Model response was not valid JSON.", 500);
   }
+
+  // Optional retail-price verification. If BRAVE_SEARCH_API_KEY is set
+  // in env, we look up each paid solution and replace the AI estimate
+  // with a 25th–75th percentile range pulled from real retail snippets.
+  // Falls through silently if the key isn't set or the search returns
+  // unusable results — every paid item still has an ai-estimated price.
+  const enriched = await Promise.all(
+    data.paidSolutions.map(async (s) => {
+      const verified = await verifyPriceRange({
+        label: s.label,
+        estimatedPriceLow: s.estimatedPriceLow,
+        estimatedPriceHigh: s.estimatedPriceHigh,
+      });
+      if (verified) {
+        return {
+          ...s,
+          estimatedPriceLow: verified.low,
+          estimatedPriceHigh: verified.high,
+          priceSource: "live-verified" as const,
+          verifiedAt: new Date().toISOString(),
+          verifiedSources: verified.sourcesConsulted,
+        };
+      }
+      return { ...s, priceSource: "ai-estimated" as const };
+    }),
+  );
+
+  // Recompute the totals from the (possibly re-priced) solutions so the
+  // headline range matches the per-item ranges.
+  const totalPaidLow = enriched.reduce(
+    (sum, s) => sum + s.estimatedPriceLow,
+    0,
+  );
+  const totalPaidHigh = enriched.reduce(
+    (sum, s) => sum + s.estimatedPriceHigh,
+    0,
+  );
+
+  return new Response(
+    JSON.stringify({
+      ...data,
+      paidSolutions: enriched,
+      totalPaidLow,
+      totalPaidHigh,
+    }),
+    { headers: { "Content-Type": "application/json" } },
+  );
 }
 
 function jsonError(error: string, status: number) {

@@ -489,12 +489,13 @@ function PaidBlock({
               </div>
             </div>
             <div className="text-xs text-ink/70 mt-0.5">{s.rationale}</div>
-            <div className="text-[11px] text-ink/55 mt-1">
+            <div className="text-[11px] text-ink/55 mt-1 flex flex-wrap gap-2 items-baseline">
               <span className="uppercase tracking-wider text-amber-700">
                 {s.category}
               </span>
+              <PriceBadge solution={s} />
               {s.exampleSources.length > 0 && (
-                <span> · Look at: {s.exampleSources.join(" · ")}</span>
+                <span>· Look at: {s.exampleSources.join(" · ")}</span>
               )}
             </div>
           </li>
@@ -621,6 +622,31 @@ function LetterPreview({ letter }: { letter: AccommodationLetter }) {
         }
       `}</style>
     </article>
+  );
+}
+
+function PriceBadge({ solution }: { solution: PaidSolution }) {
+  if (solution.priceSource === "live-verified") {
+    return (
+      <span
+        className="text-[10px] uppercase tracking-wider bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-semibold"
+        title={
+          solution.verifiedSources?.length
+            ? `Pulled from ${solution.verifiedSources.length} retail source(s)`
+            : "Live retail verified"
+        }
+      >
+        ✓ Verified retail
+      </span>
+    );
+  }
+  return (
+    <span
+      className="text-[10px] uppercase tracking-wider bg-ink/10 text-ink/65 px-2 py-0.5 rounded-full font-semibold"
+      title="Estimated by Claude from training data"
+    >
+      AI estimate
+    </span>
   );
 }
 
