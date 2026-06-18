@@ -109,8 +109,8 @@ const RESPONSE_SCHEMA = {
     },
     nextSteps: {
       type: "array",
-      minItems: 3,
       items: { type: "string" },
+      description: "3-6 concrete, ordered next steps the client should take.",
     },
   },
   required: [

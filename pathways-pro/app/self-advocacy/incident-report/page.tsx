@@ -13,6 +13,7 @@ import {
   type Incident,
   type ProblemAnalysisReport,
 } from "@/lib/self-advocacy";
+import { recordCaseNoteEvent } from "@/lib/case-notes";
 
 interface ApiResponse {
   executiveSummary: string;
@@ -132,6 +133,16 @@ export default function IncidentReportPage() {
       saveProblemAnalysisReport(report);
       setReports(loadProblemAnalysisReports());
       setActiveId(report.id);
+      recordCaseNoteEvent({
+        kind: "problem-analysis-generated",
+        participantType: "individual-client",
+        caseId: client?.caseId,
+        clientName,
+        sourceArtifactId: report.id,
+        employerName,
+        incidentCount: report.incidents.length,
+        statutesCited: report.legalCrossReference.length,
+      });
     } catch (e) {
       setError(e instanceof Error ? e.message : "Network error");
     } finally {

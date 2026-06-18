@@ -166,7 +166,6 @@ const RESPONSE_SCHEMA = {
         },
         paragraphs: {
           type: "array",
-          minItems: 4,
           items: { type: "string" },
           description:
             "4-6 paragraphs of the letter body in order: (1) identify self + invoke ADA Title I + state purpose; (2) describe the workplace barrier without over-disclosing medical detail; (3) propose zero-cost options as a bulleted-style paragraph; (4) propose paid options with estimated price ranges as a bulleted-style paragraph; (5) cite JAN data on accommodation costs to pre-empt undue hardship concerns; (6) request interactive-process meeting within 10 business days and offer to provide any documentation HR needs.",

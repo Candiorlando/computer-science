@@ -14,6 +14,7 @@ import {
   type BusinessPlan,
 } from "@/lib/entrepreneurship";
 import { LEGAL_DISCLAIMER } from "@/lib/self-advocacy";
+import { recordCaseNoteEvent } from "@/lib/case-notes";
 
 type ApiResponse = Omit<
   BusinessPlan,
@@ -111,6 +112,21 @@ export default function BusinessPlanPage() {
       saveBusinessPlan(plan);
       setPlans(loadBusinessPlans());
       setActiveId(plan.id);
+      const atTotal = (plan.assistiveTechBudget ?? []).reduce(
+        (s, a) => s + (a.estimatedCost ?? 0),
+        0,
+      );
+      recordCaseNoteEvent({
+        kind: "business-plan-generated",
+        participantType: "individual-client",
+        caseId: client?.caseId,
+        clientName,
+        sourceArtifactId: plan.id,
+        businessName: plan.businessName,
+        startingBudget: plan.startingBudget,
+        breakEvenMonth: plan.financialProjections.breakEvenMonth,
+        atBudgetTotal: atTotal,
+      });
     } catch (e) {
       setError(e instanceof Error ? e.message : "Network error");
     } finally {

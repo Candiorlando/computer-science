@@ -14,6 +14,7 @@ import {
   type OCRDOJComplaint,
   type RespondentType,
 } from "@/lib/self-advocacy";
+import { recordCaseNoteEvent } from "@/lib/case-notes";
 
 const RIGHTS = [
   "ADA Title II (state/local government)",
@@ -145,6 +146,16 @@ export default function OCRDOJPage() {
       saveOCRComplaint(complaint);
       setComplaints(loadOCRComplaints());
       setActiveId(complaint.id);
+      recordCaseNoteEvent({
+        kind: "ocr-doj-complaint-generated",
+        participantType: "individual-client",
+        caseId: client?.caseId,
+        clientName,
+        sourceArtifactId: complaint.id,
+        agency,
+        respondentName,
+        rightsViolated,
+      });
     } catch (e) {
       setError(e instanceof Error ? e.message : "Network error");
     } finally {

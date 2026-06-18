@@ -16,6 +16,7 @@ import {
   type ConceptMatchSession,
 } from "@/lib/entrepreneurship";
 import { LEGAL_DISCLAIMER } from "@/lib/self-advocacy";
+import { recordCaseNoteEvent } from "@/lib/case-notes";
 
 interface ApiResponse {
   concepts: BusinessConcept[];
@@ -111,6 +112,15 @@ export default function ConceptMatchPage() {
       saveConceptMatch(session);
       setSessions(loadConceptMatches());
       setActiveId(session.id);
+      recordCaseNoteEvent({
+        kind: "concept-match-generated",
+        participantType: "individual-client",
+        caseId: client?.caseId,
+        clientName,
+        sourceArtifactId: session.id,
+        hollandCode: profile?.hollandCode,
+        conceptCount: session.concepts.length,
+      });
     } catch (e) {
       setError(e instanceof Error ? e.message : "Network error");
     } finally {

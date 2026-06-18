@@ -31,6 +31,8 @@ import {
   type ServiceRequest,
 } from "@/lib/service-requests";
 import { seedBusinessPortal } from "@/lib/business-portal-seed";
+import { loadCaseNotes, type CaseNote } from "@/lib/case-notes";
+import { CaseNotesPanel } from "@/components/CaseNotesPanel";
 
 export default function CounselorBusinessView() {
   const router = useRouter();
@@ -80,6 +82,17 @@ export default function CounselorBusinessView() {
       .slice(0, 20);
     const employerSummary = summarizeEmployers(placements);
     const pendingServiceRequests = pendingRequestsForCounselor(user.email);
+    const orgIds = Array.from(
+      new Set(placements.map((p) => p.employerOrgId)),
+    );
+    const businessCaseNotes: CaseNote[] = loadCaseNotes()
+      .filter(
+        (n) =>
+          n.participantType === "business-vendor" &&
+          n.businessOrgId &&
+          orgIds.includes(n.businessOrgId),
+      )
+      .sort((a, b) => Date.parse(b.sessionAt) - Date.parse(a.sessionAt));
     return {
       placements,
       auths,
@@ -93,6 +106,7 @@ export default function CounselorBusinessView() {
       activity,
       employerSummary,
       pendingServiceRequests,
+      businessCaseNotes,
     };
   }, [user, bump]);
 
@@ -245,6 +259,13 @@ export default function CounselorBusinessView() {
           onDecision={refresh}
         />
       </section>
+
+      {/* Business-side case notes (DAP) */}
+      <CaseNotesPanel
+        notes={data.businessCaseNotes}
+        title="Business client case notes"
+        emptyLabel="No auto-generated case notes for business clients yet."
+      />
 
       {/* ⑥ Activity feed */}
       <section>

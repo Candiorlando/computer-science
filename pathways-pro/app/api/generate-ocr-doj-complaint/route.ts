@@ -89,8 +89,8 @@ const RESPONSE_SCHEMA = {
     legalBasis: { type: "string" },
     remediesSought: {
       type: "array",
-      minItems: 3,
       items: { type: "string" },
+      description: "3-6 specific, non-monetary remedies sought.",
     },
   },
   required: ["formalComplaint", "legalBasis", "remediesSought"],

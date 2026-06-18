@@ -13,6 +13,7 @@ import {
   type EEOCBasis,
   type EEOCCharge,
 } from "@/lib/self-advocacy";
+import { recordCaseNoteEvent } from "@/lib/case-notes";
 
 const BASES: EEOCBasis[] = [
   "Disability",
@@ -158,6 +159,17 @@ export default function EEOCPage() {
       saveEEOCCharge(charge);
       setCharges(loadEEOCCharges());
       setActiveId(charge.id);
+      recordCaseNoteEvent({
+        kind: "eeoc-charge-generated",
+        participantType: "individual-client",
+        caseId: client?.caseId,
+        clientName,
+        sourceArtifactId: charge.id,
+        employerName,
+        bases: bases as string[],
+        earliestDate,
+        latestDate,
+      });
     } catch (e) {
       setError(e instanceof Error ? e.message : "Network error");
     } finally {

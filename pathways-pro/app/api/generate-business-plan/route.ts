@@ -81,7 +81,7 @@ const RESPONSE_SCHEMA = {
         marketSize: { type: "string" },
         competitors: {
           type: "array",
-          minItems: 2,
+          description: "2-5 competitor types.",
           items: {
             type: "object",
             additionalProperties: false,
@@ -94,7 +94,7 @@ const RESPONSE_SCHEMA = {
         },
         gotoMarketChannels: {
           type: "array",
-          minItems: 3,
+          description: "3-5 specific low-cost channels.",
           items: { type: "string" },
         },
       },
@@ -106,13 +106,12 @@ const RESPONSE_SCHEMA = {
       properties: {
         workflowSteps: {
           type: "array",
-          minItems: 4,
+          description: "4-8 sequential workflow steps.",
           items: { type: "string" },
         },
         keyMilestones30_60_90: {
           type: "array",
-          minItems: 3,
-          maxItems: 3,
+          description: "Exactly 3 entries, one each for day 30, 60, and 90.",
           items: {
             type: "object",
             additionalProperties: false,
@@ -125,7 +124,6 @@ const RESPONSE_SCHEMA = {
         },
         accommodationsBuiltIn: {
           type: "array",
-          minItems: 1,
           items: { type: "string" },
         },
       },
@@ -141,7 +139,7 @@ const RESPONSE_SCHEMA = {
       properties: {
         startupCosts: {
           type: "array",
-          minItems: 3,
+          description: "3-8 line items.",
           items: {
             type: "object",
             additionalProperties: false,
@@ -154,7 +152,7 @@ const RESPONSE_SCHEMA = {
         },
         monthlyExpenses: {
           type: "array",
-          minItems: 3,
+          description: "3-8 line items.",
           items: {
             type: "object",
             additionalProperties: false,
@@ -167,8 +165,7 @@ const RESPONSE_SCHEMA = {
         },
         revenueProjections: {
           type: "array",
-          minItems: 6,
-          maxItems: 12,
+          description: "6-12 monthly projections (one row per month).",
           items: {
             type: "object",
             additionalProperties: false,
@@ -204,7 +201,7 @@ const RESPONSE_SCHEMA = {
     },
     risksAndMitigations: {
       type: "array",
-      minItems: 4,
+      description: "4-6 risk/mitigation pairs.",
       items: {
         type: "object",
         additionalProperties: false,
@@ -217,7 +214,7 @@ const RESPONSE_SCHEMA = {
     },
     fundingPathways: {
       type: "array",
-      minItems: 3,
+      description: "3-6 specific named programs.",
       items: { type: "string" },
     },
   },

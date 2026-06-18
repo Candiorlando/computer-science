@@ -256,7 +256,7 @@ function RequestModal({
         : "approved-in-progress",
       requestedAt: new Date().toISOString(),
     };
-    appendServiceRequest(req);
+    appendServiceRequest(req, user.scopeRole);
     onSubmitted();
   }
 

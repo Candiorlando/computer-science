@@ -80,8 +80,8 @@ const RESPONSE_SCHEMA = {
     legalAnalysis: { type: "string" },
     recommendedNextSteps: {
       type: "array",
-      minItems: 3,
       items: { type: "string" },
+      description: "3-6 ordered, concrete next-step actions.",
     },
   },
   required: ["formalParticulars", "legalAnalysis", "recommendedNextSteps"],

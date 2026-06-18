@@ -77,8 +77,7 @@ const RESPONSE_SCHEMA = {
   properties: {
     concepts: {
       type: "array",
-      minItems: 3,
-      maxItems: 3,
+      description: "EXACTLY 3 distinct concepts. No more, no fewer.",
       items: {
         type: "object",
         additionalProperties: false,
@@ -143,8 +142,8 @@ const RESPONSE_SCHEMA = {
     rationaleNarrative: { type: "string" },
     generalCautions: {
       type: "array",
-      minItems: 3,
       items: { type: "string" },
+      description: "3-5 cautions every VR self-employment client should hear.",
     },
   },
   required: ["concepts", "rationaleNarrative", "generalCautions"],

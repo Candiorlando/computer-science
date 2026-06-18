@@ -11,6 +11,7 @@
 // client never sees draft documents before counselor sign-off.
 
 import { appendActivity } from "./business-portal";
+import { recordCaseNoteEvent } from "./case-notes";
 
 export type ServiceRequestStatus =
   | "pending-counselor-review"
@@ -214,7 +215,10 @@ export function saveServiceRequests(items: ServiceRequest[]) {
   window.localStorage.setItem(KEY, JSON.stringify(items));
 }
 
-export function appendServiceRequest(r: ServiceRequest) {
+export function appendServiceRequest(
+  r: ServiceRequest,
+  requesterScopeRole = "business-contact",
+) {
   saveServiceRequests([r, ...loadServiceRequests()]);
   appendActivity({
     kind: "auth_requested",
@@ -227,6 +231,20 @@ export function appendServiceRequest(r: ServiceRequest) {
       serviceId: r.serviceId,
       retainingOrgId: r.requesterOrgId,
     },
+  });
+  recordCaseNoteEvent({
+    kind: "business-service-requested",
+    participantType: "business-vendor",
+    orgId: r.requesterOrgId,
+    orgName: r.requesterOrgName,
+    requesterName: r.requesterName,
+    sourceArtifactId: r.id,
+    serviceTitle: r.serviceTitle,
+    matterCaption: r.matterCaption,
+    subjectClientName: r.subjectClientName,
+    urgency: r.urgency,
+    notes: r.notes,
+    scopeRole: requesterScopeRole,
   });
 }
 
@@ -284,6 +302,16 @@ export function approveRequest(
       caseId: r.subjectCaseId,
       payload: { requestId: r.id, retainingOrgId: r.requesterOrgId },
     });
+    recordCaseNoteEvent({
+      kind: "business-service-approved",
+      participantType: "business-vendor",
+      orgId: r.requesterOrgId,
+      orgName: r.requesterOrgName,
+      requesterName: r.requesterName,
+      sourceArtifactId: r.id,
+      serviceTitle: r.serviceTitle,
+      decisionedByEmail: counselorEmail,
+    });
   }
 }
 
@@ -307,6 +335,17 @@ export function declineRequest(
       actorRole: "counselor",
       caseId: r.subjectCaseId,
       payload: { requestId: r.id, retainingOrgId: r.requesterOrgId },
+    });
+    recordCaseNoteEvent({
+      kind: "business-service-declined",
+      participantType: "business-vendor",
+      orgId: r.requesterOrgId,
+      orgName: r.requesterOrgName,
+      requesterName: r.requesterName,
+      sourceArtifactId: r.id,
+      serviceTitle: r.serviceTitle,
+      decisionedByEmail: counselorEmail,
+      reason,
     });
   }
 }
@@ -338,6 +377,16 @@ export function releaseDocument(
       caseId: r.subjectCaseId,
       documentId: r.draftDocumentId,
       payload: { requestId: r.id, retainingOrgId: r.requesterOrgId },
+    });
+    recordCaseNoteEvent({
+      kind: "business-service-released",
+      participantType: "business-vendor",
+      orgId: r.requesterOrgId,
+      orgName: r.requesterOrgName,
+      requesterName: r.requesterName,
+      sourceArtifactId: r.id,
+      serviceTitle: r.serviceTitle,
+      releasedByEmail: counselorEmail,
     });
   }
 }

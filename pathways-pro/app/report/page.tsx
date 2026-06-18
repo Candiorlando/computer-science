@@ -24,6 +24,8 @@ import { riasecNames, traitNames } from "@/lib/assessments";
 import { analyzeHollandCode } from "@/lib/holland-analysis";
 import { nameWithInitial } from "@/lib/document-id";
 import { supportLabel } from "@/lib/intake-supports";
+import { notesForClient } from "@/lib/case-notes";
+import { CaseNotesPanel } from "@/components/CaseNotesPanel";
 import type { IPE } from "@/lib/ipe";
 import { loadScreenerResults, SCREENERS, type ScreenerResult } from "@/lib/screeners";
 
@@ -464,6 +466,16 @@ function ReportDocument({
 
         <FooterBlock report={report} />
       </article>
+
+      {/* Case Notes (auto-generated DAP) — shown only on screen, not
+          on the printable assessment report PDF. */}
+      <div className="print:hidden">
+        <CaseNotesPanel
+          notes={notesForClient(report.caseId)}
+          title="Case notes (auto-generated DAP)"
+          emptyLabel="No case notes generated yet — they appear as the client uses platform tools."
+        />
+      </div>
 
       <style jsx global>{`
         .report-page {

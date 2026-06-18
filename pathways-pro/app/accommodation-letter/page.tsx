@@ -16,6 +16,7 @@ import {
   JAN_CITATION,
 } from "@/lib/accommodation-letters";
 import { nameWithInitial } from "@/lib/document-id";
+import { recordCaseNoteEvent } from "@/lib/case-notes";
 
 interface ApiResponse {
   barrierAnalysis: string;
@@ -118,6 +119,21 @@ export default function AccommodationLetterPage() {
       const next = appendAccommodationLetter(saved);
       setLetters(next);
       setActiveId(saved.id);
+      recordCaseNoteEvent({
+        kind: "accommodation-letter-generated",
+        participantType: "individual-client",
+        caseId: client?.caseId,
+        clientName: fullName,
+        sourceArtifactId: saved.id,
+        workplaceProblem,
+        zeroCostCount: saved.zeroCostSolutions.length,
+        paidCount: saved.paidSolutions.length,
+        totalPaidLow: saved.totalPaidLow,
+        totalPaidHigh: saved.totalPaidHigh,
+        priceVerified: saved.paidSolutions.some(
+          (s) => s.priceSource === "live-verified",
+        ),
+      });
     } catch (e) {
       setError(e instanceof Error ? e.message : "Network error");
     } finally {
