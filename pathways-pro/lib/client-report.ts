@@ -4,6 +4,15 @@ import type { UserProfile } from "./storage";
 import type { TSAResult } from "./tsa-storage";
 import type { IPE, IPEStatus } from "./ipe";
 import type { AccommodationLetter } from "./accommodation-letters";
+import type {
+  EEOCCharge,
+  OCRDOJComplaint,
+  ProblemAnalysisReport,
+} from "./self-advocacy";
+import type {
+  BusinessPlan,
+  ConceptMatchSession,
+} from "./entrepreneurship";
 
 // Aggregated per-case client report, populated whenever the client completes
 // any assessment. Lives in localStorage in the demo; in production this would
@@ -24,6 +33,11 @@ export interface ClientReport {
   ipeUpdatedAt?: string;
   ipe?: IPE; // full IPE document (services, accommodations, signatures, ...)
   lastAccommodationLetter?: AccommodationLetter; // most recent self-advocacy letter
+  lastProblemAnalysisReport?: ProblemAnalysisReport; // discrimination documentation
+  lastEEOCCharge?: EEOCCharge;
+  lastOCRDOJComplaint?: OCRDOJComplaint;
+  lastConceptMatch?: ConceptMatchSession;
+  lastBusinessPlan?: BusinessPlan;
   lastUpdated: string;
 }
 
