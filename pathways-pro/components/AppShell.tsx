@@ -69,6 +69,13 @@ function ComplianceFooter() {
   return (
     <footer className="border-t border-ink/10 mt-16">
       <div className="max-w-6xl mx-auto px-6 py-6 text-xs text-ink/60">
+        <p className="mb-3 text-ink/85 leading-relaxed">
+          <span className="font-semibold text-ink">Pathways Pro</span> is an
+          AI-powered vocational rehabilitation and compliance platform that
+          increases competitive integrated employment for disabled individuals
+          by automating ADA / 504 / EEO documentation, case strategy, evidence
+          organization, remote work safety, and entrepreneurship support.
+        </p>
         <p className="mb-2">
           <span className="font-semibold text-ink">🔒 Pathways Pro</span> ·
           HIPAA-compliant · ADA Title I · Section 504 / 501 · WIOA Title IV ·

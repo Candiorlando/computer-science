@@ -63,11 +63,18 @@ function Hero() {
             Defensible vocational opinions, on the platform that already runs the
             <em className="italic text-accent"> rehab</em>.
           </h1>
-          <p className="text-lg text-ink/80 prose-narrow">
-            Pathways Pro extends beyond the case file. Workers&apos; comp adjusters,
-            HR directors, defense and applicant attorneys, and supported-employment
-            vendors all work in one auditable system — with documents routed
-            automatically to every party who needs them, and the counselor of record
+          <p className="text-lg text-ink/85 prose-narrow font-medium">
+            Pathways Pro is an AI-powered vocational rehabilitation and
+            compliance platform that increases competitive integrated
+            employment for disabled individuals by automating ADA / 504 /
+            EEO documentation, case strategy, evidence organization, remote
+            work safety, and entrepreneurship support.
+          </p>
+          <p className="text-base text-ink/70 prose-narrow">
+            Workers&apos; comp adjusters, HR directors, defense and
+            applicant attorneys, and supported-employment vendors all work
+            in one auditable system — with documents routed automatically
+            to every party who needs them, and the counselor of record
             kept in the loop by default.
           </p>
 

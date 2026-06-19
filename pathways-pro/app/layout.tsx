@@ -3,9 +3,9 @@ import type { Metadata } from "next";
 import { AppShell } from "@/components/AppShell";
 
 export const metadata: Metadata = {
-  title: "Pathways Pro — Vocational Rehabilitation Platform",
+  title: "Pathways Pro — AI-Powered Vocational Rehabilitation & Compliance Platform",
   description:
-    "Dual-mode platform for VR counselors and clients. WIOA Title IV aligned. Built on O*NET, BLS OOH, and CRCC standards.",
+    "Pathways Pro is an AI-powered vocational rehabilitation and compliance platform that increases competitive integrated employment for disabled individuals by automating ADA/504/EEO documentation, case strategy, evidence organization, remote work safety, and entrepreneurship support.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

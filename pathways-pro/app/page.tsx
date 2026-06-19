@@ -47,9 +47,16 @@ function Hero() {
             Vocational Rehabilitation,{" "}
             <em className="italic text-accent">unified</em>.
           </h1>
-          <p className="text-lg text-ink/80 prose-narrow">
-            Pathways Pro replaces the patchwork of spreadsheets, PDFs, and
-            third-party portals with one WIOA-compliant platform. Generate
+          <p className="text-lg text-ink/85 prose-narrow font-medium">
+            Pathways Pro is an AI-powered vocational rehabilitation and
+            compliance platform that increases competitive integrated
+            employment for disabled individuals by automating ADA / 504 /
+            EEO documentation, case strategy, evidence organization, remote
+            work safety, and entrepreneurship support.
+          </p>
+          <p className="text-base text-ink/70 prose-narrow">
+            One WIOA-compliant platform replaces the patchwork of
+            spreadsheets, PDFs, and third-party portals. Generate
             signature-ready IPEs in minutes, give every client a real
             assessment, and surface live BLS labor-market data without
             leaving the case.
