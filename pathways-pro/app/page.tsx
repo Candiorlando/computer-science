@@ -50,9 +50,13 @@ function Hero() {
           <p className="text-lg text-ink/85 prose-narrow font-medium">
             Pathways Pro is an AI-powered vocational rehabilitation and
             compliance platform that increases competitive integrated
-            employment for disabled individuals by automating ADA / 504 /
-            EEO documentation, case strategy, evidence organization, remote
-            work safety, and entrepreneurship support.
+            employment for disabled individuals. It also provides
+            business-facing solutions — including inclusive hiring
+            assessments, job task analysis, retention risk reporting, and
+            ADA / Section 504 / EEO compliance consulting — creating a
+            unified ecosystem where clients, counselors, businesses, and
+            vendors collaborate to improve employment outcomes and
+            accessibility.
           </p>
           <p className="text-base text-ink/70 prose-narrow">
             One WIOA-compliant platform replaces the patchwork of
