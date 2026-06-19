@@ -7,12 +7,19 @@
 
 import { recordCaseNoteEvent } from "./case-notes";
 
-export type Role = "counselor" | "client" | "business" | "vendor";
+export type Role = "counselor" | "client" | "business" | "vendor" | "partner";
+
+export type ThreadTag =
+  | "customized-employment"
+  | "supported-employment"
+  | "accommodation"
+  | "general";
 
 export type ThreadContext =
   | { kind: "client-case"; caseId: string; clientName: string }
   | { kind: "business-org"; orgId: string; orgName: string }
   | { kind: "vendor-org"; vendorOrgId: string; vendorOrgName: string }
+  | { kind: "partner-org"; partnerOrgId: string; partnerOrgName: string }
   | { kind: "general" };
 
 export interface Participant {

@@ -569,6 +569,7 @@ function roleLabel(r: Role): string {
     client: "Client",
     business: "Business",
     vendor: "Vendor",
+    partner: "Employment Partner",
   }[r];
 }
 function contextLabel(c: MessageThread["context"]): string {

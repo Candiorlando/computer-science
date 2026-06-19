@@ -237,6 +237,8 @@ function metaLine(user: AnyUser): string {
       return (user as BusinessUser).orgName;
     case "vendor":
       return (user as VendorUser).vendorOrgName;
+    case "partner":
+      return (user as { partnerOrgName: string }).partnerOrgName;
   }
 }
 

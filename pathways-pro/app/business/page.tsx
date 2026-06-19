@@ -28,9 +28,11 @@ export default function BusinessLandingPage() {
           ? "/business-portal"
           : u.role === "vendor"
             ? "/vendor-portal"
-            : u.role === "counselor"
-              ? "/dashboard/business"
-              : "/portal";
+            : u.role === "partner"
+              ? "/partner-portal"
+              : u.role === "counselor"
+                ? "/dashboard/business"
+                : "/portal";
       router.replace(dest);
     }
   }, [router]);
@@ -614,7 +616,7 @@ function DemoChip({
 
 function SignInPanel() {
   const router = useRouter();
-  const [role, setRole] = useState<"business" | "vendor" | "counselor">(
+  const [role, setRole] = useState<"business" | "vendor" | "partner" | "counselor">(
     "business",
   );
   const [email, setEmail] = useState("");
@@ -635,14 +637,16 @@ function SignInPanel() {
         ? "/business-portal"
         : u.role === "vendor"
           ? "/vendor-portal"
-          : "/dashboard/business";
+          : u.role === "partner"
+            ? "/partner-portal"
+            : "/dashboard/business";
     router.push(dest);
   }
 
   return (
     <form onSubmit={handleSubmit} className="p-6 space-y-5">
-      <div className="grid grid-cols-3 bg-ink/5 rounded-md p-1 text-xs">
-        {(["business", "vendor", "counselor"] as const).map((r) => (
+      <div className="grid grid-cols-4 bg-ink/5 rounded-md p-1 text-xs">
+        {(["business", "vendor", "partner", "counselor"] as const).map((r) => (
           <button
             key={r}
             type="button"
@@ -657,7 +661,9 @@ function SignInPanel() {
               ? "Business"
               : r === "vendor"
                 ? "Vendor"
-                : "Counselor"}
+                : r === "partner"
+                  ? "Partner"
+                  : "Counselor"}
           </button>
         ))}
       </div>

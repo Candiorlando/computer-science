@@ -14,7 +14,10 @@
 
 // ─── Types ─────────────────────────────────────────────────────────────
 
-export type ParticipantType = "individual-client" | "business-vendor";
+export type ParticipantType =
+  | "individual-client"
+  | "business-vendor"
+  | "employment-partner";
 
 export type CaseNoteEventKind =
   // Module 1 — Self-Employment (individual client)
@@ -34,7 +37,16 @@ export type CaseNoteEventKind =
   | "business-service-requested"
   | "business-service-approved"
   | "business-service-declined"
-  | "business-service-released";
+  | "business-service-released"
+  // Employment Partner
+  | "partner-opportunity-posted"
+  | "partner-ce-selected"
+  | "partner-ce-stage-advanced"
+  | "partner-accommodation-inquiry"
+  | "partner-placement-offered"
+  | "partner-placement-accepted"
+  | "partner-progress-update"
+  | "partner-document-uploaded";
 
 export interface CaseNote {
   id: string;
@@ -44,6 +56,8 @@ export interface CaseNote {
   clientName?: string;
   businessOrgId?: string;
   businessOrgName?: string;
+  partnerOrgId?: string;
+  partnerOrgName?: string;
   // Metadata
   sessionAt: string;       // when the activity happened
   activityType: string;    // human-readable, e.g. "ADA Accommodation Draft"
@@ -95,6 +109,12 @@ export function notesForBusinessOrg(orgId: string): CaseNote[] {
     .sort((a, b) => Date.parse(b.sessionAt) - Date.parse(a.sessionAt));
 }
 
+export function notesForPartnerOrg(orgId: string): CaseNote[] {
+  return loadCaseNotes()
+    .filter((n) => n.partnerOrgId === orgId)
+    .sort((a, b) => Date.parse(b.sessionAt) - Date.parse(a.sessionAt));
+}
+
 export function notesForCounselor(emails: {
   clientCaseIds?: string[];
   businessOrgIds?: string[];
@@ -126,6 +146,14 @@ interface BaseBusinessEvent {
   orgId: string;
   orgName: string;
   requesterName: string;
+  sessionAt?: string;
+  sourceArtifactId?: string;
+}
+interface BasePartnerEvent {
+  participantType: "employment-partner";
+  partnerOrgId: string;
+  partnerOrgName: string;
+  actorName: string;
   sessionAt?: string;
   sourceArtifactId?: string;
 }
@@ -211,6 +239,52 @@ export type CaseNoteEvent =
       kind: "business-service-released";
       serviceTitle: string;
       releasedByEmail: string;
+    })
+  | (BasePartnerEvent & {
+      kind: "partner-opportunity-posted";
+      opportunityTitle: string;
+      opportunityKind: string;
+      hoursPerWeek: number;
+    })
+  | (BasePartnerEvent & {
+      kind: "partner-ce-selected";
+      acknowledgedAt?: string;
+    })
+  | (BasePartnerEvent & {
+      kind: "partner-ce-stage-advanced";
+      clientName?: string;
+      caseId?: string;
+      newStage: string;
+    })
+  | (BasePartnerEvent & {
+      kind: "partner-accommodation-inquiry";
+      jobTitle: string;
+      question: string;
+    })
+  | (BasePartnerEvent & {
+      kind: "partner-placement-offered";
+      clientName: string;
+      caseId: string;
+      opportunityTitle: string;
+    })
+  | (BasePartnerEvent & {
+      kind: "partner-placement-accepted";
+      clientName: string;
+      caseId: string;
+      opportunityTitle: string;
+    })
+  | (BasePartnerEvent & {
+      kind: "partner-progress-update";
+      clientName: string;
+      caseId: string;
+      hoursWorked: number;
+      reportingWeek: string;
+      flags: string[];
+    })
+  | (BasePartnerEvent & {
+      kind: "partner-document-uploaded";
+      documentTitle: string;
+      documentKind: string;
     });
 
 // ─── recordCaseNoteEvent ───────────────────────────────────────────────
@@ -232,11 +306,20 @@ export function recordCaseNoteEvent(event: CaseNoteEvent) {
           clientCaseId: event.caseId,
           clientName: event.clientName,
         }
-      : {
-          businessOrgId: event.orgId,
-          businessOrgName: event.orgName,
-          clientName: event.requesterName,
-        }),
+      : event.participantType === "business-vendor"
+        ? {
+            businessOrgId: event.orgId,
+            businessOrgName: event.orgName,
+            clientName: event.requesterName,
+          }
+        : {
+            partnerOrgId: event.partnerOrgId,
+            partnerOrgName: event.partnerOrgName,
+            clientName: event.actorName,
+            // If the partner event references a linked client case
+            clientCaseId:
+              "caseId" in event ? event.caseId : undefined,
+          }),
     ...buildDap(event),
   };
   appendCaseNote(note);
@@ -259,6 +342,14 @@ function activityLabel(k: CaseNoteEventKind): string {
     "business-service-approved": "Business Service Request — Counselor Approval",
     "business-service-declined": "Business Service Request — Counselor Decline",
     "business-service-released": "Business Service Deliverable — Counselor Release",
+    "partner-opportunity-posted": "Employment Partner — Opportunity Posted",
+    "partner-ce-selected": "Employment Partner — Customized Employment Selected",
+    "partner-ce-stage-advanced": "Customized Employment — Stage Advanced",
+    "partner-accommodation-inquiry": "Employment Partner — Accommodation Inquiry",
+    "partner-placement-offered": "Employment Partner — Placement Offered",
+    "partner-placement-accepted": "Employment Partner — Placement Accepted",
+    "partner-progress-update": "Employment Partner — Weekly Progress Update",
+    "partner-document-uploaded": "Employment Partner — Document Upload",
   }[k];
 }
 
@@ -278,6 +369,14 @@ function toolRoute(k: CaseNoteEventKind): string {
     "business-service-approved": "/dashboard/business",
     "business-service-declined": "/dashboard/business",
     "business-service-released": "/dashboard/business",
+    "partner-opportunity-posted": "/partner-portal/opportunities",
+    "partner-ce-selected": "/partner-portal/customized-employment",
+    "partner-ce-stage-advanced": "/partner-portal/customized-employment",
+    "partner-accommodation-inquiry": "/partner-portal/accommodation-requests",
+    "partner-placement-offered": "/partner-portal/opportunities",
+    "partner-placement-accepted": "/partner-portal/opportunities",
+    "partner-progress-update": "/partner-portal",
+    "partner-document-uploaded": "/partner-portal",
   }[k];
 }
 
@@ -385,6 +484,62 @@ function buildDap(e: CaseNoteEvent): {
         data: `VR Counselor ${e.releasedByEmail} released the deliverable for service "${e.serviceTitle}" to ${e.orgName} following pre-release review. The deliverable became visible in the business client's vault at the time of release.`,
         assessment: `Release reflects completion of the counselor's pre-release review process, confirming the deliverable meets the documentation, accuracy, and PHI-boundary standards required before disclosure to a business-side recipient.`,
         plan: `Counselor to document the release in the case file, monitor the activity feed for acknowledgment by the requesting org, and follow up if no acknowledgment is recorded within five business days.`,
+      };
+
+    case "partner-opportunity-posted":
+      return {
+        data: `${e.actorName} of ${e.partnerOrgName} posted an opportunity titled "${e.opportunityTitle}" categorized as ${e.opportunityKind.replaceAll("-", " ")}, with a workload of ${e.hoursPerWeek} hours per week. The posting is visible to the counselor for candidate matching.`,
+        assessment: `Activity reflects continued participation of the employment partner in the platform's competitive integrated employment pipeline. Posting expands available placement options for clients on the counselor's caseload.`,
+        plan: `Counselor to review the posting for fit against the active caseload, identify candidate matches with appropriate vocational profile, and coordinate referral discussions with the partner.`,
+      };
+
+    case "partner-ce-selected":
+      return {
+        data: `${e.partnerOrgName} elected to participate in Customized Employment services on the platform. The Customized Employment workspace is now available in the partner's portal and visible in the counselor's per-partner case file.`,
+        assessment: `Selection signals the partner's willingness to engage in strengths-based, individualized job design — an evidence-based pathway for clients with significant disabilities who benefit from carved roles, negotiated work conditions, or self-employment models.`,
+        plan: `Counselor to schedule a Customized Employment intake conversation with the partner, identify candidates from the active caseload who may benefit, and initiate Discovery on at least one match within the next 30 days.`,
+      };
+
+    case "partner-ce-stage-advanced":
+      return {
+        data: `Customized Employment engagement at ${e.partnerOrgName}${e.clientName ? ` for client ${e.clientName}` : ""} advanced to the "${e.newStage.replaceAll("-", " ")}" stage. The stage transition was logged by ${e.actorName}.`,
+        assessment: `Stage advancement reflects measurable progress on the Customized Employment continuum (Discovery → Job Design → Employer Negotiation → Worksite Customization → Placement → Stabilization → Long-term Support). Movement supports the WIOA § 7(38) competitive integrated employment outcome standard.`,
+        plan: `Counselor and partner to schedule the planning conversation appropriate to the new stage, document evidence supporting the transition, and confirm next milestone target date.`,
+      };
+
+    case "partner-accommodation-inquiry":
+      return {
+        data: `${e.actorName} of ${e.partnerOrgName} submitted an accommodation inquiry regarding the position "${e.jobTitle}": "${e.question.slice(0, 240)}${e.question.length > 240 ? "…" : ""}"`,
+        assessment: `Inquiry demonstrates the partner's good-faith engagement in the ADA interactive process and willingness to design accommodations proactively. Activity supports the platform's compliance-by-default posture and reduces downstream EEO risk for the partner.`,
+        plan: `Counselor to respond to the inquiry within two business days, recommend an accommodation grounded in JAN standard practices, and route any cost-bearing requests through the appropriate VR service authorization channel.`,
+      };
+
+    case "partner-placement-offered":
+      return {
+        data: `${e.partnerOrgName} extended an employment offer to ${e.clientName} (Case ${e.caseId}) for the position "${e.opportunityTitle}". Offer was generated through the platform's matching and is visible in both the counselor and client case files.`,
+        assessment: `Offer reflects successful matching of vocational interests, accommodations, and partner capacity. Acceptance would advance the active IPE toward the competitive integrated employment outcome required under WIOA Title IV.`,
+        plan: `Counselor to discuss offer terms with the client at the next session, confirm accommodation readiness with the partner, and document the client's decision on the IPE. Job-coaching service authorization to be opened upon acceptance.`,
+      };
+
+    case "partner-placement-accepted":
+      return {
+        data: `${e.clientName} (Case ${e.caseId}) accepted the placement offer from ${e.partnerOrgName} for the position "${e.opportunityTitle}". Placement workspace is now active for tracking 30 / 60 / 90-day retention milestones.`,
+        assessment: `Acceptance triggers the WIOA § 116 common performance indicator tracking window. Successful retention through Day 90 contributes to the agency's competitive integrated employment outcome reporting.`,
+        plan: `Counselor to authorize any agreed-upon job-coaching or assistive-technology services, schedule Day-30 check-in with both the partner and the client, and document baseline accommodations in place at start of employment.`,
+      };
+
+    case "partner-progress-update":
+      return {
+        data: `${e.actorName} of ${e.partnerOrgName} submitted a weekly progress update for ${e.clientName} (Case ${e.caseId}) covering reporting week ${e.reportingWeek}. Hours worked: ${e.hoursWorked}.${e.flags.length > 0 ? ` Flags raised: ${e.flags.join(", ")}.` : ""}`,
+        assessment: `Routine progress reporting maintains the platform's auditable engagement trail and surfaces early indicators of retention risk. ${e.flags.length > 0 ? "Flagged concerns warrant counselor follow-up before the next reporting cycle." : "No flags raised this reporting period."}`,
+        plan: `Counselor to review the update, contact the client to confirm self-reported status, and ${e.flags.length > 0 ? "respond to the flagged concerns within the next two business days." : "continue routine monitoring."}`,
+      };
+
+    case "partner-document-uploaded":
+      return {
+        data: `${e.actorName} of ${e.partnerOrgName} uploaded a document titled "${e.documentTitle}" categorized as ${e.documentKind}. The document is now available in the counselor's per-partner case file.`,
+        assessment: `Upload supports documentation completeness for the partner case file and contributes to the platform's auditable engagement record for state VR program review.`,
+        plan: `Counselor to review the uploaded document, file under the appropriate case categorization, and acknowledge receipt to the partner.`,
       };
   }
 }

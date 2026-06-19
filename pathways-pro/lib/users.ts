@@ -2,7 +2,7 @@
 // In production this would be a real auth backend (Auth0, Supabase, etc.).
 // Source: pathways-pro-v3.jsx (Google Drive — Pathways Pro project folder).
 
-export type Role = "counselor" | "client" | "business" | "vendor";
+export type Role = "counselor" | "client" | "business" | "vendor" | "partner";
 
 export interface CounselorUser {
   email: string;
@@ -62,7 +62,37 @@ export interface VendorUser {
   role: "vendor";
 }
 
-export type AnyUser = CounselorUser | ClientUser | BusinessUser | VendorUser;
+export type PartnerOrgType =
+  | "small-employer"
+  | "corporate-hr"
+  | "nonprofit"
+  | "community-org"
+  | "school-district"
+  | "government"
+  | "social-enterprise";
+
+export interface EmploymentPartnerUser {
+  email: string;
+  password: string;
+  name: string;
+  title: string;
+  partnerOrgId: string;
+  partnerOrgName: string;
+  partnerOrgType: PartnerOrgType;
+  // Whether this partner participates in Customized Employment. Set at
+  // signup or toggled from the partner's settings; drives whether the
+  // Customized Employment workspace appears in their nav and counselor
+  // view.
+  participatesInCustomizedEmployment: boolean;
+  role: "partner";
+}
+
+export type AnyUser =
+  | CounselorUser
+  | ClientUser
+  | BusinessUser
+  | VendorUser
+  | EmploymentPartnerUser;
 
 export const COUNSELORS: Record<string, CounselorUser> = {
   "candace.metcalf@idhs.illinois.gov": {
@@ -246,6 +276,11 @@ export function authenticate(
   }
   if (role === "vendor") {
     const record = getAllVendorUsers()[key];
+    if (record && record.password === password) return record;
+    return null;
+  }
+  if (role === "partner") {
+    const record = getAllPartnerUsers()[key];
     if (record && record.password === password) return record;
     return null;
   }
@@ -593,4 +628,100 @@ function caseIdNumber(caseId: string): number {
 function lastName(fullName: string): string {
   const parts = fullName.trim().split(/\s+/);
   return parts.length > 1 ? parts[parts.length - 1] : fullName;
+}
+
+// ── Employment Partners ───────────────────────────────────────────────
+// Local businesses, nonprofits, community organizations, and employers
+// who participate in supported employment, internships, apprenticeships,
+// volunteer placements, and competitive integrated employment.
+
+export const PARTNER_USERS_SEED: Record<string, EmploymentPartnerUser> = {
+  "jana.weber@northbranchcafe.com": {
+    email: "jana.weber@northbranchcafe.com",
+    password: "demo1234",
+    name: "Jana Weber",
+    title: "Owner / Hiring Manager",
+    partnerOrgId: "partner-northbranch",
+    partnerOrgName: "North Branch Cafe",
+    partnerOrgType: "small-employer",
+    participatesInCustomizedEmployment: true,
+    role: "partner",
+  },
+  "outreach@chicagolibraries.org": {
+    email: "outreach@chicagolibraries.org",
+    password: "demo1234",
+    name: "Reggie Park",
+    title: "Workforce Development Coordinator",
+    partnerOrgId: "partner-cpl-outreach",
+    partnerOrgName: "Chicago Public Libraries — Workforce Programs",
+    partnerOrgType: "government",
+    participatesInCustomizedEmployment: true,
+    role: "partner",
+  },
+};
+
+const PARTNER_SIGNUP_KEY = "pathways-pro:partner-signups-v1";
+
+function loadPartnerSignups(): Record<string, EmploymentPartnerUser> {
+  if (typeof window === "undefined") return {};
+  try {
+    const raw = window.localStorage.getItem(PARTNER_SIGNUP_KEY);
+    return raw
+      ? (JSON.parse(raw) as Record<string, EmploymentPartnerUser>)
+      : {};
+  } catch {
+    return {};
+  }
+}
+
+export function getAllPartnerUsers(): Record<string, EmploymentPartnerUser> {
+  return { ...PARTNER_USERS_SEED, ...loadPartnerSignups() };
+}
+
+export interface PartnerSignupInput {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  title: string;
+  partnerOrgName: string;
+  partnerOrgType: PartnerOrgType;
+  participatesInCustomizedEmployment: boolean;
+}
+
+export function registerPartnerUser(
+  input: PartnerSignupInput,
+):
+  | { ok: true; user: EmploymentPartnerUser }
+  | { ok: false; error: string } {
+  const email = input.email.toLowerCase().trim();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+    return { ok: false, error: "Enter a valid work email." };
+  if (input.password.length < 6)
+    return { ok: false, error: "Password must be at least 6 characters." };
+  if (!input.partnerOrgName.trim())
+    return { ok: false, error: "Organization name is required." };
+  if (getAllPartnerUsers()[email])
+    return {
+      ok: false,
+      error: "An account with this email already exists.",
+    };
+  const user: EmploymentPartnerUser = {
+    email,
+    password: input.password,
+    name: `${input.firstName.trim()} ${input.lastName.trim()}`,
+    title: input.title.trim() || "—",
+    partnerOrgId: "partner-" + slugify(input.partnerOrgName),
+    partnerOrgName: input.partnerOrgName.trim(),
+    partnerOrgType: input.partnerOrgType,
+    participatesInCustomizedEmployment:
+      input.participatesInCustomizedEmployment,
+    role: "partner",
+  };
+  const all = loadPartnerSignups();
+  all[email] = user;
+  if (typeof window !== "undefined") {
+    window.localStorage.setItem(PARTNER_SIGNUP_KEY, JSON.stringify(all));
+  }
+  return { ok: true, user };
 }

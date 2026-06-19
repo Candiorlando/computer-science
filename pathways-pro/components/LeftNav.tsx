@@ -21,6 +21,8 @@ function menuFor(user: AnyUser, unread: number): NavItem[] {
     return [
       { href: "/dashboard", label: "Home", icon: "🏠" },
       { href: "/caseload", label: "Caseload", icon: "📋" },
+      { href: "/dashboard/partners", label: "Employment Partners", icon: "🤝" },
+      { href: "/dashboard/services-catalog", label: "Service Catalog", icon: "💼" },
       { href: "/clinical-assessments", label: "Assessments", icon: "📝" },
       { href: "/report", label: "Documents", icon: "📄" },
       { href: "/messages", label: "Messages", icon: "✉️", badge: unread },
@@ -43,22 +45,49 @@ function menuFor(user: AnyUser, unread: number): NavItem[] {
   if (user.role === "business") {
     return [
       { href: "/business-portal", label: "Home", icon: "🏠" },
-      { href: "/business-portal/services", label: "Services", icon: "🛠️" },
+      { href: "/business-portal/services", label: "Service Catalog", icon: "💼" },
       { href: "/business-portal", label: "Documents", icon: "📄" },
       { href: "/messages", label: "Messages", icon: "✉️", badge: unread },
       { href: "/case-notes", label: "Case Notes", icon: "🗒️" },
       { href: "/settings", label: "Settings", icon: "⚙️" },
     ];
   }
-  // vendor
-  return [
-    { href: "/vendor-portal", label: "Home", icon: "🏠" },
-    { href: "/vendor-portal", label: "Engagements", icon: "📋" },
-    { href: "/vendor-portal", label: "Documents", icon: "📄" },
+  if (user.role === "vendor") {
+    return [
+      { href: "/vendor-portal", label: "Home", icon: "🏠" },
+      { href: "/vendor-portal", label: "Engagements", icon: "📋" },
+      { href: "/vendor-portal/services", label: "Services", icon: "💼" },
+      { href: "/vendor-portal", label: "Documents", icon: "📄" },
+      { href: "/messages", label: "Messages", icon: "✉️", badge: unread },
+      { href: "/case-notes", label: "Case Notes", icon: "🗒️" },
+      { href: "/settings", label: "Settings", icon: "⚙️" },
+    ];
+  }
+  // partner — Employment Partner
+  const items: NavItem[] = [
+    { href: "/partner-portal", label: "Home", icon: "🏠" },
+    { href: "/partner-portal/opportunities", label: "Opportunities", icon: "📋" },
+    { href: "/partner-portal/supported-employment", label: "Supported Employment", icon: "🤝" },
+  ];
+  if (
+    "participatesInCustomizedEmployment" in user &&
+    user.participatesInCustomizedEmployment
+  ) {
+    items.push({
+      href: "/partner-portal/customized-employment",
+      label: "Customized Employment",
+      icon: "🎯",
+    });
+  }
+  items.push(
+    { href: "/partner-portal/services", label: "Service Catalog", icon: "💼" },
+    { href: "/partner-portal/accommodation-requests", label: "Accommodation Requests", icon: "♿" },
+    { href: "/partner-portal/documents", label: "Documents", icon: "📄" },
     { href: "/messages", label: "Messages", icon: "✉️", badge: unread },
     { href: "/case-notes", label: "Case Notes", icon: "🗒️" },
     { href: "/settings", label: "Settings", icon: "⚙️" },
-  ];
+  );
+  return items;
 }
 
 function roleBadge(role: AnyUser["role"]): { label: string; bg: string } {
@@ -67,6 +96,7 @@ function roleBadge(role: AnyUser["role"]): { label: string; bg: string } {
     client: { label: "Client", bg: "bg-blue-100 text-blue-900" },
     business: { label: "Business", bg: "bg-purple-100 text-purple-900" },
     vendor: { label: "Vendor", bg: "bg-amber-100 text-amber-900" },
+    partner: { label: "Partner", bg: "bg-cyan-100 text-cyan-900" },
   }[role];
 }
 
@@ -90,7 +120,11 @@ export function LeftNav() {
   function signOut() {
     clearSession();
     router.push(
-      user!.role === "business" || user!.role === "vendor" ? "/business" : "/",
+      user!.role === "business" ||
+        user!.role === "vendor" ||
+        user!.role === "partner"
+        ? "/business"
+        : "/",
     );
   }
 
