@@ -15,7 +15,6 @@ import {
   type ZeroCostSolution,
   JAN_CITATION,
 } from "@/lib/accommodation-letters";
-import { nameWithInitial } from "@/lib/document-id";
 import { recordCaseNoteEvent } from "@/lib/case-notes";
 
 interface ApiResponse {
@@ -538,16 +537,10 @@ function PaidBlock({
 function LetterPreview({ letter }: { letter: AccommodationLetter }) {
   return (
     <article className="letter-page bg-white shadow-sm border border-ink/15 rounded-sm">
-      <header className="letter-header">
-        <h1 className="letter-author">{letter.clientName}</h1>
-        {letter.workLocation && (
-          <p className="letter-meta">{letter.workLocation}</p>
-        )}
-        <p className="letter-meta">
-          Case {letter.caseId ?? "—"} ·{" "}
-          {nameWithInitial(letter.clientName)} · Self-advocacy packet
-        </p>
-      </header>
+      <div className="letter-return">
+        <div>{letter.clientName}</div>
+        {letter.workLocation && <div>{letter.workLocation}</div>}
+      </div>
 
       <p className="letter-date">{letter.letter.date}</p>
       {letter.letter.recipientBlock.length > 0 && (
@@ -580,21 +573,9 @@ function LetterPreview({ letter }: { letter: AccommodationLetter }) {
           font-size: 11pt;
           line-height: 1.55;
         }
-        .letter-header {
-          text-align: center;
-          border-bottom: 1.5pt solid #1a1a1a;
-          padding-bottom: 8px;
-          margin-bottom: 24px;
-        }
-        .letter-author {
-          font-size: 22pt;
-          margin: 0 0 4px;
-          letter-spacing: 0.02em;
-        }
-        .letter-meta {
-          margin: 0;
-          font-size: 10pt;
-          color: #444;
+        .letter-return {
+          margin: 0 0 18px;
+          line-height: 1.4;
         }
         .letter-date {
           margin: 0 0 18px;
