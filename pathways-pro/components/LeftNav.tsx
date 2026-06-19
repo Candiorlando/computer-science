@@ -21,19 +21,22 @@ function menuFor(user: AnyUser, unread: number): NavItem[] {
     return [
       { href: "/dashboard", label: "Home", icon: "🏠" },
       { href: "/caseload", label: "Caseload", icon: "📋" },
+      { href: "/dashboard/vendors", label: "Vendors", icon: "🛠️" },
+      { href: "/dashboard/business", label: "Business Clients", icon: "🏢" },
       { href: "/dashboard/partners", label: "Employment Partners", icon: "🤝" },
-      { href: "/dashboard/services-catalog", label: "Service Catalog", icon: "💼" },
-      { href: "/clinical-assessments", label: "Assessments", icon: "📝" },
-      { href: "/report", label: "Documents", icon: "📄" },
       { href: "/messages", label: "Messages", icon: "✉️", badge: unread },
+      { href: "/dashboard/daily-briefing", label: "Daily Briefing", icon: "📰" },
+      { href: "/dashboard/financials", label: "Financials (AR/AP)", icon: "💰" },
+      { href: "/dashboard/reports", label: "Reports", icon: "📊" },
+      { href: "/dashboard/services-catalog", label: "Service Catalog", icon: "💼" },
       { href: "/case-notes", label: "Case Notes", icon: "🗒️" },
-      { href: "/practitioner-hub", label: "Tools", icon: "🛠️" },
       { href: "/settings", label: "Settings", icon: "⚙️" },
     ];
   }
   if (user.role === "client") {
     return [
       { href: "/portal", label: "Home", icon: "🏠" },
+      { href: "/progress", label: "My Progress", icon: "📈" },
       { href: "/assessment", label: "Assessments", icon: "📝" },
       { href: "/report", label: "Documents", icon: "📄" },
       { href: "/messages", label: "Messages", icon: "✉️", badge: unread },
