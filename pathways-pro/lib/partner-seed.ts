@@ -116,7 +116,7 @@ export function seedPartnerDemo() {
         partnerOrgName: "North Branch Cafe",
         caseId: "VR-2026-0029",
         clientName: "Marcus Thomas",
-        counselorEmail: "candace.metcalf@idhs.illinois.gov",
+        counselorEmail: "candace.metcalf@pathwayspro.app",
         discoveryNotes:
           "Marcus thrives on routine and physical work. Lost track of time when restocking the welding supply room at his last job. Drained quickly by customer-facing roles. Energized by working alongside one or two trusted coworkers.",
         clientStrengths: [
@@ -177,7 +177,7 @@ export function seedPartnerDemo() {
       opportunityTitle: "Branch Pages — Materials Handling (Pilot)",
       caseId: "VR-2026-0052",
       clientName: "Leon Washington",
-      counselorEmail: "candace.metcalf@idhs.illinois.gov",
+      counselorEmail: "candace.metcalf@pathwayspro.app",
       hireDate: daysAgo(12).slice(0, 10),
       status: "stabilizing",
       hoursPerWeek: 16,

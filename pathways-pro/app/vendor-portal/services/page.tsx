@@ -27,7 +27,7 @@ export default function VendorServicesPage() {
         orgId: user.vendorOrgId,
         orgName: user.vendorOrgName,
         audience: "vendor",
-        effectiveCounselorEmail: "candace.metcalf@idhs.illinois.gov",
+        effectiveCounselorEmail: "candace.metcalf@pathwayspro.app",
         scopeRole: user.vendorType,
       }}
       introNote="Vendor service requests route to the assigned VR counselor for review. Forensic and data-evaluation services follow Daubert-defensible deliverable standards."

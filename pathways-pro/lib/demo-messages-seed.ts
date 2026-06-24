@@ -19,7 +19,7 @@ export function seedDemoMessages() {
   if (typeof window === "undefined") return;
   if (window.localStorage.getItem(SEED_FLAG) === "1") return;
 
-  const candace = COUNSELORS["candace.metcalf@idhs.illinois.gov"];
+  const candace = COUNSELORS["candace.metcalf@pathwayspro.app"];
   if (candace) {
     const cMarcus = CLIENTS["marcus.thomas@vr.client"];
     const cJordan = CLIENTS["jordan.hayes@vr.client"];

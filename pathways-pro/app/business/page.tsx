@@ -529,7 +529,7 @@ function FinalCta() {
             />
             <DemoChip
               label="Counselor (sees Business View)"
-              email="candace.metcalf@idhs.illinois.gov"
+              email="candace.metcalf@pathwayspro.app"
               password="CRC2026!"
             />
           </div>

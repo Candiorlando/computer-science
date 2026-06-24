@@ -481,7 +481,7 @@ function Testimonial() {
           <div className="text-left">
             <div className="font-semibold">Candace Metcalf, CRC · LPC</div>
             <div className="text-sm text-ink/60">
-              Founder, Pathways Pro · IDHS-DRS, Chicago
+              Founder, Pathways Pro · Chicago
             </div>
           </div>
         </div>

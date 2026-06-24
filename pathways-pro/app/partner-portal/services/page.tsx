@@ -29,7 +29,7 @@ export default function PartnerServicesPage() {
         orgId: user.partnerOrgId,
         orgName: user.partnerOrgName,
         audience: "partner",
-        effectiveCounselorEmail: "candace.metcalf@idhs.illinois.gov",
+        effectiveCounselorEmail: "candace.metcalf@pathwayspro.app",
         scopeRole: user.title,
       }}
       introNote="Every request routes to your assigned VR counselor for review. Customized Employment Consulting requests are visible automatically in your CE workspace once approved."

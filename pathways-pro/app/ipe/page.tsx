@@ -846,7 +846,7 @@ function ServiceProvidersEditor({
               type="text"
               value={p.name}
               onChange={(e) => update(idx, { name: e.target.value })}
-              placeholder="Provider name (e.g. IDHS-DRS Ford City Office)"
+              placeholder="Provider name (e.g. State VR Agency — Local Office)"
               className="bg-white border border-ink/20 rounded px-3 py-2 text-sm focus:outline-none focus:border-accent"
             />
             <select

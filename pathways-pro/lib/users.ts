@@ -95,13 +95,13 @@ export type AnyUser =
   | EmploymentPartnerUser;
 
 export const COUNSELORS: Record<string, CounselorUser> = {
-  "candace.metcalf@idhs.illinois.gov": {
-    email: "candace.metcalf@idhs.illinois.gov",
+  "candace.metcalf@pathwayspro.app": {
+    email: "candace.metcalf@pathwayspro.app",
     password: "CRC2026!",
     name: "Candace Metcalf",
     credentials: "CRC · LPC",
-    office: "Ford City Office — Chicago, IL",
-    agency: "IDHS-DRS",
+    office: "Chicago Office",
+    agency: "Pathways Pro",
     employeeId: "#452",
     role: "counselor",
     clientKeys: [
@@ -195,7 +195,7 @@ export const CLIENTS: Record<string, ClientUser> = {
     name: "Jordan Hayes",
     dob: "1991-03-14",
     caseId: "VR-2026-0041",
-    counselorEmail: "candace.metcalf@idhs.illinois.gov",
+    counselorEmail: "candace.metcalf@pathwayspro.app",
     counselorName: "Candace Metcalf, CRC",
     goal: "Medical Office Administration",
     status: "In Training",
@@ -209,7 +209,7 @@ export const CLIENTS: Record<string, ClientUser> = {
     name: "Priya Sharma",
     dob: "1998-07-22",
     caseId: "VR-2026-0038",
-    counselorEmail: "candace.metcalf@idhs.illinois.gov",
+    counselorEmail: "candace.metcalf@pathwayspro.app",
     counselorName: "Candace Metcalf, CRC",
     goal: "Early Childhood Education",
     status: "Job Placement",
@@ -223,7 +223,7 @@ export const CLIENTS: Record<string, ClientUser> = {
     name: "Marcus Thomas",
     dob: "1985-11-02",
     caseId: "VR-2026-0029",
-    counselorEmail: "candace.metcalf@idhs.illinois.gov",
+    counselorEmail: "candace.metcalf@pathwayspro.app",
     counselorName: "Candace Metcalf, CRC",
     goal: "Welding Technology",
     status: "Assessment Phase",
@@ -237,7 +237,7 @@ export const CLIENTS: Record<string, ClientUser> = {
     name: "Diana Reyes",
     dob: "1979-04-18",
     caseId: "VR-2026-0014",
-    counselorEmail: "candace.metcalf@idhs.illinois.gov",
+    counselorEmail: "candace.metcalf@pathwayspro.app",
     counselorName: "Candace Metcalf, CRC",
     goal: "Bookkeeping & Accounting",
     status: "In Training",
@@ -251,7 +251,7 @@ export const CLIENTS: Record<string, ClientUser> = {
     name: "Leon Washington",
     dob: "2002-09-30",
     caseId: "VR-2026-0052",
-    counselorEmail: "candace.metcalf@idhs.illinois.gov",
+    counselorEmail: "candace.metcalf@pathwayspro.app",
     counselorName: "Candace Metcalf, CRC",
     goal: "IT Support (Pre-ETS)",
     status: "Intake",
@@ -718,7 +718,7 @@ export function registerClient(input: SignupInput): SignupResult {
     caseId: nextCaseId(),
     // New signups default to Candace's caseload in the demo. In
     // production a counselor would claim or be auto-assigned.
-    counselorEmail: "candace.metcalf@idhs.illinois.gov",
+    counselorEmail: "candace.metcalf@pathwayspro.app",
     counselorName: "Candace Metcalf, CRC",
     goal: input.goal?.trim() || "To be determined with counselor",
     status: "Intake",

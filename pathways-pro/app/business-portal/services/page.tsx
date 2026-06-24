@@ -37,7 +37,7 @@ export default function BusinessServicesPage() {
         orgId: user.orgId,
         orgName: user.orgName,
         audience: "business",
-        effectiveCounselorEmail: "candace.metcalf@idhs.illinois.gov",
+        effectiveCounselorEmail: "candace.metcalf@pathwayspro.app",
         scopeRole: user.scopeRole,
       }}
       introNote="Every service request routes through your assigned VR counselor for review and document preparation. Counselor-reviewed deliverables appear in your portal once approved."

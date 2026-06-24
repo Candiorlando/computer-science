@@ -73,7 +73,7 @@ const IPE_SCHEMA = {
         type: "object",
         additionalProperties: false,
         properties: {
-          name: { type: "string", description: "Provider name (e.g. 'IDHS-DRS Ford City Office', 'Goodwill Industries Job Coaching Program', 'City Colleges of Chicago — Truman College')" },
+          name: { type: "string", description: "Provider name (e.g. 'State VR Agency — Local Office', 'Goodwill Industries Job Coaching Program', 'City Colleges of Chicago — Truman College')" },
           type: {
             type: "string",
             enum: [
