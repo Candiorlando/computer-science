@@ -21,10 +21,11 @@ import {
 import { loadServiceRequests, type ServiceRequest } from "@/lib/service-requests";
 import { notesForBusinessOrg } from "@/lib/case-notes";
 import { CaseNotesPanel } from "@/components/CaseNotesPanel";
+import { CaseAssessmentsPanel } from "@/components/CaseAssessmentsPanel";
 import { threadsForUser, type MessageThread } from "@/lib/messages";
 import { recordCaseOpen } from "@/lib/recent-cases";
 
-type Tab = "overview" | "documents" | "case-notes" | "messages" | "timeline";
+type Tab = "overview" | "documents" | "case-notes" | "messages" | "timeline" | "assessments";
 
 export default function CounselorBusinessCaseFile() {
   const router = useRouter();
@@ -140,6 +141,9 @@ export default function CounselorBusinessCaseFile() {
         <TabBtn active={tab === "timeline"} onClick={() => setTab("timeline")}>
           Activity Timeline
         </TabBtn>
+        <TabBtn active={tab === "assessments"} onClick={() => setTab("assessments")}>
+          Assessments
+        </TabBtn>
       </div>
 
       {tab === "overview" && (
@@ -160,6 +164,15 @@ export default function CounselorBusinessCaseFile() {
       )}
       {tab === "messages" && <MessagesTab threads={data.threads} />}
       {tab === "timeline" && <TimelineTab activity={data.activity} />}
+      {tab === "assessments" && (
+        <CaseAssessmentsPanel
+          scopeKind="business-org"
+          scopeId={orgId}
+          audience="counselor"
+          counselorEmail={user.email}
+          launchRoute={(toolId) => `/dashboard/business/${orgId}/assessment/${toolId}`}
+        />
+      )}
     </div>
   );
 }

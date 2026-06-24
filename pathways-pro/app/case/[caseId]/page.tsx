@@ -17,6 +17,7 @@ import {
 import { threadsForUser } from "@/lib/messages";
 import { buildProgress } from "@/lib/positive-psychology";
 import { recordCaseOpen } from "@/lib/recent-cases";
+import { CaseAssessmentsPanel } from "@/components/CaseAssessmentsPanel";
 
 type Tab =
   | "overview"
@@ -24,6 +25,7 @@ type Tab =
   | "case-notes"
   | "messages"
   | "timeline"
+  | "assessments"
   | "progress";
 
 export default function CaseFilePage() {
@@ -98,6 +100,9 @@ export default function CaseFilePage() {
         <TabBtn active={tab === "timeline"} onClick={() => setTab("timeline")}>
           Activity Timeline
         </TabBtn>
+        <TabBtn active={tab === "assessments"} onClick={() => setTab("assessments")}>
+          Assessments
+        </TabBtn>
         <TabBtn active={tab === "progress"} onClick={() => setTab("progress")}>
           Progress
         </TabBtn>
@@ -110,6 +115,15 @@ export default function CaseFilePage() {
         <MessagesTab userEmail={user.email} clientEmail={client.email} />
       )}
       {tab === "timeline" && <TimelineTab caseId={caseId} />}
+      {tab === "assessments" && (
+        <CaseAssessmentsPanel
+          scopeKind="client-case"
+          scopeId={caseId}
+          audience="counselor"
+          counselorEmail={user.email}
+          launchRoute={(toolId) => `/case/${caseId}/assessment/${toolId}`}
+        />
+      )}
       {tab === "progress" && <ProgressTab caseId={caseId} client={client} />}
     </div>
   );

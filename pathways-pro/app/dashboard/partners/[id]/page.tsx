@@ -14,6 +14,7 @@ import {
 } from "@/lib/employment-partners";
 import { notesForPartnerOrg } from "@/lib/case-notes";
 import { CaseNotesPanel } from "@/components/CaseNotesPanel";
+import { CaseAssessmentsPanel } from "@/components/CaseAssessmentsPanel";
 import { seedPartnerDemo } from "@/lib/partner-seed";
 import { recordCaseOpen } from "@/lib/recent-cases";
 
@@ -226,6 +227,17 @@ export default function CounselorPartnerCaseFile() {
         title="Case notes (auto-generated DAP)"
         emptyLabel="No auto-generated case notes yet for this partner."
       />
+
+      <section>
+        <h2 className="text-xl font-semibold mb-3">Assessments</h2>
+        <CaseAssessmentsPanel
+          scopeKind="partner-org"
+          scopeId={partnerId}
+          audience="counselor"
+          counselorEmail={user.email}
+          launchRoute={(toolId) => `/dashboard/partners/${partnerId}/assessment/${toolId}`}
+        />
+      </section>
     </div>
   );
 }
