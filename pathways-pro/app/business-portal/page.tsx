@@ -19,6 +19,7 @@ import {
   type BusinessOrg,
 } from "@/lib/business-portal";
 import { seedBusinessPortal } from "@/lib/business-portal-seed";
+import { seedDemoAccounts } from "@/lib/demo-accounts-seed";
 
 export default function BusinessPortalPage() {
   const router = useRouter();
@@ -27,6 +28,7 @@ export default function BusinessPortalPage() {
 
   useEffect(() => {
     seedBusinessPortal();
+    seedDemoAccounts();
     const s = loadSession();
     if (!s) return router.replace("/business");
     if (s.role !== "business") {

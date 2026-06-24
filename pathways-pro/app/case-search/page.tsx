@@ -18,6 +18,7 @@ import {
 import { loadPartnerOrgs } from "@/lib/employment-partners";
 import { loadCaseNotes } from "@/lib/case-notes";
 import { threadsForUser, unreadCount } from "@/lib/messages";
+import { seedDemoAccounts } from "@/lib/demo-accounts-seed";
 
 type CaseType = "client" | "vendor" | "business" | "partner";
 
@@ -54,6 +55,7 @@ export default function CaseSearchPage() {
     const s = loadSession();
     if (!s) return router.replace("/");
     if (s.role !== "counselor") return router.replace("/portal");
+    seedDemoAccounts();
     setUser(s);
   }, [router]);
 

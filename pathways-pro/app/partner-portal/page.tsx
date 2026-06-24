@@ -15,6 +15,7 @@ import {
 import { threadsForUser, unreadCount } from "@/lib/messages";
 import { notesForPartnerOrg } from "@/lib/case-notes";
 import { seedPartnerDemo } from "@/lib/partner-seed";
+import { seedDemoAccounts } from "@/lib/demo-accounts-seed";
 
 export default function PartnerHome() {
   const router = useRouter();
@@ -35,6 +36,7 @@ export default function PartnerHome() {
       return router.replace(dest);
     }
     seedPartnerDemo();
+    seedDemoAccounts();
     setUser(s);
   }, [router]);
 

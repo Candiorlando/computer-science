@@ -22,6 +22,7 @@ import {
   type DocumentForRecipient,
 } from "@/lib/business-portal";
 import { seedBusinessPortal } from "@/lib/business-portal-seed";
+import { seedDemoAccounts } from "@/lib/demo-accounts-seed";
 
 export default function VendorPortalPage() {
   const router = useRouter();
@@ -29,6 +30,7 @@ export default function VendorPortalPage() {
 
   useEffect(() => {
     seedBusinessPortal();
+    seedDemoAccounts();
     const s = loadSession();
     if (!s) return router.replace("/business");
     if (s.role !== "vendor") {
