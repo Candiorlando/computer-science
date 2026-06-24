@@ -186,6 +186,9 @@ export interface ServiceRequest {
   // Request details
   notes: string;
   urgency: "routine" | "expedited" | "wioa-deadline";
+  // Due date (ISO date) — requester picks at submission; drives
+  // counselor queue prioritization.
+  dueDate?: string;
   // Routing
   assignedCounselorEmail?: string;
   // Lifecycle
@@ -196,6 +199,20 @@ export interface ServiceRequest {
   decisionNotes?: string;
   draftDocumentId?: string;     // VaultDocument id when the draft is uploaded
   releasedAt?: string;
+
+  // ── Deliverable workflow ──
+  // AI-drafted deliverable content (Markdown). Generated on demand
+  // from the catalog service's aiTemplate + the request context.
+  deliverableDraft?: string;
+  deliverableDraftGeneratedAt?: string;
+  deliverableDraftModel?: string;
+  // Counselor's edited final version. When the counselor clicks
+  // "Send to Client," the final is locked and releasedAt is set.
+  deliverableFinal?: string;
+  deliverableFinalEditedAt?: string;
+  // Send to client (business / vendor / partner)
+  sentToClientAt?: string;
+  sentToClientByEmail?: string;
 }
 
 const KEY = "pathways-pro:service-requests-v1";
@@ -376,6 +393,59 @@ export function releaseDocument(
       actorRole: "counselor",
       caseId: r.subjectCaseId,
       documentId: r.draftDocumentId,
+      payload: { requestId: r.id, retainingOrgId: r.requesterOrgId },
+    });
+    recordCaseNoteEvent({
+      kind: "business-service-released",
+      participantType: "business-vendor",
+      orgId: r.requesterOrgId,
+      orgName: r.requesterOrgName,
+      requesterName: r.requesterName,
+      sourceArtifactId: r.id,
+      serviceTitle: r.serviceTitle,
+      releasedByEmail: counselorEmail,
+    });
+  }
+}
+
+// ── Deliverable workflow ──────────────────────────────────────────────
+
+export function saveDeliverableDraft(
+  id: string,
+  draft: string,
+  model: string,
+) {
+  updateServiceRequest(id, {
+    deliverableDraft: draft,
+    deliverableDraftGeneratedAt: new Date().toISOString(),
+    deliverableDraftModel: model,
+    deliverableFinal: draft, // start the counselor edit with the draft
+    deliverableFinalEditedAt: new Date().toISOString(),
+    status: "draft-awaiting-release",
+  });
+}
+
+export function saveDeliverableEdit(id: string, edited: string) {
+  updateServiceRequest(id, {
+    deliverableFinal: edited,
+    deliverableFinalEditedAt: new Date().toISOString(),
+  });
+}
+
+export function sendToClient(id: string, counselorEmail: string) {
+  const r = updateServiceRequest(id, {
+    status: "delivered",
+    sentToClientAt: new Date().toISOString(),
+    sentToClientByEmail: counselorEmail,
+    releasedAt: new Date().toISOString(),
+  });
+  if (r) {
+    appendActivity({
+      kind: "doc_uploaded",
+      summary: `${counselorEmail} sent ${r.serviceTitle} deliverable to ${r.requesterOrgName}`,
+      actorEmail: counselorEmail,
+      actorRole: "counselor",
+      caseId: r.subjectCaseId,
       payload: { requestId: r.id, retainingOrgId: r.requesterOrgId },
     });
     recordCaseNoteEvent({

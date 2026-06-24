@@ -247,6 +247,12 @@ function RequestModal({
   const [jurisdiction, setJurisdiction] = useState("");
   const [notes, setNotes] = useState("");
   const [urgency, setUrgency] = useState<ServiceRequest["urgency"]>("routine");
+  // Default due date = today + 14 days. Required field — the
+  // counselor's queue is sorted by it.
+  const defaultDue = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)
+    .toISOString()
+    .slice(0, 10);
+  const [dueDate, setDueDate] = useState(defaultDue);
 
   function submit() {
     const req: ServiceRequest = {
@@ -263,6 +269,7 @@ function RequestModal({
       jurisdiction: jurisdiction || undefined,
       notes,
       urgency,
+      dueDate,
       status: "pending-counselor-review",
       requestedAt: new Date().toISOString(),
     };
@@ -328,6 +335,15 @@ function RequestModal({
               <option value="expedited">Expedited</option>
               <option value="wioa-deadline">WIOA deadline</option>
             </select>
+          </Field>
+          <Field label="Deliverable needed by">
+            <input
+              type="date"
+              className="input"
+              value={dueDate}
+              onChange={(e) => setDueDate(e.target.value)}
+              required
+            />
           </Field>
         </div>
         <Field label="Notes for your counselor">

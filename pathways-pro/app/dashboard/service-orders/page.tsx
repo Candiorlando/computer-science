@@ -80,7 +80,10 @@ export default function ServiceOrdersPage() {
           : "—";
         return { ...r, orgKind: kind, caseFileHref: href, priceLabel };
       })
-      .sort((a, b) => Date.parse(b.requestedAt) - Date.parse(a.requestedAt));
+      // Prioritize: WIOA-deadline first, then overdue, then by due date
+      // ascending, then most recent request. Counselors should clear
+      // imminent work before browsing recent.
+      .sort((a, b) => priorityScore(a) - priorityScore(b));
   }, [user, bump]);
 
   const filtered = useMemo(() => {
@@ -232,6 +235,16 @@ export default function ServiceOrdersPage() {
   );
 }
 
+function priorityScore(r: EnrichedRequest): number {
+  // Lower number = higher priority. WIOA deadlines always float to top.
+  // Then by days-until-due (overdue is negative → comes first).
+  // Then by reverse request time (newer last among equally-prioritized).
+  const wioaBoost = r.urgency === "wioa-deadline" ? -1_000_000 : 0;
+  const expeditedBoost = r.urgency === "expedited" ? -500_000 : 0;
+  const due = r.dueDate ? new Date(r.dueDate).getTime() : Number.MAX_SAFE_INTEGER;
+  return wioaBoost + expeditedBoost + due;
+}
+
 function computeCounts(rows: EnrichedRequest[]) {
   return {
     pending: rows.filter((r) => r.status === "pending-counselor-review").length,
@@ -311,7 +324,16 @@ function OrderRow({
         · requested by {order.requesterName}
       </p>
 
-      <div className="grid sm:grid-cols-4 gap-2 mt-3 text-xs">
+      <div className="grid sm:grid-cols-5 gap-2 mt-3 text-xs">
+        <Tile
+          label="Due"
+          value={order.dueDate ? dueLabel(order.dueDate) : "—"}
+          alert={
+            !!order.dueDate &&
+            (daysUntil(order.dueDate) <= 3 ||
+              order.urgency === "wioa-deadline")
+          }
+        />
         <Tile label="Requested" value={shortDate(order.requestedAt)} />
         <Tile
           label="Urgency"
@@ -342,13 +364,19 @@ function OrderRow({
       )}
 
       <div className="flex flex-wrap gap-2 mt-3">
+        <Link
+          href={`/dashboard/service-orders/${order.id}`}
+          className="grad-tealblue text-white text-xs px-3 py-1.5 rounded-md font-semibold"
+        >
+          Open order →
+        </Link>
         {order.status === "pending-counselor-review" && (
           <>
             <button
               onClick={onApprove}
-              className="grad-tealblue text-white text-xs px-3 py-1.5 rounded-md font-semibold"
+              className="border border-cyan-500 text-cyan-700 text-xs px-3 py-1.5 rounded-md font-semibold hover:bg-cyan-50"
             >
-              ✓ Approve · begin engagement
+              ✓ Quick-approve
             </button>
             <button
               onClick={onDecline}
@@ -473,6 +501,20 @@ function Pill({
       {children}
     </button>
   );
+}
+
+function daysUntil(iso: string): number {
+  return Math.ceil(
+    (new Date(iso).getTime() - Date.now()) / (24 * 60 * 60 * 1000),
+  );
+}
+
+function dueLabel(iso: string): string {
+  const d = daysUntil(iso);
+  if (d < 0) return `${Math.abs(d)}d overdue`;
+  if (d === 0) return "Today";
+  if (d === 1) return "Tomorrow";
+  return `${shortDate(iso)} · ${d}d`;
 }
 
 function shortDate(iso: string): string {
