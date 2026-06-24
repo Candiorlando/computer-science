@@ -18,18 +18,21 @@ interface NavItem {
 //   Home · Assessments · Documents · Messages · Case Notes · Tools · Settings
 function menuFor(user: AnyUser, unread: number): NavItem[] {
   if (user.role === "counselor") {
+    // Case Notes and Messages are intentionally absent from the global nav.
+    // Both are strictly case-isolated and only appear inside an individual
+    // case file. The unread-message count surfaces as a badge on the
+    // Case Search row so the counselor can deep-link into the case that
+    // needs attention.
     return [
-      { href: "/dashboard", label: "Home", icon: "🏠" },
+      { href: "/case-search", label: "Case Search", icon: "🔍", badge: unread },
       { href: "/caseload", label: "Caseload", icon: "📋" },
       { href: "/dashboard/vendors", label: "Vendors", icon: "🛠️" },
       { href: "/dashboard/business", label: "Business Clients", icon: "🏢" },
       { href: "/dashboard/partners", label: "Employment Partners", icon: "🤝" },
-      { href: "/messages", label: "Messages", icon: "✉️", badge: unread },
       { href: "/dashboard/daily-briefing", label: "Daily Briefing", icon: "📰" },
       { href: "/dashboard/financials", label: "Financials (AR/AP)", icon: "💰" },
       { href: "/dashboard/reports", label: "Reports", icon: "📊" },
       { href: "/dashboard/services-catalog", label: "Service Catalog", icon: "💼" },
-      { href: "/case-notes", label: "Case Notes", icon: "🗒️" },
       { href: "/settings", label: "Settings", icon: "⚙️" },
     ];
   }

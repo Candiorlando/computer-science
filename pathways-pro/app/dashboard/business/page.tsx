@@ -31,8 +31,6 @@ import {
   type ServiceRequest,
 } from "@/lib/service-requests";
 import { seedBusinessPortal } from "@/lib/business-portal-seed";
-import { loadCaseNotes, type CaseNote } from "@/lib/case-notes";
-import { CaseNotesPanel } from "@/components/CaseNotesPanel";
 
 export default function CounselorBusinessView() {
   const router = useRouter();
@@ -82,17 +80,6 @@ export default function CounselorBusinessView() {
       .slice(0, 20);
     const employerSummary = summarizeEmployers(placements);
     const pendingServiceRequests = pendingRequestsForCounselor(user.email);
-    const orgIds = Array.from(
-      new Set(placements.map((p) => p.employerOrgId)),
-    );
-    const businessCaseNotes: CaseNote[] = loadCaseNotes()
-      .filter(
-        (n) =>
-          n.participantType === "business-vendor" &&
-          n.businessOrgId &&
-          orgIds.includes(n.businessOrgId),
-      )
-      .sort((a, b) => Date.parse(b.sessionAt) - Date.parse(a.sessionAt));
     return {
       placements,
       auths,
@@ -106,7 +93,6 @@ export default function CounselorBusinessView() {
       activity,
       employerSummary,
       pendingServiceRequests,
-      businessCaseNotes,
     };
   }, [user, bump]);
 
@@ -188,7 +174,14 @@ export default function CounselorBusinessView() {
               className="border border-ink/15 rounded-lg p-5 bg-cream"
             >
               <div className="flex items-baseline justify-between gap-3 flex-wrap mb-2">
-                <h3 className="text-xl font-semibold">{e.orgName}</h3>
+                <h3 className="text-xl font-semibold">
+                  <Link
+                    href={`/dashboard/business/${e.orgId}`}
+                    className="hover:text-cyan-700"
+                  >
+                    {e.orgName} →
+                  </Link>
+                </h3>
                 <span className="text-xs text-emerald-700 font-semibold">
                   ✓ All placements in integrated settings
                 </span>
@@ -260,12 +253,10 @@ export default function CounselorBusinessView() {
         />
       </section>
 
-      {/* Business-side case notes (DAP) */}
-      <CaseNotesPanel
-        notes={data.businessCaseNotes}
-        title="Business client case notes"
-        emptyLabel="No auto-generated case notes for business clients yet."
-      />
+      {/* Case notes are intentionally NOT shown here — under the strict
+          case-isolation model they only live inside per-business case
+          files. Use the org list above to drill into a specific
+          business; the notes tab lives there. */}
 
       {/* ⑥ Activity feed */}
       <section>

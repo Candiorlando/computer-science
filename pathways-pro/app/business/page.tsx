@@ -31,7 +31,7 @@ export default function BusinessLandingPage() {
             : u.role === "partner"
               ? "/partner-portal"
               : u.role === "counselor"
-                ? "/dashboard/business"
+                ? "/case-search"
                 : "/portal";
       router.replace(dest);
     }
@@ -639,7 +639,7 @@ function SignInPanel() {
           ? "/vendor-portal"
           : u.role === "partner"
             ? "/partner-portal"
-            : "/dashboard/business";
+            : "/case-search";
     router.push(dest);
   }
 

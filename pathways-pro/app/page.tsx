@@ -15,7 +15,7 @@ export default function HomePage() {
     setMounted(true);
     const u = loadSession();
     if (u) {
-      router.replace(u.role === "counselor" ? "/dashboard" : "/portal");
+      router.replace(u.role === "counselor" ? "/case-search" : "/portal");
     }
   }, [router]);
 
@@ -603,7 +603,7 @@ function SignInPanel() {
     }
     saveSession(u);
     if (u.role === "counselor" || u.role === "client") saveMode(u.role);
-    router.push(u.role === "counselor" ? "/dashboard" : "/portal");
+    router.push(u.role === "counselor" ? "/case-search" : "/portal");
   }
 
   function demoLogin() {
@@ -615,7 +615,7 @@ function SignInPanel() {
     if (u) {
       saveSession(u);
       if (u.role === "counselor" || u.role === "client") saveMode(u.role);
-      router.push(u.role === "counselor" ? "/dashboard" : "/portal");
+      router.push(u.role === "counselor" ? "/case-search" : "/portal");
     }
   }
 

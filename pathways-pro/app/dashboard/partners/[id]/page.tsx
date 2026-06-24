@@ -15,6 +15,7 @@ import {
 import { notesForPartnerOrg } from "@/lib/case-notes";
 import { CaseNotesPanel } from "@/components/CaseNotesPanel";
 import { seedPartnerDemo } from "@/lib/partner-seed";
+import { recordCaseOpen } from "@/lib/recent-cases";
 
 export default function CounselorPartnerCaseFile() {
   const router = useRouter();
@@ -28,7 +29,8 @@ export default function CounselorPartnerCaseFile() {
     if (s.role !== "counselor") return router.replace("/portal");
     seedPartnerDemo();
     setUser(s);
-  }, [router]);
+    recordCaseOpen(s.email, partnerId);
+  }, [router, partnerId]);
 
   const data = useMemo(() => {
     const org = loadPartnerOrgs()[partnerId];

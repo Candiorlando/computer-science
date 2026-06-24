@@ -15,6 +15,10 @@ export default function CaseNotesIndex() {
   useEffect(() => {
     const s = loadSession();
     if (!s) return router.replace("/");
+    // Counselors don't get a global case-notes list — notes are strictly
+    // case-isolated. Send them to Case Search to pick the case; the
+    // Case Notes tab lives inside each case file.
+    if (s.role === "counselor") return router.replace("/case-search");
     setUser(s);
     setNotes(filterForUser(s));
   }, [router]);

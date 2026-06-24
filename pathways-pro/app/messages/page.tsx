@@ -40,6 +40,10 @@ function Inner() {
   useEffect(() => {
     const s = loadSession();
     if (!s) return router.replace("/");
+    // Counselors don't get a global messages list — messages are
+    // case-isolated. Bounce them to Case Search so they pick a case
+    // first; the Messages tab lives inside each case file.
+    if (s.role === "counselor") return router.replace("/case-search");
     setUser(s);
     const list = threadsForUser(s.email);
     setThreads(list);

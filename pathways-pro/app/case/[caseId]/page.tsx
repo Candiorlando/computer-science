@@ -16,8 +16,15 @@ import {
 } from "@/lib/self-advocacy";
 import { threadsForUser } from "@/lib/messages";
 import { buildProgress } from "@/lib/positive-psychology";
+import { recordCaseOpen } from "@/lib/recent-cases";
 
-type Tab = "overview" | "documents" | "case-notes" | "messages" | "progress";
+type Tab =
+  | "overview"
+  | "documents"
+  | "case-notes"
+  | "messages"
+  | "timeline"
+  | "progress";
 
 export default function CaseFilePage() {
   const router = useRouter();
@@ -31,7 +38,8 @@ export default function CaseFilePage() {
     if (!s) return router.replace("/");
     if (s.role !== "counselor") return router.replace("/portal");
     setUser(s);
-  }, [router]);
+    recordCaseOpen(s.email, caseId);
+  }, [router, caseId]);
 
   const client = useMemo(
     () => Object.values(CLIENTS).find((c) => c.caseId === caseId),
@@ -87,6 +95,9 @@ export default function CaseFilePage() {
         <TabBtn active={tab === "messages"} onClick={() => setTab("messages")}>
           Messages
         </TabBtn>
+        <TabBtn active={tab === "timeline"} onClick={() => setTab("timeline")}>
+          Activity Timeline
+        </TabBtn>
         <TabBtn active={tab === "progress"} onClick={() => setTab("progress")}>
           Progress
         </TabBtn>
@@ -98,6 +109,7 @@ export default function CaseFilePage() {
       {tab === "messages" && (
         <MessagesTab userEmail={user.email} clientEmail={client.email} />
       )}
+      {tab === "timeline" && <TimelineTab caseId={caseId} />}
       {tab === "progress" && <ProgressTab caseId={caseId} client={client} />}
     </div>
   );
@@ -302,6 +314,40 @@ function MessagesTab({
         </li>
       ))}
     </ol>
+  );
+}
+
+function TimelineTab({ caseId }: { caseId: string }) {
+  const events = notesForClient(caseId);
+  if (events.length === 0) {
+    return (
+      <div className="saas-card text-center text-ink/55 italic">
+        No timeline events for this case yet.
+      </div>
+    );
+  }
+  return (
+    <section aria-label="Activity timeline">
+      <ol role="list" className="space-y-2">
+        {events.map((e) => (
+          <li
+            key={e.id}
+            className="flex items-start gap-3 border-l-2 border-cyan-300 pl-3 py-1"
+          >
+            <time
+              dateTime={e.sessionAt}
+              className="text-xs text-ink/55 w-36 shrink-0"
+            >
+              {new Date(e.sessionAt).toLocaleString()}
+            </time>
+            <div className="text-sm">
+              <div className="font-semibold">{e.activityType}</div>
+              <div className="text-xs text-ink/65 line-clamp-2">{e.data}</div>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </section>
   );
 }
 

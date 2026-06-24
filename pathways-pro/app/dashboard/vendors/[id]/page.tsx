@@ -15,6 +15,7 @@ import {
 import { loadServiceRequests } from "@/lib/service-requests";
 import { notesForBusinessOrg } from "@/lib/case-notes";
 import { CaseNotesPanel } from "@/components/CaseNotesPanel";
+import { recordCaseOpen } from "@/lib/recent-cases";
 
 export default function CounselorVendorCaseFile() {
   const router = useRouter();
@@ -27,7 +28,8 @@ export default function CounselorVendorCaseFile() {
     if (!s) return router.replace("/");
     if (s.role !== "counselor") return router.replace("/portal");
     setUser(s);
-  }, [router]);
+    recordCaseOpen(s.email, vendorId);
+  }, [router, vendorId]);
 
   const data = useMemo(() => {
     const org = loadVendorOrgs()[vendorId];

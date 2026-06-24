@@ -24,9 +24,12 @@ export default function CounselorHome() {
     const s = loadSession();
     if (!s) return router.replace("/");
     if (s.role !== "counselor") return router.replace("/portal");
-    seedDemoClientReports();
-    seedDemoMessages();
-    setUser(s);
+    // The legacy home dashboard surfaced recent case-note content and
+    // recent conversations cross-case. Under the strict case-isolation
+    // model the counselor lands on /case-search instead; aggregate-only
+    // utility pages (Daily Briefing, Financials, Reports) remain in the
+    // LeftNav.
+    return router.replace("/case-search");
   }, [router]);
 
   const data = useMemo(() => {
