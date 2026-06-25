@@ -163,7 +163,6 @@ export default function CounselorVendorCaseFile() {
           scopeId={vendorId}
           audience="counselor"
           counselorEmail={user.email}
-          showLauncher={false}
           launchRoute={(toolId) => `/dashboard/vendors/${vendorId}/assessment/${toolId}`}
         />
       </section>
