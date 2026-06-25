@@ -243,6 +243,7 @@ export default function CounselorPartnerCaseFile() {
           scopeId={partnerId}
           audience="counselor"
           counselorEmail={user.email}
+          showLauncher={false}
           launchRoute={(toolId) => `/dashboard/partners/${partnerId}/assessment/${toolId}`}
         />
       </section>

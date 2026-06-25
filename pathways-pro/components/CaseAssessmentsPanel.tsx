@@ -24,6 +24,11 @@ interface Props {
   counselorEmail?: string;
   // Where to route when an assessment is launched
   launchRoute?: (toolId: string) => string;
+  // Whether to render the "Launch an assessment" tool catalog
+  // underneath the existing-assessments list. Business / vendor /
+  // partner case files set this to false — assessments for those
+  // orgs are launched from a Service Order, not from the case file.
+  showLauncher?: boolean;
 }
 
 export function CaseAssessmentsPanel({
@@ -33,6 +38,7 @@ export function CaseAssessmentsPanel({
   filterServiceId,
   counselorEmail,
   launchRoute,
+  showLauncher = true,
 }: Props) {
   const existing = useMemo(
     () => assessmentsForScope(scopeKind, scopeId),
@@ -72,33 +78,35 @@ export function CaseAssessmentsPanel({
         )}
       </section>
 
-      <section>
-        <header className="mb-3">
-          <h2 className="text-lg font-semibold">
-            Launch an assessment{filterServiceId ? " for this service" : ""}
-          </h2>
-          <p className="text-xs text-ink/55">
-            {launchableTools.length} tool{launchableTools.length === 1 ? "" : "s"} embedded for{" "}
-            {filterServiceId ? "the selected service" : "this case type"}.
-          </p>
-        </header>
-        <ul role="list" className="grid sm:grid-cols-2 gap-2">
-          {launchableTools.map((t) => (
-            <li key={t.id}>
-              <Link
-                href={launchRoute ? launchRoute(t.id) : `/case/${scopeId}/assessment/${t.id}`}
-                className="saas-card block hover:no-underline"
-              >
-                <h3 className="font-semibold text-sm">{t.title}</h3>
-                <p className="text-xs text-ink/65 mt-1">{t.description}</p>
-                <p className="text-[10px] uppercase tracking-wider text-cyan-700 mt-2">
-                  {t.items.length} items
-                </p>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </section>
+      {showLauncher && (
+        <section>
+          <header className="mb-3">
+            <h2 className="text-lg font-semibold">
+              Launch an assessment{filterServiceId ? " for this service" : ""}
+            </h2>
+            <p className="text-xs text-ink/55">
+              {launchableTools.length} tool{launchableTools.length === 1 ? "" : "s"} embedded for{" "}
+              {filterServiceId ? "the selected service" : "this case type"}.
+            </p>
+          </header>
+          <ul role="list" className="grid sm:grid-cols-2 gap-2">
+            {launchableTools.map((t) => (
+              <li key={t.id}>
+                <Link
+                  href={launchRoute ? launchRoute(t.id) : `/case/${scopeId}/assessment/${t.id}`}
+                  className="saas-card block hover:no-underline"
+                >
+                  <h3 className="font-semibold text-sm">{t.title}</h3>
+                  <p className="text-xs text-ink/65 mt-1">{t.description}</p>
+                  <p className="text-[10px] uppercase tracking-wider text-cyan-700 mt-2">
+                    {t.items.length} items
+                  </p>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
     </div>
   );
 }

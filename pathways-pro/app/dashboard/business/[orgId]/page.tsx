@@ -192,6 +192,7 @@ export default function CounselorBusinessCaseFile() {
           scopeId={orgId}
           audience="counselor"
           counselorEmail={user.email}
+          showLauncher={false}
           launchRoute={(toolId) => `/dashboard/business/${orgId}/assessment/${toolId}`}
         />
       )}
