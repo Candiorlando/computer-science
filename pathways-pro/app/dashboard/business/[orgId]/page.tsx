@@ -33,6 +33,7 @@ export default function CounselorBusinessCaseFile() {
   const orgId = String(params.orgId);
   const [user, setUser] = useState<CounselorUser | null>(null);
   const [tab, setTab] = useState<Tab>("overview");
+  const [bump, setBump] = useState(0);
 
   useEffect(() => {
     const s = loadSession();
@@ -82,7 +83,7 @@ export default function CounselorBusinessCaseFile() {
       threads,
       activity,
     };
-  }, [user, orgId]);
+  }, [user, orgId, bump]);
 
   if (!user) return null;
   if (!data) {
@@ -174,6 +175,13 @@ export default function CounselorBusinessCaseFile() {
           notes={data.notes}
           title=""
           emptyLabel="No case notes for this business yet."
+          scope={{
+            kind: "business",
+            orgId,
+            orgName: data.org.legalName,
+          }}
+          counselorEmail={user.email}
+          onAdded={() => setBump((n) => n + 1)}
         />
       )}
       {tab === "messages" && <MessagesTab threads={data.threads} />}

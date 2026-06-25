@@ -110,7 +110,13 @@ export default function CaseFilePage() {
 
       {tab === "overview" && <OverviewTab caseId={caseId} client={client} />}
       {tab === "documents" && <DocumentsTab caseId={caseId} />}
-      {tab === "case-notes" && <CaseNotesTab caseId={caseId} />}
+      {tab === "case-notes" && (
+        <CaseNotesTab
+          caseId={caseId}
+          clientName={client.name}
+          counselorEmail={user.email}
+        />
+      )}
       {tab === "messages" && (
         <MessagesTab userEmail={user.email} clientEmail={client.email} />
       )}
@@ -276,13 +282,25 @@ function DocumentsTab({ caseId }: { caseId: string }) {
   );
 }
 
-function CaseNotesTab({ caseId }: { caseId: string }) {
-  const notes = notesForClient(caseId);
+function CaseNotesTab({
+  caseId,
+  clientName,
+  counselorEmail,
+}: {
+  caseId: string;
+  clientName: string;
+  counselorEmail: string;
+}) {
+  const [bump, setBump] = useState(0);
+  const notes = useMemo(() => notesForClient(caseId), [caseId, bump]);
   return (
     <CaseNotesPanel
       notes={notes}
       title=""
       emptyLabel="No case notes for this client yet."
+      scope={{ kind: "client", caseId, clientName }}
+      counselorEmail={counselorEmail}
+      onAdded={() => setBump((n) => n + 1)}
     />
   );
 }

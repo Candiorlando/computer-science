@@ -23,6 +23,7 @@ export default function CounselorVendorCaseFile() {
   const params = useParams();
   const vendorId = String(params.id);
   const [user, setUser] = useState<CounselorUser | null>(null);
+  const [bump, setBump] = useState(0);
 
   useEffect(() => {
     const s = loadSession();
@@ -46,7 +47,7 @@ export default function CounselorVendorCaseFile() {
     );
     const notes = notesForBusinessOrg(vendorId);
     return { org, primary, auths, placements, logs, requests, notes };
-  }, [vendorId, user]);
+  }, [vendorId, user, bump]);
 
   if (!user) return null;
   if (!data) {
@@ -144,8 +145,15 @@ export default function CounselorVendorCaseFile() {
 
       <CaseNotesPanel
         notes={data.notes}
-        title="Case notes (auto-generated DAP)"
+        title="Case notes"
         emptyLabel="No case notes for this vendor yet."
+        scope={{
+          kind: "vendor",
+          orgId: vendorId,
+          orgName: data.org.legalName,
+        }}
+        counselorEmail={user.email}
+        onAdded={() => setBump((n) => n + 1)}
       />
 
       <section>

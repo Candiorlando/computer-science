@@ -23,6 +23,7 @@ export default function CounselorPartnerCaseFile() {
   const params = useParams();
   const partnerId = String(params.id);
   const [user, setUser] = useState<CounselorUser | null>(null);
+  const [bump, setBump] = useState(0);
 
   useEffect(() => {
     const s = loadSession();
@@ -44,7 +45,7 @@ export default function CounselorPartnerCaseFile() {
       inquiries: inquiriesForPartner(partnerId),
       notes: notesForPartnerOrg(partnerId),
     };
-  }, [partnerId, user]);
+  }, [partnerId, user, bump]);
 
   if (!user) return null;
   if (!data) {
@@ -224,8 +225,15 @@ export default function CounselorPartnerCaseFile() {
 
       <CaseNotesPanel
         notes={data.notes}
-        title="Case notes (auto-generated DAP)"
-        emptyLabel="No auto-generated case notes yet for this partner."
+        title="Case notes"
+        emptyLabel="No case notes yet for this partner."
+        scope={{
+          kind: "partner",
+          orgId: partnerId,
+          orgName: data.org.legalName,
+        }}
+        counselorEmail={user.email}
+        onAdded={() => setBump((n) => n + 1)}
       />
 
       <section>
