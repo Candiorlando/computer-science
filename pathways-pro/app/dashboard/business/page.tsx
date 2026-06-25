@@ -13,6 +13,7 @@ import {
   loadPlacements,
   loadDocuments,
   loadRoutes,
+  loadBusinessOrgs,
   decisionAuthorization,
   acknowledgeRoute,
   type ActivityEntry,
@@ -22,14 +23,17 @@ import {
   type ForensicEngagement,
   type VaultDocument,
   type DocumentRoute,
+  type BusinessOrg,
 } from "@/lib/business-portal";
 import {
   approveRequest,
   declineRequest,
+  loadServiceRequests,
   pendingRequestsForCounselor,
   releaseDocument,
   type ServiceRequest,
 } from "@/lib/service-requests";
+import { getAllBusinessUsers } from "@/lib/users";
 import { seedBusinessPortal } from "@/lib/business-portal-seed";
 
 export default function CounselorBusinessView() {
@@ -80,6 +84,23 @@ export default function CounselorBusinessView() {
       .slice(0, 20);
     const employerSummary = summarizeEmployers(placements);
     const pendingServiceRequests = pendingRequestsForCounselor(user.email);
+    const allOrgs = Object.values(loadBusinessOrgs());
+    const businessUsers = Object.values(getAllBusinessUsers());
+    const allRequests = loadServiceRequests();
+    const orgRollup: BusinessOrgRollup[] = allOrgs
+      .map((o) => {
+        const contacts = businessUsers.filter((u) => u.orgId === o.id);
+        const reqs = allRequests.filter((r) => r.requesterOrgId === o.id);
+        return {
+          org: o,
+          contacts,
+          openCount: reqs.filter(
+            (r) => r.status !== "delivered" && r.status !== "declined",
+          ).length,
+          deliveredCount: reqs.filter((r) => r.status === "delivered").length,
+        };
+      })
+      .sort((a, b) => a.org.legalName.localeCompare(b.org.legalName));
     return {
       placements,
       auths,
@@ -93,6 +114,7 @@ export default function CounselorBusinessView() {
       activity,
       employerSummary,
       pendingServiceRequests,
+      orgRollup,
     };
   }, [user, bump]);
 
@@ -143,6 +165,25 @@ export default function CounselorBusinessView() {
           value={String(data.pendingAuths.length)}
           sub="Vendors awaiting your decision"
         />
+      </section>
+
+      {/* All business clients on file */}
+      <section>
+        <div className="flex items-baseline justify-between gap-3 flex-wrap mb-3">
+          <h2 className="text-2xl">All business clients on file</h2>
+          <p className="text-xs text-ink/55">
+            {data.orgRollup.length} organization
+            {data.orgRollup.length === 1 ? "" : "s"}
+          </p>
+        </div>
+        <p className="text-sm text-ink/65 mb-3">
+          Tap any client to open their case file. While you&apos;re on a call
+          or in a meeting, use{" "}
+          <strong>&ldquo;Request service&rdquo;</strong> to spin up a service
+          order on the spot — it lands in your queue pre-approved and ready
+          to draft.
+        </p>
+        <BusinessClientList rows={data.orgRollup} />
       </section>
 
       {/* Service Requests Queue (NEW — pre-release counselor review) */}
@@ -277,6 +318,96 @@ export default function CounselorBusinessView() {
 }
 
 // ─── Subcomponents ──────────────────────────────────────────────────────
+
+interface BusinessOrgRollup {
+  org: BusinessOrg;
+  contacts: ReturnType<typeof getAllBusinessUsers> extends Record<
+    string,
+    infer T
+  >
+    ? T[]
+    : never;
+  openCount: number;
+  deliveredCount: number;
+}
+
+function BusinessClientList({ rows }: { rows: BusinessOrgRollup[] }) {
+  if (rows.length === 0) {
+    return (
+      <Empty>
+        No business clients on file yet. Once a business signs up or you add
+        one from a placement, it appears here.
+      </Empty>
+    );
+  }
+  return (
+    <ul role="list" className="grid md:grid-cols-2 gap-3">
+      {rows.map((row) => (
+        <li
+          key={row.org.id}
+          className="border border-ink/15 bg-cream rounded-lg p-4 flex flex-col"
+        >
+          <div className="flex items-baseline justify-between gap-3 flex-wrap">
+            <h3 className="font-semibold">
+              <Link
+                href={`/dashboard/business/${row.org.id}`}
+                className="hover:text-cyan-700"
+              >
+                {row.org.legalName}
+              </Link>
+            </h3>
+            <span
+              className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full font-semibold ${
+                row.org.status === "active"
+                  ? "bg-emerald-100 text-emerald-900"
+                  : row.org.status === "onboarding"
+                    ? "bg-amber-100 text-amber-900"
+                    : "bg-ink/10 text-ink/65"
+              }`}
+            >
+              {row.org.status}
+            </span>
+          </div>
+          <p className="text-xs text-ink/65 mt-0.5">
+            {row.org.industry} · {row.org.hqCity}, {row.org.hqState} ·{" "}
+            {row.org.size} employees
+          </p>
+          {row.org.primaryContact && (
+            <p className="text-xs text-ink/55 mt-0.5">
+              {row.org.primaryContact}
+            </p>
+          )}
+          <div className="flex gap-4 mt-2 text-xs text-ink/70">
+            <span>
+              <strong>{row.openCount}</strong> open
+            </span>
+            <span>
+              <strong>{row.deliveredCount}</strong> delivered
+            </span>
+            <span>
+              <strong>{row.contacts.length}</strong> contact
+              {row.contacts.length === 1 ? "" : "s"}
+            </span>
+          </div>
+          <div className="flex gap-2 mt-3 flex-wrap">
+            <Link
+              href={`/dashboard/business/${row.org.id}`}
+              className="text-xs border border-ink/15 px-3 py-1.5 rounded-md hover:bg-ink/5 font-semibold"
+            >
+              Open profile →
+            </Link>
+            <Link
+              href={`/dashboard/business/${row.org.id}/request-service`}
+              className="text-xs grad-tealblue text-white px-3 py-1.5 rounded-md font-semibold"
+            >
+              📦 Request service
+            </Link>
+          </div>
+        </li>
+      ))}
+    </ul>
+  );
+}
 
 interface EmployerSummary {
   orgId: string;

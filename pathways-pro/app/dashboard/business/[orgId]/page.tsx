@@ -123,6 +123,20 @@ export default function CounselorBusinessCaseFile() {
             </span>
           )}
         </p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <Link
+            href={`/dashboard/business/${orgId}/request-service`}
+            className="grad-tealblue text-white text-sm font-semibold px-4 py-2 rounded-md"
+          >
+            📦 Request service for this business
+          </Link>
+          <Link
+            href={`/dashboard/service-orders?org=${orgId}`}
+            className="text-sm border border-ink/15 px-4 py-2 rounded-md hover:bg-ink/5 font-semibold"
+          >
+            View all orders ({data.requests.length})
+          </Link>
+        </div>
       </header>
 
       <div className="flex flex-wrap gap-2 border-b border-ink/10 pb-2">
