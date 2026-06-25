@@ -3,19 +3,19 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { loadSession } from "@/lib/session";
-import type { BusinessUser } from "@/lib/users";
+import type { VendorUser } from "@/lib/users";
 import { OrderDeliverableViewer } from "@/components/OrderDeliverableViewer";
 
-export default function BusinessOrderViewer() {
+export default function VendorOrderViewer() {
   const router = useRouter();
   const params = useParams();
   const orderId = String(params.orderId);
-  const [user, setUser] = useState<BusinessUser | null>(null);
+  const [user, setUser] = useState<VendorUser | null>(null);
 
   useEffect(() => {
     const s = loadSession();
     if (!s) return router.replace("/business");
-    if (s.role !== "business") return router.replace("/portal");
+    if (s.role !== "vendor") return router.replace("/portal");
     setUser(s);
   }, [router]);
 
@@ -23,8 +23,8 @@ export default function BusinessOrderViewer() {
   return (
     <OrderDeliverableViewer
       orderId={orderId}
-      orgId={user.orgId}
-      catalogPath="/business-portal/services"
+      orgId={user.vendorOrgId}
+      catalogPath="/vendor-portal/services"
     />
   );
 }

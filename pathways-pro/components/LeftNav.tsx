@@ -63,8 +63,8 @@ function menuFor(user: AnyUser, unread: number): NavItem[] {
   if (user.role === "vendor") {
     return [
       { href: "/vendor-portal", label: "Home", icon: "🏠" },
-      { href: "/vendor-portal", label: "Engagements", icon: "📋" },
-      { href: "/vendor-portal/services", label: "Services", icon: "💼" },
+      { href: "/vendor-portal/orders", label: "Service Orders", icon: "📦" },
+      { href: "/vendor-portal/services", label: "Service Catalog", icon: "💼" },
       { href: "/vendor-portal", label: "Documents", icon: "📄" },
       { href: "/messages", label: "Messages", icon: "✉️", badge: unread },
       { href: "/case-notes", label: "Case Notes", icon: "🗒️" },
@@ -74,6 +74,7 @@ function menuFor(user: AnyUser, unread: number): NavItem[] {
   // partner — Employment Partner
   const items: NavItem[] = [
     { href: "/partner-portal", label: "Home", icon: "🏠" },
+    { href: "/partner-portal/orders", label: "Service Orders", icon: "📦" },
     { href: "/partner-portal/opportunities", label: "Opportunities", icon: "📋" },
     { href: "/partner-portal/supported-employment", label: "Supported Employment", icon: "🤝" },
   ];

@@ -3,26 +3,26 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { loadSession } from "@/lib/session";
-import type { BusinessUser } from "@/lib/users";
+import type { VendorUser } from "@/lib/users";
 import { OrdersIndex } from "@/components/OrdersIndex";
 
-export default function BusinessServiceOrdersPage() {
+export default function VendorServiceOrdersPage() {
   const router = useRouter();
-  const [user, setUser] = useState<BusinessUser | null>(null);
+  const [user, setUser] = useState<VendorUser | null>(null);
 
   useEffect(() => {
     const s = loadSession();
     if (!s) return router.replace("/business");
-    if (s.role !== "business") return router.replace("/portal");
+    if (s.role !== "vendor") return router.replace("/portal");
     setUser(s);
   }, [router]);
 
   if (!user) return null;
   return (
     <OrdersIndex
-      orgId={user.orgId}
-      basePath="/business-portal/orders"
-      catalogPath="/business-portal/services"
+      orgId={user.vendorOrgId}
+      basePath="/vendor-portal/orders"
+      catalogPath="/vendor-portal/services"
     />
   );
 }

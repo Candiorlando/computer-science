@@ -3,19 +3,19 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { loadSession } from "@/lib/session";
-import type { BusinessUser } from "@/lib/users";
+import type { EmploymentPartnerUser } from "@/lib/users";
 import { OrderDeliverableViewer } from "@/components/OrderDeliverableViewer";
 
-export default function BusinessOrderViewer() {
+export default function PartnerOrderViewer() {
   const router = useRouter();
   const params = useParams();
   const orderId = String(params.orderId);
-  const [user, setUser] = useState<BusinessUser | null>(null);
+  const [user, setUser] = useState<EmploymentPartnerUser | null>(null);
 
   useEffect(() => {
     const s = loadSession();
     if (!s) return router.replace("/business");
-    if (s.role !== "business") return router.replace("/portal");
+    if (s.role !== "partner") return router.replace("/portal");
     setUser(s);
   }, [router]);
 
@@ -23,8 +23,8 @@ export default function BusinessOrderViewer() {
   return (
     <OrderDeliverableViewer
       orderId={orderId}
-      orgId={user.orgId}
-      catalogPath="/business-portal/services"
+      orgId={user.partnerOrgId}
+      catalogPath="/partner-portal/services"
     />
   );
 }

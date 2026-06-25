@@ -8,6 +8,20 @@ import type { AnyUser, ClientUser } from "@/lib/users";
 import { loadCaseNotes } from "@/lib/case-notes";
 import { threadsForUser, unreadCount } from "@/lib/messages";
 import { seedDemoMessages } from "@/lib/demo-messages-seed";
+import { loadAccommodationLetters } from "@/lib/accommodation-letters";
+import {
+  loadEEOCCharges,
+  loadOCRComplaints,
+  loadProblemAnalysisReports,
+} from "@/lib/self-advocacy";
+
+interface RecentDoc {
+  id: string;
+  kind: string;
+  title: string;
+  href: string;
+  createdAt: string;
+}
 
 export default function ClientHome() {
   const router = useRouter();
@@ -30,7 +44,46 @@ export default function ClientHome() {
             .filter((n) => n.clientCaseId === user.caseId)
             .slice(0, 6)
         : [];
-    return { unread, threads, recentNotes };
+    const recentDocs: RecentDoc[] = [
+      ...loadAccommodationLetters().map((l) => ({
+        id: l.id,
+        kind: "Accommodation Letter",
+        title: l.employerName
+          ? `Accommodation Letter — ${l.employerName}`
+          : "Accommodation Letter",
+        href: `/accommodation-letter?id=${l.id}`,
+        createdAt: l.createdAt,
+      })),
+      ...loadProblemAnalysisReports().map((r) => ({
+        id: r.id,
+        kind: "Problem Analysis",
+        title: r.employerName
+          ? `Problem Analysis — ${r.employerName}`
+          : "Problem Analysis Report",
+        href: `/self-advocacy/incident-report?id=${r.id}`,
+        createdAt: r.createdAt,
+      })),
+      ...loadEEOCCharges().map((c) => ({
+        id: c.id,
+        kind: "EEOC Charge",
+        title: "EEOC Charge of Discrimination",
+        href: `/self-advocacy/eeoc?id=${c.id}`,
+        createdAt: c.createdAt,
+      })),
+      ...loadOCRComplaints().map((c) => ({
+        id: c.id,
+        kind: "OCR/DOJ Complaint",
+        title: "OCR / DOJ Civil Rights Complaint",
+        href: `/self-advocacy/ocr-doj?id=${c.id}`,
+        createdAt: c.createdAt,
+      })),
+    ]
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      )
+      .slice(0, 4);
+    return { unread, threads, recentNotes, recentDocs };
   }, [user]);
 
   if (!user || !data) return null;
@@ -135,6 +188,41 @@ export default function ClientHome() {
               badge="Claude Opus 4.8"
             />
           </div>
+
+          {data.recentDocs.length > 0 && (
+            <>
+              <h2 className="text-xl font-semibold pt-2">
+                Recently delivered to you
+              </h2>
+              <ul role="list" className="grid sm:grid-cols-2 gap-3">
+                {data.recentDocs.map((d) => (
+                  <li key={d.kind + d.id}>
+                    <Link
+                      href={d.href}
+                      className="block saas-card hover:shadow-md transition border-emerald-200 bg-emerald-50/30"
+                    >
+                      <div className="text-[10px] uppercase tracking-wider text-emerald-700 font-semibold">
+                        {d.kind}
+                      </div>
+                      <div className="font-semibold text-sm mt-1">
+                        {d.title}
+                      </div>
+                      <div className="text-xs text-ink/55 mt-1">
+                        {new Date(d.createdAt).toLocaleDateString(undefined, {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                        })}
+                      </div>
+                      <div className="text-xs text-cyan-700 font-semibold mt-2">
+                        📄 Open document →
+                      </div>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
 
           <h2 className="text-xl font-semibold pt-2">Your activity</h2>
           {data.recentNotes.length === 0 ? (
