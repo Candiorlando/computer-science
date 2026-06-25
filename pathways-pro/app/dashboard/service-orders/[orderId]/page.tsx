@@ -14,6 +14,7 @@ import {
   approveRequest,
   declineRequest,
   loadServiceRequests,
+  saveCounselorSignature,
   saveDeliverableDraft,
   saveDeliverableEdit,
   sendToClient,
@@ -24,10 +25,18 @@ import {
   effectivePrice,
   formatPrice,
   getService,
-  type CatalogService,
 } from "@/lib/service-catalog";
 import { toolsForService } from "@/lib/assessment-tools";
 import { CaseAssessmentsPanel } from "@/components/CaseAssessmentsPanel";
+import {
+  SignatureBlock,
+  SignaturePad,
+  type SignatureValue,
+} from "@/components/SignaturePad";
+import {
+  loadSavedSignature,
+  saveSignature as saveSignatureToProfile,
+} from "@/lib/counselor-signatures";
 
 type OrgKind = "business" | "vendor" | "partner";
 
@@ -41,6 +50,7 @@ export default function ServiceOrderDetail() {
   const [editText, setEditText] = useState("");
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [signing, setSigning] = useState(false);
 
   useEffect(() => {
     const s = loadSession();
@@ -151,6 +161,25 @@ export default function ServiceOrderDetail() {
     )
       return;
     sendToClient(order.id, user!.email);
+    setBump((n) => n + 1);
+  }
+
+  function applySignature(sig: SignatureValue) {
+    saveCounselorSignature(order.id, {
+      dataUrl: sig.dataUrl,
+      text: sig.text,
+      printedName: sig.printedName,
+      credentials: sig.credentials,
+    });
+    if (sig.rememberOnProfile) {
+      saveSignatureToProfile(user!.email, {
+        dataUrl: sig.dataUrl,
+        text: sig.text,
+        printedName: sig.printedName,
+        credentials: sig.credentials,
+      });
+    }
+    setSigning(false);
     setBump((n) => n + 1);
   }
 
@@ -362,9 +391,65 @@ export default function ServiceOrderDetail() {
                     onChange={(e) => setEditText(e.target.value)}
                   />
                 ) : (
-                  <pre className="text-sm whitespace-pre-wrap bg-cream border border-ink/10 rounded p-4 leading-relaxed">
-                    {order.deliverableFinal ?? order.deliverableDraft}
-                  </pre>
+                  <>
+                    <div className="flex justify-end mb-2 print:hidden">
+                      <button
+                        onClick={() => window.print()}
+                        className="text-xs border border-ink/15 px-3 py-1.5 rounded-md hover:bg-ink/5"
+                      >
+                        🖨️ Print / Save as PDF
+                      </button>
+                    </div>
+                    <article
+                      className="deliverable-page bg-white border border-ink/15 rounded p-8 leading-relaxed text-sm"
+                      aria-label="Deliverable preview"
+                    >
+                      <header className="border-b border-ink/15 pb-4 mb-4">
+                        <h1 className="text-xl font-semibold">
+                          {order.serviceTitle}
+                        </h1>
+                        <p className="text-xs text-ink/65 mt-1">
+                          Prepared for {order.requesterOrgName} ·{" "}
+                          {order.requesterName}
+                          {order.matterCaption && (
+                            <span> · Matter: {order.matterCaption}</span>
+                          )}
+                        </p>
+                        <p className="text-xs text-ink/55 mt-0.5">
+                          Counselor of record: {user!.name}
+                          {user!.credentials && `, ${user!.credentials}`} ·{" "}
+                          {new Date(
+                            order.deliverableFinalEditedAt ??
+                              order.deliverableDraftGeneratedAt ??
+                              new Date().toISOString(),
+                          ).toLocaleDateString(undefined, {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          })}
+                        </p>
+                      </header>
+                      <MarkdownBody
+                        text={order.deliverableFinal ?? order.deliverableDraft ?? ""}
+                      />
+                      {order.signedAt && (
+                        <SignatureBlock
+                          dataUrl={order.counselorSignatureDataUrl}
+                          text={order.counselorSignatureText}
+                          printedName={order.counselorSignatureName ?? user!.name}
+                          credentials={
+                            order.counselorSignatureCredentials ??
+                            user!.credentials
+                          }
+                          signedAt={order.signedAt}
+                        />
+                      )}
+                      <footer className="border-t border-ink/15 mt-6 pt-4 text-xs text-ink/55 italic">
+                        Prepared via Pathways Pro · Claude Opus 4.8 ·{" "}
+                        Reviewed and approved by the counselor of record.
+                      </footer>
+                    </article>
+                  </>
                 )}
                 <p className="text-xs text-ink/55 italic mt-2">
                   Counselor edit log:{" "}
@@ -377,21 +462,113 @@ export default function ServiceOrderDetail() {
           </Section>
         )}
 
+      {/* Sign deliverable */}
+      {order.deliverableFinal && order.status !== "delivered" && (
+        <Section title="Step 4 · Sign deliverable">
+          {!order.signedAt ? (
+            <>
+              <p className="text-sm text-ink/65 mb-3">
+                Apply your signature before releasing the document. You can
+                type your signature in cursive or draw it with mouse / trackpad
+                / touch. Save it on your profile to skip this step on future
+                deliverables.
+              </p>
+              {signing ? (
+                <SignaturePad
+                  suggestedName={user!.name}
+                  credentials={user!.credentials}
+                  savedDataUrl={loadSavedSignature(user!.email)?.dataUrl}
+                  savedText={loadSavedSignature(user!.email)?.text}
+                  onSave={applySignature}
+                  onCancel={() => setSigning(false)}
+                />
+              ) : (
+                <div className="flex gap-2 flex-wrap items-baseline">
+                  <button
+                    onClick={() => setSigning(true)}
+                    className="grad-tealblue text-white font-semibold px-5 py-2 rounded-md text-sm"
+                  >
+                    ✍️ Open signature pad
+                  </button>
+                  {loadSavedSignature(user!.email) && (
+                    <button
+                      onClick={() => {
+                        const saved = loadSavedSignature(user!.email)!;
+                        applySignature({
+                          dataUrl: saved.dataUrl,
+                          text: saved.text,
+                          printedName: saved.printedName,
+                          credentials: saved.credentials,
+                          rememberOnProfile: false,
+                        });
+                      }}
+                      className="text-sm border border-cyan-500 text-cyan-700 px-4 py-2 rounded-md hover:bg-cyan-50"
+                    >
+                      Use saved signature
+                    </button>
+                  )}
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="flex items-baseline justify-between gap-3 flex-wrap">
+              <div className="text-sm">
+                <span className="text-emerald-700 font-semibold">
+                  ✓ Signed
+                </span>{" "}
+                <span className="text-ink/65">
+                  {new Date(order.signedAt).toLocaleString()}
+                </span>
+              </div>
+              <button
+                onClick={() => setSigning(true)}
+                className="text-xs text-cyan-700 hover:underline"
+              >
+                Replace signature
+              </button>
+              {signing && (
+                <div className="w-full mt-3">
+                  <SignaturePad
+                    suggestedName={user!.name}
+                    credentials={user!.credentials}
+                    savedDataUrl={loadSavedSignature(user!.email)?.dataUrl}
+                    savedText={loadSavedSignature(user!.email)?.text}
+                    onSave={applySignature}
+                    onCancel={() => setSigning(false)}
+                  />
+                </div>
+              )}
+            </div>
+          )}
+        </Section>
+      )}
+
       {/* Send to client */}
       {order.deliverableFinal && order.status !== "delivered" && (
-        <Section title="Step 4 · Send to client">
+        <Section title="Step 5 · Send to client">
           <p className="text-sm text-ink/65 mb-3">
             Sending releases the deliverable into{" "}
-            <strong>{order.requesterOrgName}</strong>&apos;s portal. They
-            see exactly the document you see above — your edited final
-            version, not the original AI draft.
+            <strong>{order.requesterOrgName}</strong>&apos;s portal with your
+            signature applied. They see exactly the document you see above —
+            your edited final version, signed.
           </p>
           <button
             onClick={send}
-            className="bg-purple-700 text-white font-semibold px-5 py-2.5 rounded-md text-sm"
+            disabled={!order.signedAt}
+            className="bg-purple-700 text-white font-semibold px-5 py-2.5 rounded-md text-sm disabled:bg-ink/25 disabled:cursor-not-allowed"
+            title={
+              order.signedAt
+                ? undefined
+                : "Apply your signature in Step 4 before sending"
+            }
           >
             🚀 Send to client
           </button>
+          {!order.signedAt && (
+            <p className="text-xs text-ink/55 mt-2 italic">
+              Apply your signature in Step 4 before sending.
+            </p>
+          )}
         </Section>
       )}
 
@@ -416,6 +593,27 @@ export default function ServiceOrderDetail() {
           </p>
         </section>
       )}
+
+      <style jsx global>{`
+        @media print {
+          body * {
+            visibility: hidden;
+          }
+          .deliverable-page,
+          .deliverable-page * {
+            visibility: visible;
+          }
+          .deliverable-page {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            box-shadow: none;
+            border: none;
+            font-family: Georgia, "Times New Roman", Times, serif;
+          }
+        }
+      `}</style>
     </div>
   );
 }
@@ -500,6 +698,107 @@ function Row({ label, value }: { label: string; value: string }) {
       <dd className="text-sm font-semibold mt-0.5">{value}</dd>
     </div>
   );
+}
+
+// Tiny Markdown renderer — handles the subset the AI deliverable
+// template emits: headings (#, ##, ###), bullet lists (-, *), numbered
+// lists (1.), bold (**), italic (*), and paragraph breaks. Keeps the
+// bundle small and never executes HTML from the model output.
+function MarkdownBody({ text }: { text: string }) {
+  const lines = text.split("\n");
+  const out: React.ReactNode[] = [];
+  let listBuf: string[] = [];
+  let listType: "ul" | "ol" | null = null;
+
+  function flushList() {
+    if (listType === "ul") {
+      out.push(
+        <ul
+          key={out.length}
+          className="list-disc pl-6 my-2 space-y-1"
+          role="list"
+        >
+          {listBuf.map((li, i) => (
+            <li key={i}>{renderInline(li)}</li>
+          ))}
+        </ul>,
+      );
+    } else if (listType === "ol") {
+      out.push(
+        <ol
+          key={out.length}
+          className="list-decimal pl-6 my-2 space-y-1"
+          role="list"
+        >
+          {listBuf.map((li, i) => (
+            <li key={i}>{renderInline(li)}</li>
+          ))}
+        </ol>,
+      );
+    }
+    listBuf = [];
+    listType = null;
+  }
+
+  for (const raw of lines) {
+    const line = raw.trimEnd();
+    if (!line.trim()) {
+      flushList();
+      continue;
+    }
+    const h3 = line.match(/^###\s+(.*)$/);
+    const h2 = line.match(/^##\s+(.*)$/);
+    const h1 = line.match(/^#\s+(.*)$/);
+    const ulItem = line.match(/^[-*]\s+(.*)$/);
+    const olItem = line.match(/^\d+\.\s+(.*)$/);
+    if (h1) {
+      flushList();
+      out.push(<h2 key={out.length} className="text-lg font-semibold mt-4 mb-2">{renderInline(h1[1])}</h2>);
+    } else if (h2) {
+      flushList();
+      out.push(<h3 key={out.length} className="text-base font-semibold mt-4 mb-1">{renderInline(h2[1])}</h3>);
+    } else if (h3) {
+      flushList();
+      out.push(<h4 key={out.length} className="text-sm font-semibold mt-3 mb-1 uppercase tracking-wider text-ink/65">{renderInline(h3[1])}</h4>);
+    } else if (ulItem) {
+      if (listType !== "ul") flushList();
+      listType = "ul";
+      listBuf.push(ulItem[1]);
+    } else if (olItem) {
+      if (listType !== "ol") flushList();
+      listType = "ol";
+      listBuf.push(olItem[1]);
+    } else {
+      flushList();
+      out.push(<p key={out.length} className="my-2">{renderInline(line)}</p>);
+    }
+  }
+  flushList();
+  return <>{out}</>;
+}
+
+function renderInline(s: string): React.ReactNode {
+  // Parse **bold** and *italic* recursively into spans. Plain-text fallback.
+  const parts: React.ReactNode[] = [];
+  let rest = s;
+  let key = 0;
+  const re = /(\*\*[^*]+\*\*|\*[^*]+\*)/;
+  while (rest.length) {
+    const m = re.exec(rest);
+    if (!m) {
+      parts.push(<span key={key++}>{rest}</span>);
+      break;
+    }
+    if (m.index > 0) parts.push(<span key={key++}>{rest.slice(0, m.index)}</span>);
+    const token = m[0];
+    if (token.startsWith("**")) {
+      parts.push(<strong key={key++}>{token.slice(2, -2)}</strong>);
+    } else {
+      parts.push(<em key={key++}>{token.slice(1, -1)}</em>);
+    }
+    rest = rest.slice(m.index + token.length);
+  }
+  return parts;
 }
 
 function StatusChip({ status }: { status: ServiceRequest["status"] }) {

@@ -53,6 +53,7 @@ function menuFor(user: AnyUser, unread: number): NavItem[] {
     return [
       { href: "/business-portal", label: "Home", icon: "🏠" },
       { href: "/business-portal/services", label: "Service Catalog", icon: "💼" },
+      { href: "/business-portal/orders", label: "Service Orders", icon: "📦" },
       { href: "/business-portal", label: "Documents", icon: "📄" },
       { href: "/messages", label: "Messages", icon: "✉️", badge: unread },
       { href: "/case-notes", label: "Case Notes", icon: "🗒️" },

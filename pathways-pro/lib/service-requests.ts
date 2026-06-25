@@ -213,6 +213,14 @@ export interface ServiceRequest {
   // Send to client (business / vendor / partner)
   sentToClientAt?: string;
   sentToClientByEmail?: string;
+  // Counselor signature applied to the deliverable. Either a base64
+  // PNG data URL of a drawn signature OR a typed cursive name. The
+  // signed-at timestamp marks when the counselor authorized release.
+  counselorSignatureDataUrl?: string;
+  counselorSignatureText?: string;
+  counselorSignatureName?: string;        // printed name shown under the signature line
+  counselorSignatureCredentials?: string; // credentials line shown under printed name
+  signedAt?: string;
 }
 
 const KEY = "pathways-pro:service-requests-v1";
@@ -429,6 +437,24 @@ export function saveDeliverableEdit(id: string, edited: string) {
   updateServiceRequest(id, {
     deliverableFinal: edited,
     deliverableFinalEditedAt: new Date().toISOString(),
+  });
+}
+
+export function saveCounselorSignature(
+  id: string,
+  sig: {
+    dataUrl?: string;
+    text?: string;
+    printedName: string;
+    credentials?: string;
+  },
+) {
+  updateServiceRequest(id, {
+    counselorSignatureDataUrl: sig.dataUrl,
+    counselorSignatureText: sig.text,
+    counselorSignatureName: sig.printedName,
+    counselorSignatureCredentials: sig.credentials,
+    signedAt: new Date().toISOString(),
   });
 }
 
