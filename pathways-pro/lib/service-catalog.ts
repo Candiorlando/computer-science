@@ -58,7 +58,7 @@ export const SERVICE_CATALOG: CatalogService[] = [
       "Helps employers identify suitable roles, build disability-inclusive pipelines, and match candidates to essential job functions.",
     defaultPriceCents: F(120_000),
     priceUnit: "flat",
-    availableTo: ["business", "partner"],
+    availableTo: ["business", "partner", "vendor"],
     visibleToClient: false,
     turnaround: "10–15 business days",
     aiTemplate:
@@ -100,7 +100,7 @@ export const SERVICE_CATALOG: CatalogService[] = [
       "Analyzes job tasks and restructures duties to improve retention and reduce barriers.",
     defaultPriceCents: F(100_000),
     priceUnit: "flat",
-    availableTo: ["business", "partner"],
+    availableTo: ["business", "partner", "vendor"],
     visibleToClient: true,
     turnaround: "7 business days",
     aiTemplate:
@@ -114,7 +114,7 @@ export const SERVICE_CATALOG: CatalogService[] = [
       "Teaches communication, professionalism, time management, and workplace expectations.",
     defaultPriceCents: F(75_000),
     priceUnit: "flat",
-    availableTo: ["business", "partner"],
+    availableTo: ["business", "partner", "vendor"],
     visibleToClient: true,
     turnaround: "Scheduled cohort",
     aiTemplate:
@@ -128,7 +128,7 @@ export const SERVICE_CATALOG: CatalogService[] = [
       "Designs individualized roles based on Discovery, strengths, and job carving for workers with significant disabilities.",
     defaultPriceCents: F(150_000),
     priceUnit: "flat",
-    availableTo: ["business", "partner"],
+    availableTo: ["business", "partner", "vendor"],
     visibleToClient: true,
     turnaround: "30-day Discovery",
     aiTemplate:
@@ -144,7 +144,7 @@ export const SERVICE_CATALOG: CatalogService[] = [
       "Guides employers through responding to accommodation requests and documenting the interactive process.",
     defaultPriceCents: F(85_000),
     priceUnit: "flat",
-    availableTo: ["business", "partner"],
+    availableTo: ["business", "partner", "vendor"],
     visibleToClient: true,
     turnaround: "5 business days",
     aiTemplate:
@@ -172,7 +172,7 @@ export const SERVICE_CATALOG: CatalogService[] = [
       "Creates individualized accommodation plans with recommended tools and supports.",
     defaultPriceCents: F(120_000),
     priceUnit: "flat",
-    availableTo: ["business", "partner"],
+    availableTo: ["business", "partner", "vendor"],
     visibleToClient: true,
     turnaround: "7 business days",
     aiTemplate:
@@ -200,7 +200,7 @@ export const SERVICE_CATALOG: CatalogService[] = [
       "Evaluates home offices for ergonomic, safety, and ADA compliance.",
     defaultPriceCents: F(125_000),
     priceUnit: "flat",
-    availableTo: ["business", "partner"],
+    availableTo: ["business", "partner", "vendor"],
     visibleToClient: true,
     turnaround: "5–7 business days",
     aiTemplate:
@@ -214,7 +214,7 @@ export const SERVICE_CATALOG: CatalogService[] = [
       "Reviews HR, onboarding, and training workflows for accessibility gaps.",
     defaultPriceCents: F(220_000),
     priceUnit: "flat",
-    availableTo: ["business", "partner"],
+    availableTo: ["business", "partner", "vendor"],
     visibleToClient: false,
     turnaround: "15 business days",
     aiTemplate:
@@ -258,7 +258,7 @@ export const SERVICE_CATALOG: CatalogService[] = [
       "Expert analysis for legal cases, disability claims, and litigation.",
     defaultPriceCents: F(250_000),
     priceUnit: "flat",
-    availableTo: ["business", "vendor"],
+    availableTo: ["business", "partner", "vendor"],
     visibleToClient: false,
     turnaround: "14–21 business days",
     aiTemplate:
@@ -272,7 +272,7 @@ export const SERVICE_CATALOG: CatalogService[] = [
       "Determines employability and wage potential.",
     defaultPriceCents: F(180_000),
     priceUnit: "flat",
-    availableTo: ["business", "vendor"],
+    availableTo: ["business", "partner", "vendor"],
     visibleToClient: false,
     turnaround: "10–14 business days",
     aiTemplate:
@@ -286,7 +286,7 @@ export const SERVICE_CATALOG: CatalogService[] = [
       "Quarterly or annual reporting for agencies and employers.",
     defaultPriceCents: F(180_000),
     priceUnit: "flat",
-    availableTo: ["business", "partner"],
+    availableTo: ["business", "partner", "vendor"],
     visibleToClient: false,
     turnaround: "5 business days after period close",
     aiTemplate:
@@ -302,7 +302,7 @@ export const SERVICE_CATALOG: CatalogService[] = [
       "Builds disability-inclusive hiring pipelines.",
     defaultPriceCents: F(100_000),
     priceUnit: "flat",
-    availableTo: ["business", "partner"],
+    availableTo: ["business", "partner", "vendor"],
     visibleToClient: false,
     turnaround: "10 business days",
     aiTemplate:
@@ -316,7 +316,7 @@ export const SERVICE_CATALOG: CatalogService[] = [
       "Identifies risks to employee retention and provides corrective recommendations.",
     defaultPriceCents: F(120_000),
     priceUnit: "flat",
-    availableTo: ["business", "partner"],
+    availableTo: ["business", "partner", "vendor"],
     visibleToClient: false,
     turnaround: "10 business days",
     aiTemplate:
@@ -330,7 +330,7 @@ export const SERVICE_CATALOG: CatalogService[] = [
       "Improves disability inclusion across teams and leadership.",
     defaultPriceCents: F(150_000),
     priceUnit: "flat",
-    availableTo: ["business", "partner"],
+    availableTo: ["business", "partner", "vendor"],
     visibleToClient: false,
     turnaround: "21 business days",
     aiTemplate:
@@ -344,7 +344,7 @@ export const SERVICE_CATALOG: CatalogService[] = [
       "Establishes long-term VR–employer partnerships.",
     defaultPriceCents: F(100_000),
     priceUnit: "flat",
-    availableTo: ["business", "partner"],
+    availableTo: ["business", "partner", "vendor"],
     visibleToClient: false,
     turnaround: "30-day engagement",
     aiTemplate:
@@ -360,7 +360,7 @@ export const SERVICE_CATALOG: CatalogService[] = [
       "Educates teams on disability etiquette and inclusion.",
     defaultPriceCents: F(120_000),
     priceUnit: "flat",
-    availableTo: ["business", "partner"],
+    availableTo: ["business", "partner", "vendor"],
     visibleToClient: false,
     turnaround: "Scheduled session",
     aiTemplate:
@@ -374,7 +374,7 @@ export const SERVICE_CATALOG: CatalogService[] = [
       "Provides legal and procedural training for HR and supervisors.",
     defaultPriceCents: F(150_000),
     priceUnit: "flat",
-    availableTo: ["business", "partner"],
+    availableTo: ["business", "partner", "vendor"],
     visibleToClient: false,
     turnaround: "Scheduled session",
     aiTemplate:
@@ -388,7 +388,7 @@ export const SERVICE_CATALOG: CatalogService[] = [
       "Teaches supervisors how to manage accommodations.",
     defaultPriceCents: F(120_000),
     priceUnit: "flat",
-    availableTo: ["business", "partner"],
+    availableTo: ["business", "partner", "vendor"],
     visibleToClient: false,
     turnaround: "Scheduled session",
     aiTemplate:
@@ -416,7 +416,7 @@ export const SERVICE_CATALOG: CatalogService[] = [
       "Supports employees with trauma histories or mental health conditions.",
     defaultPriceCents: F(120_000),
     priceUnit: "flat",
-    availableTo: ["business", "partner"],
+    availableTo: ["business", "partner", "vendor"],
     visibleToClient: false,
     turnaround: "Scheduled session",
     aiTemplate:
@@ -430,7 +430,7 @@ export const SERVICE_CATALOG: CatalogService[] = [
       "Recurring annual training package for compliance and culture.",
     defaultPriceCents: F(150_000),
     priceUnit: "annual",
-    availableTo: ["business", "partner"],
+    availableTo: ["business", "partner", "vendor"],
     visibleToClient: false,
     turnaround: "Quarterly sessions",
     aiTemplate:
@@ -446,7 +446,7 @@ export const SERVICE_CATALOG: CatalogService[] = [
       "Creates or updates HR, accessibility, and accommodation policies.",
     defaultPriceCents: F(15_000),
     priceUnit: "hourly",
-    availableTo: ["business", "partner"],
+    availableTo: ["business", "partner", "vendor"],
     visibleToClient: false,
     turnaround: "Scoped per project",
     aiTemplate:
@@ -460,7 +460,7 @@ export const SERVICE_CATALOG: CatalogService[] = [
       "Builds comprehensive accessibility and inclusion policies.",
     defaultPriceCents: F(150_000),
     priceUnit: "flat",
-    availableTo: ["business", "partner"],
+    availableTo: ["business", "partner", "vendor"],
     visibleToClient: false,
     turnaround: "15 business days",
     aiTemplate:
@@ -474,7 +474,7 @@ export const SERVICE_CATALOG: CatalogService[] = [
       "Designs end-to-end accommodation request workflows.",
     defaultPriceCents: F(200_000),
     priceUnit: "flat",
-    availableTo: ["business", "partner"],
+    availableTo: ["business", "partner", "vendor"],
     visibleToClient: false,
     turnaround: "15 business days",
     aiTemplate:
@@ -502,7 +502,7 @@ export const SERVICE_CATALOG: CatalogService[] = [
       "Annual audit of policies, workflows, and documentation.",
     defaultPriceCents: F(300_000),
     priceUnit: "annual",
-    availableTo: ["business", "partner"],
+    availableTo: ["business", "partner", "vendor"],
     visibleToClient: false,
     turnaround: "30-day engagement",
     aiTemplate:
@@ -532,7 +532,7 @@ export const SERVICE_CATALOG: CatalogService[] = [
       "Comprehensive annual audit of ADA Title I employment compliance and EEO posture.",
     defaultPriceCents: F(350_000),
     priceUnit: "annual",
-    availableTo: ["business", "partner"],
+    availableTo: ["business", "partner", "vendor"],
     visibleToClient: false,
     turnaround: "45-day engagement",
     aiTemplate:
@@ -546,7 +546,7 @@ export const SERVICE_CATALOG: CatalogService[] = [
       "Quarterly outcomes dashboard for hiring, retention, accommodation requests, and inclusion metrics.",
     defaultPriceCents: F(150_000),
     priceUnit: "quarterly",
-    availableTo: ["business", "partner"],
+    availableTo: ["business", "partner", "vendor"],
     visibleToClient: false,
     turnaround: "5 business days after quarter close",
     aiTemplate:
@@ -560,7 +560,7 @@ export const SERVICE_CATALOG: CatalogService[] = [
       "Monthly oversight of vendor invoicing, deliverables, and engagement quality.",
     defaultPriceCents: F(120_000),
     priceUnit: "monthly",
-    availableTo: ["business", "partner"],
+    availableTo: ["business", "partner", "vendor"],
     visibleToClient: false,
     turnaround: "Continuous",
     aiTemplate:
@@ -574,7 +574,7 @@ export const SERVICE_CATALOG: CatalogService[] = [
       "Annual refresh of JTA documents to track changing essential functions.",
     defaultPriceCents: F(100_000),
     priceUnit: "annual",
-    availableTo: ["business", "partner"],
+    availableTo: ["business", "partner", "vendor"],
     visibleToClient: false,
     turnaround: "10 business days per role",
     aiTemplate:
@@ -588,7 +588,7 @@ export const SERVICE_CATALOG: CatalogService[] = [
       "Annual audit of the accommodation workflow performance and SLA compliance.",
     defaultPriceCents: F(220_000),
     priceUnit: "annual",
-    availableTo: ["business", "partner"],
+    availableTo: ["business", "partner", "vendor"],
     visibleToClient: false,
     turnaround: "21-day engagement",
     aiTemplate:
