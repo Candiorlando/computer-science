@@ -104,6 +104,8 @@ export default function ResultsPage() {
         </div>
       </section>
 
+      <AiCareerIdeas profile={profile} />
+
       <section className="pt-6 border-t border-ink/10">
         <h2 className="text-2xl mb-3">Next: talk to the coach</h2>
         <p className="text-ink/70 prose-narrow mb-4">
@@ -115,6 +117,173 @@ export default function ResultsPage() {
         </Link>
       </section>
     </div>
+  );
+}
+
+interface CareerIdea {
+  title: string;
+  riasecMatch: string;
+  whyItFits: string;
+  educationPath: string;
+  realWorldNote: string;
+  firstStep: string;
+}
+
+interface CareerIdeasResponse {
+  rationaleNarrative: string;
+  ideasByTier: {
+    "no-degree": CareerIdea[];
+    certificate: CareerIdea[];
+    associate: CareerIdea[];
+    bachelor: CareerIdea[];
+    graduate: CareerIdea[];
+  };
+}
+
+const TIER_LABELS: Record<keyof CareerIdeasResponse["ideasByTier"], string> = {
+  "no-degree": "No degree required",
+  certificate: "Certificate / vocational program",
+  associate: "Associate degree (2 yr)",
+  bachelor: "Bachelor's degree (4 yr)",
+  graduate: "Graduate / professional",
+};
+
+const TIER_COLORS: Record<keyof CareerIdeasResponse["ideasByTier"], string> = {
+  "no-degree": "border-emerald-300 bg-emerald-50/40",
+  certificate: "border-cyan-300 bg-cyan-50/40",
+  associate: "border-blue-300 bg-blue-50/40",
+  bachelor: "border-purple-300 bg-purple-50/40",
+  graduate: "border-amber-300 bg-amber-50/40",
+};
+
+function AiCareerIdeas({ profile }: { profile: UserProfile }) {
+  const [data, setData] = useState<CareerIdeasResponse | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+
+  async function generate() {
+    if (!profile.riasec || !profile.hollandCode) return;
+    setLoading(true);
+    setErr(null);
+    try {
+      const resp = await fetch("/api/generate-career-ideas", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          hollandCode: profile.hollandCode,
+          riasec: profile.riasec,
+          bigFive: profile.bigFive,
+          educationLevel: profile.intake?.educationLevel,
+          dreamJob: profile.intake?.dreamJob,
+          constraints: profile.intake?.constraints,
+        }),
+      });
+      if (!resp.ok) {
+        const j = (await resp.json().catch(() => ({}))) as { error?: string };
+        throw new Error(j.error ?? `Request failed (${resp.status})`);
+      }
+      const j = (await resp.json()) as { ideas: CareerIdeasResponse };
+      setData(j.ideas);
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "Network error");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <section className="pt-6 border-t border-ink/10">
+      <div className="flex items-baseline justify-between flex-wrap gap-3 mb-3">
+        <div>
+          <h2 className="text-2xl">More ideas matched to your personality</h2>
+          <p className="text-sm text-ink/65 max-w-2xl">
+            Beyond the O*NET ranked list above, the AI counselor brainstorms
+            additional career ideas grouped by how much schooling each one
+            takes. Helpful when you&apos;re weighing whether to invest in
+            more training, or looking at a career change.
+          </p>
+        </div>
+        {!data && !loading && (
+          <button
+            onClick={generate}
+            className="bg-accent text-white text-sm font-semibold px-4 py-2 rounded-md"
+          >
+            ✨ Generate ideas
+          </button>
+        )}
+        {data && !loading && (
+          <button
+            onClick={generate}
+            className="text-xs border border-ink/20 px-3 py-1.5 rounded-md hover:bg-ink/5"
+          >
+            ↻ Regenerate
+          </button>
+        )}
+      </div>
+
+      {loading && (
+        <div className="border border-dashed border-ink/20 rounded-lg p-6 text-center text-ink/65">
+          Brainstorming with Claude Opus 4.8 — usually 8–12 seconds…
+        </div>
+      )}
+
+      {err && (
+        <div className="border border-rose-300 bg-rose-50 text-rose-900 rounded-lg p-4 text-sm">
+          {err}
+        </div>
+      )}
+
+      {data && (
+        <div className="space-y-5">
+          <p className="text-sm italic text-ink/75 border-l-2 border-accent/40 pl-3">
+            {data.rationaleNarrative}
+          </p>
+          {(Object.keys(TIER_LABELS) as Array<keyof typeof TIER_LABELS>).map(
+            (tier) => {
+              const ideas = data.ideasByTier[tier];
+              if (!ideas?.length) return null;
+              return (
+                <div key={tier}>
+                  <h3 className="text-sm uppercase tracking-wider font-semibold text-ink/70 mb-2">
+                    {TIER_LABELS[tier]}{" "}
+                    <span className="text-ink/50 font-normal">
+                      ({ideas.length})
+                    </span>
+                  </h3>
+                  <ul role="list" className="grid sm:grid-cols-2 gap-3">
+                    {ideas.map((idea, i) => (
+                      <li
+                        key={`${tier}-${i}`}
+                        className={`border rounded-lg p-4 ${TIER_COLORS[tier]}`}
+                      >
+                        <div className="flex items-baseline justify-between gap-2 flex-wrap">
+                          <h4 className="font-semibold">{idea.title}</h4>
+                          <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-white text-ink/70 font-mono">
+                            {idea.riasecMatch}
+                          </span>
+                        </div>
+                        <p className="text-xs text-ink/80 mt-1">
+                          <strong>Why it fits:</strong> {idea.whyItFits}
+                        </p>
+                        <p className="text-xs text-ink/70 mt-1.5">
+                          <strong>Training:</strong> {idea.educationPath}
+                        </p>
+                        <p className="text-xs text-ink/70 italic mt-1.5">
+                          {idea.realWorldNote}
+                        </p>
+                        <p className="text-xs text-accent mt-2">
+                          <strong>This week:</strong> {idea.firstStep}
+                        </p>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            },
+          )}
+        </div>
+      )}
+    </section>
   );
 }
 
