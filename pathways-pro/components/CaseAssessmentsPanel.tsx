@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import {
   ASSESSMENT_TOOLS,
+  getAssessmentTool,
   type Audience,
 } from "@/lib/assessment-tools";
 import {
@@ -124,6 +125,10 @@ function AssessmentRow({
       assessment.aiDraftInterpretation ??
       "",
   );
+  const [aiBusy, setAiBusy] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
+  const [aiGuidance, setAiGuidance] = useState("");
+  const [showGuidance, setShowGuidance] = useState(false);
 
   function saveEdit() {
     updateCaseAssessment(assessment.id, {
@@ -140,6 +145,47 @@ function AssessmentRow({
       counselorApprovedByEmail: counselorEmail,
       counselorApprovedAt: new Date().toISOString(),
     });
+  }
+
+  async function aiRefine() {
+    setAiBusy(true);
+    setAiError(null);
+    try {
+      const tool = getAssessmentTool(assessment.toolId);
+      const enrichedResponses = assessment.responses.map((r) => {
+        const item = tool?.items.find((i) => i.id === r.itemId);
+        return {
+          itemId: r.itemId,
+          prompt: item?.prompt,
+          value: r.value,
+        };
+      });
+      const resp = await fetch("/api/refine-assessment-interpretation", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          toolTitle: assessment.toolTitle,
+          toolDescription: tool?.description,
+          aiInterpretationTemplate: tool?.aiInterpretationTemplate,
+          responses: enrichedResponses,
+          currentDraft: text,
+          guidance: aiGuidance.trim() || undefined,
+        }),
+      });
+      if (!resp.ok) {
+        const j = (await resp.json().catch(() => ({}))) as { error?: string };
+        throw new Error(j.error ?? `Request failed (${resp.status})`);
+      }
+      const j = (await resp.json()) as { refined: string };
+      setText(j.refined);
+      setEditing(true);
+      setShowGuidance(false);
+      setAiGuidance("");
+    } catch (e) {
+      setAiError(e instanceof Error ? e.message : "Network error");
+    } finally {
+      setAiBusy(false);
+    }
   }
 
   return (
@@ -215,6 +261,24 @@ function AssessmentRow({
                 </button>
               )}
               <button
+                onClick={() => {
+                  if (showGuidance) {
+                    aiRefine();
+                  } else {
+                    setShowGuidance(true);
+                  }
+                }}
+                disabled={aiBusy}
+                className="text-xs border border-purple-400 text-purple-700 px-3 py-1.5 rounded-md hover:bg-purple-50 font-semibold disabled:opacity-50"
+                title="Use Claude Opus 4.8 to expand the draft into a polished 2-4 paragraph clinical interpretation"
+              >
+                {aiBusy
+                  ? "✨ Refining…"
+                  : showGuidance
+                    ? "✨ Run refinement"
+                    : "✨ AI assist"}
+              </button>
+              <button
                 onClick={approve}
                 className="text-xs grad-tealblue text-white px-3 py-1.5 rounded-md font-semibold"
               >
@@ -223,6 +287,43 @@ function AssessmentRow({
             </>
           )}
         </div>
+
+        {showGuidance && !assessment.counselorApproved && (
+          <div className="mt-3 border border-purple-200 bg-purple-50/40 rounded-md p-3">
+            <label className="block text-[10px] uppercase tracking-wider text-purple-900 font-semibold mb-1">
+              Optional guidance for the AI (steer the refinement)
+            </label>
+            <textarea
+              value={aiGuidance}
+              onChange={(e) => setAiGuidance(e.target.value)}
+              rows={2}
+              placeholder="e.g., emphasize accommodation recommendations, expand the leadership-buyin response, frame for the IPE meeting…"
+              className="w-full bg-white border border-purple-200 rounded-md px-3 py-2 text-sm"
+            />
+            <div className="flex items-baseline gap-2 mt-2">
+              <span className="text-xs text-ink/55 italic flex-1">
+                The AI gets the tool description, every response, your
+                current draft, and this guidance — then writes a 2-4
+                paragraph clinical interpretation in your voice.
+              </span>
+              <button
+                onClick={() => {
+                  setShowGuidance(false);
+                  setAiGuidance("");
+                }}
+                className="text-xs text-ink/55 hover:text-ink"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+
+        {aiError && (
+          <div className="mt-2 text-xs border border-rose-300 bg-rose-50 text-rose-900 rounded-md p-2">
+            {aiError}
+          </div>
+        )}
       </div>
     </li>
   );
