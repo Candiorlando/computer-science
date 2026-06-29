@@ -26,10 +26,224 @@ export default function HomePage() {
       <Hero />
       <TrustBar />
       <HowItWorks />
+      <SpecializedCounselors />
       <RoiMetrics />
       <Testimonial />
       <FinalCta />
     </div>
+  );
+}
+
+interface CounselorSpec {
+  title: string;
+  services: { label: string; detail: string }[];
+  markets: string;
+}
+
+const SPECIALIZED_COUNSELORS: CounselorSpec[] = [
+  {
+    title: "Career Counselors",
+    services: [
+      {
+        label: "Assessment & Appraisal",
+        detail:
+          "Selecting and interpreting vocational, interest, achievement, and psychological tests.",
+      },
+      {
+        label: "Vocational Counseling",
+        detail:
+          "Guiding clients through the educational and career implications of their limitations and assets.",
+      },
+      {
+        label: "Advocacy & Barrier Removal",
+        detail:
+          "Eliminating attitudinal, environmental, and employment barriers.",
+      },
+    ],
+    markets:
+      "K-12 school systems, colleges/universities, state vocational rehabilitation agencies, and community non-profits.",
+  },
+  {
+    title: "Return-to-Work Coordinators",
+    services: [
+      {
+        label: "Diagnosis & Treatment Planning",
+        detail:
+          "Analyzing medical and psychosocial info to develop formal, individualized rehabilitation plans.",
+      },
+      {
+        label: "Rehabilitation Technology",
+        detail:
+          "Providing consultation on and securing access to assistive workplace accommodations.",
+      },
+      {
+        label: "Case Management & Referral",
+        detail:
+          "Coordinating multidisciplinary services, managing benefits, and ensuring continuity of care.",
+      },
+    ],
+    markets:
+      "For-profit corporations, private insurance companies, industrial health settings, and human resource departments.",
+  },
+  {
+    title: "Forensic Rehabilitation Specialists",
+    services: [
+      {
+        label: "Consultation",
+        detail:
+          "Providing professional expert advice across multiple regulatory, medical, and corporate systems.",
+      },
+      {
+        label: "Wage-Earning Analysis",
+        detail:
+          "Evaluating the impact of injury on quality of life and earning capacity.",
+      },
+      {
+        label: "Legal Testimony",
+        detail:
+          "Offering objective data and testimony within legal proceedings.",
+      },
+    ],
+    markets:
+      "Court systems, private legal practices, workers' compensation carriers, and federal defense agencies.",
+  },
+  {
+    title: "Job Development & Placement Specialists",
+    services: [
+      {
+        label: "Job Placement",
+        detail:
+          "Conducting labor market surveys, identifying leads, and teaching job-seeking skills.",
+      },
+      {
+        label: "Employer Negotiation",
+        detail:
+          "Matching client skills with employer needs and consulting on workplace inclusion.",
+      },
+      {
+        label: "Assistive Tech Coordination",
+        detail:
+          "Collaborating with technology teams to modify work environments.",
+      },
+    ],
+    markets:
+      "Supported employment agencies, commercial staffing firms, non-profit rehabilitation centers, and public workforce centers.",
+  },
+  {
+    title: "Mental Health & Psychiatric Rehabilitation Counselors",
+    services: [
+      {
+        label: "Psychotherapy",
+        detail:
+          "Providing individual and group counseling aimed at building behavioral independence.",
+      },
+      {
+        label: "Psychosocial Analysis",
+        detail:
+          "Evaluating the intersection of mental health diagnoses with vocational capability.",
+      },
+      {
+        label: "Crisis Intervention",
+        detail:
+          "Coordinating continuity of care during psychological distress.",
+      },
+    ],
+    markets:
+      "Inpatient and outpatient psychiatric facilities, community mental health clinics, and private practices.",
+  },
+  {
+    title: "Certified Vocational Evaluation Specialists (CVE)",
+    services: [
+      {
+        label: "Comprehensive Evaluation",
+        detail:
+          "Administering extensive, community-based vocational assessments.",
+      },
+      {
+        label: "Data Synthesis",
+        detail:
+          "Translating multi-disciplinary medical, psychological, and social data into employment recommendations.",
+      },
+      {
+        label: "Plan Formulation",
+        detail:
+          "Designing baseline actionable vocational pathways for other counselors to execute.",
+      },
+    ],
+    markets:
+      "Veterans Affairs (VA) hospitals, state/federal rehabilitation agencies, and specialized disability evaluation centers.",
+  },
+];
+
+function SpecializedCounselors() {
+  return (
+    <section
+      aria-labelledby="specialized-counselors-heading"
+      className="border-b border-ink/10 bg-cream/40"
+    >
+      <div className="max-w-6xl mx-auto px-6 py-20">
+        <div className="max-w-2xl mb-10">
+          <p className="text-xs uppercase tracking-widest text-accent mb-2">
+            Who works on the platform
+          </p>
+          <h2
+            id="specialized-counselors-heading"
+            className="text-4xl tracking-tight"
+          >
+            Specialized Counselors: Services &amp; Markets
+          </h2>
+          <p className="text-ink/75 mt-3">
+            Pathways Pro is built around six specialized rehabilitation
+            counselor archetypes — each with distinct services, certifications,
+            and the markets they serve.
+          </p>
+        </div>
+
+        <ul
+          role="list"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"
+        >
+          {SPECIALIZED_COUNSELORS.map((c, i) => (
+            <li key={c.title}>
+              <article className="saas-card h-full flex flex-col bg-white hover:shadow-md transition">
+                <header>
+                  <span className="text-[10px] uppercase tracking-wider font-semibold text-accent">
+                    Counselor type {i + 1}
+                  </span>
+                  <h3 className="text-lg font-semibold mt-1 leading-snug">
+                    {c.title}
+                  </h3>
+                </header>
+
+                <ul role="list" className="mt-3 space-y-2 flex-1">
+                  {c.services.map((s) => (
+                    <li key={s.label} className="flex gap-2 text-sm">
+                      <span
+                        aria-hidden
+                        className="text-accent flex-shrink-0 mt-0.5"
+                      >
+                        ✓
+                      </span>
+                      <span>
+                        <strong className="font-semibold">{s.label}:</strong>{" "}
+                        <span className="text-ink/75">{s.detail}</span>
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+
+                <div className="mt-4 grad-tealblue-soft border border-cyan-200 rounded-md p-3">
+                  <div className="text-[10px] uppercase tracking-wider font-semibold text-cyan-900 mb-1">
+                    Employment Markets
+                  </div>
+                  <p className="text-xs text-ink/80 leading-snug">{c.markets}</p>
+                </div>
+              </article>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
   );
 }
 
