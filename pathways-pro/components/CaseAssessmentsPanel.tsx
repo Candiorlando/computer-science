@@ -13,6 +13,7 @@ import {
   type CaseAssessment,
   type CaseScopeKind,
 } from "@/lib/case-assessments";
+import { AddServiceAssessmentDropdown } from "@/components/AddServiceAssessmentDropdown";
 
 interface Props {
   scopeKind: CaseScopeKind;
@@ -81,14 +82,17 @@ export function CaseAssessmentsPanel({
 
       {showLauncher && (
         <section>
-          <header className="mb-3">
-            <h2 className="text-lg font-semibold">
-              Launch an assessment{filterServiceId ? " for this service" : ""}
-            </h2>
-            <p className="text-xs text-ink/55">
-              {launchableTools.length} tool{launchableTools.length === 1 ? "" : "s"} embedded for{" "}
-              {filterServiceId ? "the selected service" : "this case type"}.
-            </p>
+          <header className="mb-3 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+            <div>
+              <h2 className="text-lg font-semibold">
+                Launch an assessment{filterServiceId ? " for this service" : ""}
+              </h2>
+              <p className="text-xs text-ink/55">
+                {launchableTools.length} tool{launchableTools.length === 1 ? "" : "s"} embedded for{" "}
+                {filterServiceId ? "the selected service" : "this case type"}.
+              </p>
+            </div>
+            <AddServiceAssessmentDropdown />
           </header>
           <ul role="list" className="grid sm:grid-cols-2 gap-2">
             {launchableTools.map((t) => (
