@@ -41,6 +41,7 @@ function menuFor(user: AnyUser, unread: number): NavItem[] {
     return [
       { href: "/portal", label: "Home", icon: "🏠" },
       { href: "/progress", label: "My Progress", icon: "📈" },
+      { href: "/ipe", label: "My IPE Plan", icon: "📋" },
       { href: "/assessment", label: "Assessments", icon: "📝" },
       { href: "/report", label: "Documents", icon: "📄" },
       { href: "/messages", label: "Messages", icon: "✉️", badge: unread },
