@@ -14,6 +14,7 @@ import {
   loadOCRComplaints,
   loadProblemAnalysisReports,
 } from "@/lib/self-advocacy";
+import InteractiveProgress from "./InteractiveProgress";
 
 interface RecentDoc {
   id: string;
@@ -123,6 +124,12 @@ export default function ClientHome() {
           </Link>
         </div>
       </section>
+
+      {isClient && (
+        <section className="saas-card">
+          <InteractiveProgress />
+        </section>
+      )}
 
       {c && (
         <section className="saas-card">
