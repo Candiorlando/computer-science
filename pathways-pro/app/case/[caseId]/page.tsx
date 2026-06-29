@@ -82,6 +82,14 @@ export default function CaseFilePage() {
           <span className="font-mono">{client.caseId}</span> · DOB {client.dob} ·
           Goal: <strong>{client.goal}</strong>
         </p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <Link
+            href={`/case/${caseId}/assign-service`}
+            className="grad-tealblue text-white text-sm font-semibold px-4 py-2 rounded-md"
+          >
+            🤝 Assign service to client
+          </Link>
+        </div>
       </header>
 
       <div className="flex flex-wrap gap-2 border-b border-ink/10 pb-2">

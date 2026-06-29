@@ -15,7 +15,9 @@ export type ServiceCategory =
   | "training"
   | "documentation-policy"
   | "recurring"
-  | "one-time";
+  | "one-time"
+  | "client-services"
+  | "partner-coordination";
 
 export type PriceUnit =
   | "flat"
@@ -24,7 +26,10 @@ export type PriceUnit =
   | "quarterly"
   | "annual";
 
-export type ExternalAudience = "business" | "partner" | "vendor";
+// Adds "client" so counselors can assign client-facing ancillary
+// services directly to vocational clients (Category A in the
+// expanded catalog).
+export type ExternalAudience = "business" | "partner" | "vendor" | "client";
 
 export interface CatalogService {
   id: string;
@@ -594,6 +599,286 @@ export const SERVICE_CATALOG: CatalogService[] = [
     aiTemplate:
       "Draft an Annual Accommodation Workflow Review with SLA performance, decision-quality sampling, employee-experience feedback, recommended workflow improvements.",
   },
+
+  // ─── CATEGORY A · CLIENT-FACING ANCILLARY SERVICES ─────────────────
+  // Assigned BY counselors TO vocational clients. The counselor uses
+  // the "Assign service" UI on the client case file; the client sees
+  // the active assignment on their portal home.
+  {
+    id: "benefits-counseling",
+    title: "Benefits Counseling & Work Incentives Planning",
+    category: "client-services",
+    description:
+      "WIPA-aligned benefits planning — SSI / SSDI work incentives, Ticket to Work, PASS plans, IRWE / SEIE deductions.",
+    defaultPriceCents: F(45_000),
+    priceUnit: "flat",
+    availableTo: ["business", "partner", "vendor", "client"],
+    visibleToClient: true,
+    turnaround: "7 business days",
+    aiTemplate:
+      "Draft a benefits-counseling brief tailored to the client's current SSA status. Model how the proposed wages affect each benefit; identify applicable work incentives; recommend reporting cadence; cite the SSA POMS sections relied on.",
+  },
+  {
+    id: "assistive-tech-screening",
+    title: "Assistive Technology (AT) Screening & Device Training",
+    category: "client-services",
+    description:
+      "AT functional needs assessment, device trial, training plan, and JAN-backed AT recommendations.",
+    defaultPriceCents: F(95_000),
+    priceUnit: "flat",
+    availableTo: ["business", "partner", "vendor", "client"],
+    visibleToClient: true,
+    turnaround: "10 business days",
+    aiTemplate:
+      "Draft an AT screening report covering current functional barriers, AT recommendations with cost bands from JAN, a training plan (hours and milestones), and a vendor short-list.",
+  },
+  {
+    id: "travel-training",
+    title: "Travel Training & Mobility Instruction",
+    category: "client-services",
+    description:
+      "Route planning, fixed-route + paratransit orientation, safety drills, and independent travel certification.",
+    defaultPriceCents: F(60_000),
+    priceUnit: "flat",
+    availableTo: ["business", "partner", "vendor", "client"],
+    visibleToClient: true,
+    turnaround: "Scheduled cohort (3-6 weeks)",
+    aiTemplate:
+      "Draft a travel-training plan: identify the home-to-worksite route, transit options, safety scenarios to drill, instructor session count, success criteria, and a fallback plan if transit changes.",
+  },
+  {
+    id: "self-advocacy-coaching",
+    title: "Self-Advocacy & Disclosure Coaching",
+    category: "client-services",
+    description:
+      "1-on-1 coaching on ADA disclosure, accommodation requests, and rights-based self-advocacy at work.",
+    defaultPriceCents: F(55_000),
+    priceUnit: "flat",
+    availableTo: ["business", "partner", "vendor", "client"],
+    visibleToClient: true,
+    turnaround: "6 weekly sessions",
+    aiTemplate:
+      "Draft a self-advocacy coaching plan: target situations (interview, onboarding, accommodation request, supervisor conflict), the script template for each, and rehearsal milestones.",
+  },
+  {
+    id: "soft-skills-bootcamp",
+    title: "Soft Skills & Work Readiness Bootcamp",
+    category: "client-services",
+    description:
+      "Cohort-based bootcamp on workplace communication, time management, conflict resolution, and feedback skills.",
+    defaultPriceCents: F(85_000),
+    priceUnit: "flat",
+    availableTo: ["business", "partner", "vendor", "client"],
+    visibleToClient: true,
+    turnaround: "4-week cohort",
+    aiTemplate:
+      "Draft a soft-skills bootcamp syllabus: weekly objectives, daily exercises, role-play scenarios, assessment rubric, and a portfolio piece each participant builds.",
+  },
+  {
+    id: "financial-literacy",
+    title: "Financial Literacy & Asset Development",
+    category: "client-services",
+    description:
+      "Budgeting, banking, ABLE / IDA account setup, credit-building, and asset-development counseling.",
+    defaultPriceCents: F(50_000),
+    priceUnit: "flat",
+    availableTo: ["business", "partner", "vendor", "client"],
+    visibleToClient: true,
+    turnaround: "6 weekly sessions",
+    aiTemplate:
+      "Draft a financial-literacy curriculum: client's current cash flow, budget recommendations, ABLE/IDA eligibility, credit-building actions, and three asset-development goals tied to the IPE.",
+  },
+  {
+    id: "post-employment-retention",
+    title: "Post-Employment Stabilization & Retention Check-ins",
+    category: "client-services",
+    description:
+      "90-day post-placement retention coaching — check-ins, accommodation refinement, supervisor mediation when needed.",
+    defaultPriceCents: F(110_000),
+    priceUnit: "flat",
+    availableTo: ["business", "partner", "vendor", "client"],
+    visibleToClient: true,
+    turnaround: "90-day engagement",
+    aiTemplate:
+      "Draft a post-employment retention plan: check-in cadence (30/60/90 day), red-flag indicators, accommodation tune-up triggers, supervisor relationship temperature checks, and the closeout criteria for moving to status maintenance.",
+  },
+
+  // ─── CATEGORY B · BUSINESS & EMPLOYER-FACING SERVICES ──────────────
+  // Requested BY businesses through their portal. Counselor approves
+  // and drafts the deliverable. (Augments the existing workforce
+  // consulting + ADA categories — these are the named instruments.)
+  {
+    id: "ada-title-i-audit",
+    title: "ADA Title I Compliance Audit",
+    category: "ada-compliance",
+    description:
+      "Comprehensive ADA Title I audit — job descriptions, hiring practices, accommodation workflow, and reasonable-accommodation log review.",
+    defaultPriceCents: F(450_000),
+    priceUnit: "flat",
+    availableTo: ["business", "partner", "vendor"],
+    visibleToClient: false,
+    turnaround: "30-day engagement",
+    aiTemplate:
+      "Draft an ADA Title I Compliance Audit report: findings by control area (recruitment, hiring, accommodation process, training, retaliation safeguards), risk ratings, regulatory citations (29 CFR Part 1630), and a 90-day corrective action plan.",
+  },
+  {
+    id: "digital-a11y-review-services",
+    title: "Digital Accessibility (A11y) Review",
+    category: "ada-compliance",
+    description:
+      "WCAG 2.2 AA audit of public-facing and employee-facing digital products with remediation roadmap.",
+    defaultPriceCents: F(380_000),
+    priceUnit: "flat",
+    availableTo: ["business", "partner", "vendor"],
+    visibleToClient: false,
+    turnaround: "21 business days",
+    aiTemplate:
+      "Draft a digital accessibility review: WCAG 2.2 AA scan results by success criterion, severity ranking, code-level remediation guidance, and a sequenced backlog for the engineering team.",
+  },
+  {
+    id: "workplace-ergonomic-accommodation",
+    title: "Workplace Ergonomic & Accommodation Assessment",
+    category: "ada-compliance",
+    description:
+      "On-site ergonomic evaluation paired with accommodation recommendations and JAN-backed cost data.",
+    defaultPriceCents: F(220_000),
+    priceUnit: "flat",
+    availableTo: ["business", "partner", "vendor"],
+    visibleToClient: false,
+    turnaround: "10 business days",
+    aiTemplate:
+      "Draft a workplace ergonomic assessment: physical-demand observations, ANSI/HFES violations, recommended equipment changes with cost bands, and a JAN-backed accommodation memo per affected employee.",
+  },
+  {
+    id: "neurodiversity-inclusion-training",
+    title: "Neurodiversity & Disability Inclusion Training",
+    category: "training",
+    description:
+      "Manager + team training on neurodiversity hiring, accommodation, and inclusive team practices.",
+    defaultPriceCents: F(150_000),
+    priceUnit: "flat",
+    availableTo: ["business", "partner", "vendor"],
+    visibleToClient: false,
+    turnaround: "Scheduled session",
+    aiTemplate:
+      "Draft a neurodiversity & disability inclusion training agenda: research framing, case studies, role-plays, manager toolkit, and a 30-day post-training application plan.",
+  },
+  {
+    id: "tax-credit-optimization",
+    title: "Tax Credit & Financial Incentive Optimization",
+    category: "business-engagement",
+    description:
+      "WOTC, Disabled Access Credit (§44), and Architectural Barrier Removal Deduction (§190) optimization.",
+    defaultPriceCents: F(180_000),
+    priceUnit: "flat",
+    availableTo: ["business", "partner", "vendor"],
+    visibleToClient: false,
+    turnaround: "15 business days",
+    aiTemplate:
+      "Draft a tax-credit optimization memo: WOTC eligibility flagging across hires this period, §44 expense classification, §190 deductible items, projected federal credit/deduction value, and the documentation packet HR needs to claim each.",
+  },
+  {
+    id: "stay-at-work-intervention",
+    title: "Stay-at-Work (SAW) Early Intervention",
+    category: "workforce-consulting",
+    description:
+      "Early-intervention SAW protocol for employees with new-onset conditions — accommodation triage before disability leave starts.",
+    defaultPriceCents: F(140_000),
+    priceUnit: "flat",
+    availableTo: ["business", "partner", "vendor"],
+    visibleToClient: false,
+    turnaround: "5 business days",
+    aiTemplate:
+      "Draft a SAW intervention plan: functional assessment, modified-duty options, schedule-flex options, AT recommendations, supervisor coaching, and a return-to-baseline timeline with check-in milestones.",
+  },
+  {
+    id: "customized-job-carving",
+    title: "Customized Job Carving & Restructuring",
+    category: "workforce-consulting",
+    description:
+      "Discovery-based job carving — restructure existing duties or create a custom role from unmet employer needs.",
+    defaultPriceCents: F(195_000),
+    priceUnit: "flat",
+    availableTo: ["business", "partner", "vendor"],
+    visibleToClient: false,
+    turnaround: "30-day engagement",
+    aiTemplate:
+      "Draft a customized job carving proposal: Discovery profile inputs, unmet employer needs identified, the carved task list with productivity assumptions, supervisor + co-worker impact analysis, and a 60-day stabilization plan.",
+  },
+
+  // ─── CATEGORY C · EMPLOYMENT & PLACEMENT PARTNER SERVICES ──────────
+  // Shared between Employment Partners and Counselors. Partners can
+  // request, counselors can co-request, both share the deliverable.
+  {
+    id: "labor-market-detail-sourcing",
+    title: "Labor Market Detail & Targeted Sourcing",
+    category: "partner-coordination",
+    description:
+      "Hyper-local labor market sweep with named-employer targeting and warm-intro queue building.",
+    defaultPriceCents: F(160_000),
+    priceUnit: "flat",
+    availableTo: ["business", "partner", "vendor"],
+    visibleToClient: false,
+    turnaround: "10 business days",
+    aiTemplate:
+      "Draft a labor-market-detail report: target SOC codes, employer short-list with hiring signals, contact strategy per employer, openings density forecast, and a 30-day warm-intro queue with assigned owners.",
+  },
+  {
+    id: "co-case-management",
+    title: "Co-Case Management & Tripartite Service Coordination",
+    category: "partner-coordination",
+    description:
+      "Three-way case coordination between counselor, partner, and client — shared milestones, decision log, weekly cadence.",
+    defaultPriceCents: F(125_000),
+    priceUnit: "monthly",
+    availableTo: ["business", "partner", "vendor"],
+    visibleToClient: true,
+    turnaround: "Continuous",
+    aiTemplate:
+      "Draft a tripartite case-coordination charter: roles and responsibilities, shared milestones with owners, decision-rights matrix, weekly meeting cadence, escalation path, and the criteria for closing the co-managed engagement.",
+  },
+  {
+    id: "onsite-job-coaching-coordination",
+    title: "On-Site Job Coaching Coordination",
+    category: "partner-coordination",
+    description:
+      "Coordination of on-site job coaching across multiple placements — schedule, fade-out plan, natural-supports build-up.",
+    defaultPriceCents: F(180_000),
+    priceUnit: "monthly",
+    availableTo: ["business", "partner", "vendor"],
+    visibleToClient: true,
+    turnaround: "Continuous",
+    aiTemplate:
+      "Draft an on-site job-coaching coordination plan: coaching hours per placement, fade-out schedule, natural-supports development targets, supervisor handoff criteria, and weekly metrics tracked.",
+  },
+  {
+    id: "subcontractor-compliance-tracking",
+    title: "Subcontractor Compliance Tracking",
+    category: "partner-coordination",
+    description:
+      "Tracking of subcontractor / partner agency deliverable compliance against scope, timeline, and outcome measures.",
+    defaultPriceCents: F(140_000),
+    priceUnit: "quarterly",
+    availableTo: ["business", "partner", "vendor"],
+    visibleToClient: false,
+    turnaround: "Quarterly",
+    aiTemplate:
+      "Draft a subcontractor compliance report: scope-vs-delivery variance per subcontractor, on-time rate, outcome quality sampling, corrective-action items, and a recommendation on renewal vs replacement for next period.",
+  },
+  {
+    id: "customized-recruitment-framework",
+    title: "Customized Recruitment Framework",
+    category: "partner-coordination",
+    description:
+      "Inclusive recruitment framework for a partner employer — sourcing channels, application accommodations, structured interview design.",
+    defaultPriceCents: F(165_000),
+    priceUnit: "flat",
+    availableTo: ["business", "partner", "vendor"],
+    visibleToClient: false,
+    turnaround: "21 business days",
+    aiTemplate:
+      "Draft a customized recruitment framework: inclusive sourcing channel list (DOBE registries, RSA-211 EN list, community colleges), application accommodations, structured interview rubric, hiring committee composition, and a 90-day rollout plan with metrics.",
+  },
 ];
 
 // ── Counselor pricing overrides ────────────────────────────────────────
@@ -780,4 +1065,6 @@ export const CATEGORY_LABELS: Record<ServiceCategory, string> = {
   "documentation-policy": "🗂️ Documentation, Policy & Systems",
   recurring: "🔁 Recurring & Annual Services",
   "one-time": "⭐ One-Time / Project-Based",
+  "client-services": "🤝 Client-Facing Ancillary Services",
+  "partner-coordination": "🔗 Employment Partner Coordination",
 };

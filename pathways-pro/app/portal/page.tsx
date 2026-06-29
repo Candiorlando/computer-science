@@ -15,6 +15,8 @@ import {
   loadProblemAnalysisReports,
 } from "@/lib/self-advocacy";
 import InteractiveProgress from "./InteractiveProgress";
+import { loadServiceRequests } from "@/lib/service-requests";
+import { getService } from "@/lib/service-catalog";
 
 interface RecentDoc {
   id: string;
@@ -45,6 +47,23 @@ export default function ClientHome() {
             .filter((n) => n.clientCaseId === user.caseId)
             .slice(0, 6)
         : [];
+    const myCaseId = "caseId" in user ? user.caseId : null;
+    const activeServices = myCaseId
+      ? loadServiceRequests()
+          .filter(
+            (r) =>
+              r.subjectCaseId === myCaseId &&
+              r.status !== "declined" &&
+              r.status !== "delivered" &&
+              getService(r.serviceId)?.visibleToClient === true,
+          )
+          .sort(
+            (a, b) =>
+              new Date(b.requestedAt).getTime() -
+              new Date(a.requestedAt).getTime(),
+          )
+          .slice(0, 4)
+      : [];
     const recentDocs: RecentDoc[] = [
       ...loadAccommodationLetters().map((l) => ({
         id: l.id,
@@ -84,7 +103,7 @@ export default function ClientHome() {
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
       )
       .slice(0, 4);
-    return { unread, threads, recentNotes, recentDocs };
+    return { unread, threads, recentNotes, recentDocs, activeServices };
   }, [user]);
 
   if (!user || !data) return null;
@@ -195,6 +214,43 @@ export default function ClientHome() {
               badge="Claude Opus 4.8"
             />
           </div>
+
+          {data.activeServices.length > 0 && (
+            <>
+              <h2 className="text-xl font-semibold pt-2">
+                Services your counselor is working on for you
+              </h2>
+              <ul role="list" className="grid sm:grid-cols-2 gap-3">
+                {data.activeServices.map((s) => (
+                  <li key={s.id}>
+                    <div className="saas-card border-cyan-200 bg-cyan-50/30">
+                      <div className="text-[10px] uppercase tracking-wider text-cyan-700 font-semibold">
+                        {s.status === "approved-in-progress"
+                          ? "In progress"
+                          : s.status === "draft-awaiting-release"
+                            ? "Final review"
+                            : "Awaiting counselor review"}
+                      </div>
+                      <div className="font-semibold text-sm mt-1">
+                        {s.serviceTitle}
+                      </div>
+                      {s.dueDate && (
+                        <div className="text-xs text-ink/55 mt-1">
+                          Target completion{" "}
+                          {new Date(s.dueDate).toLocaleDateString()}
+                        </div>
+                      )}
+                      {s.notes && (
+                        <p className="text-xs text-ink/70 mt-2 italic">
+                          &ldquo;{s.notes}&rdquo;
+                        </p>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
 
           {data.recentDocs.length > 0 && (
             <>
