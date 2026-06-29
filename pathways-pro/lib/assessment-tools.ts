@@ -10,6 +10,27 @@
 
 export type Audience = "counselor" | "client" | "business" | "vendor" | "partner";
 
+// Specialized counselor archetypes the platform supports. Tools can be
+// tagged with one or more so the launcher can group by counselor role
+// without changing serviceIds (which already drives embedded-by-service
+// discovery on the existing UI).
+export type CounselorRole =
+  | "career"
+  | "return-to-work"
+  | "forensic"
+  | "job-development"
+  | "mental-health"
+  | "cve";
+
+export const COUNSELOR_ROLE_LABELS: Record<CounselorRole, string> = {
+  career: "Career Counselors",
+  "return-to-work": "Return-to-Work Coordinators",
+  forensic: "Forensic Rehabilitation Specialists",
+  "job-development": "Job Development & Placement Specialists",
+  "mental-health": "Mental Health & Psychiatric Rehabilitation Counselors",
+  cve: "Certified Vocational Evaluation Specialists (CVE)",
+};
+
 export type ItemKind = "likert5" | "yesno" | "multiselect" | "text" | "scale10";
 
 export interface AssessmentItem {
@@ -25,6 +46,10 @@ export interface AssessmentTool {
   description: string;
   serviceIds: string[];      // catalog services this tool is embedded in
   audiences: Audience[];     // who can complete it
+  // Optional — specialized counselor archetype(s) this tool belongs to.
+  // A single tool can serve multiple roles (e.g., TSA is used by both
+  // Return-to-Work and Forensic counselors).
+  counselorRoles?: CounselorRole[];
   items: AssessmentItem[];
   aiInterpretationTemplate: string;
 }
@@ -526,6 +551,7 @@ export const ASSESSMENT_TOOLS: AssessmentTool[] = [
     serviceIds: ["remote-work-safety"],
     audiences: ["counselor", "client", "business", "partner", "vendor"],
     items: ergonomicsChecklist("hoe"),
+    counselorRoles: ["return-to-work"],
     aiInterpretationTemplate: "Identify ergonomic violations. Recommend equipment changes with cost estimates.",
   },
   {
@@ -662,6 +688,7 @@ export const ASSESSMENT_TOOLS: AssessmentTool[] = [
     description: "Pre-injury vs residual earning capacity.",
     serviceIds: ["forensic-vocational-evaluation", "earning-capacity-assessment"],
     audiences: ["counselor", "business", "partner", "vendor"],
+    counselorRoles: ["forensic"],
     items: [
       { id: "lec-1", prompt: "Pre-injury average weekly wage.", kind: "scale10" },
       { id: "lec-2", prompt: "Residual weekly capacity (estimate).", kind: "scale10" },
@@ -675,8 +702,9 @@ export const ASSESSMENT_TOOLS: AssessmentTool[] = [
     id: "forensic-labor-market-review",
     title: "Forensic Labor Market Review",
     description: "Labor market review for litigation context.",
-    serviceIds: ["forensic-vocational-evaluation"],
+    serviceIds: ["forensic-vocational-evaluation", "labor-market-analysis"],
     audiences: ["counselor", "business", "partner", "vendor"],
+    counselorRoles: ["forensic", "job-development"],
     items: readinessItems("flmr"),
     aiInterpretationTemplate: "Provide an LMA narrative grounded in BLS data with methodology notes. Make findings Rule 26 disclosure-ready.",
   },
@@ -708,8 +736,9 @@ export const ASSESSMENT_TOOLS: AssessmentTool[] = [
     id: "functional-capacity-impact",
     title: "Functional Capacity Impact Tool",
     description: "Translates FCE findings into job impact.",
-    serviceIds: ["earning-capacity-assessment"],
+    serviceIds: ["earning-capacity-assessment", "return-to-work-planning"],
     audiences: ["counselor", "business", "partner", "vendor"],
+    counselorRoles: ["return-to-work", "forensic"],
     items: functionalChecklist("fci"),
     aiInterpretationTemplate: "Translate FCE limitations into specific job-level impacts and accommodations.",
   },
@@ -1153,6 +1182,392 @@ export const ASSESSMENT_TOOLS: AssessmentTool[] = [
     items: readinessItems("awp"),
     aiInterpretationTemplate: "Annual workflow performance review. Recommend process improvements for next year.",
   },
+
+  // ── Specialized standardized instruments mapped to CRC archetypes ──
+  // These follow the same shape as the other tools — short likert /
+  // yes-no proxy item sets for the demo platform, with the AI prompt
+  // referencing the actual standardized scoring methodology so the
+  // counselor's interpretation cites the real instrument's norms.
+
+  // 1. Career Counselors ───────────────────────────────────────────────
+  {
+    id: "strong-interest-inventory",
+    title: "Strong Interest Inventory (SII)",
+    description:
+      "RIASEC-based vocational interest profiler grounded in the Strong SII methodology.",
+    serviceIds: ["job-development-consulting", "supported-employment-planning"],
+    audiences: ["counselor", "client"],
+    counselorRoles: ["career"],
+    items: [
+      { id: "sii-1", prompt: "I enjoy hands-on, mechanical, or outdoor work.", kind: "likert5" },
+      { id: "sii-2", prompt: "I'm drawn to investigating problems and analyzing data.", kind: "likert5" },
+      { id: "sii-3", prompt: "I express myself through art, writing, music, or design.", kind: "likert5" },
+      { id: "sii-4", prompt: "I find meaning in helping, teaching, or counseling others.", kind: "likert5" },
+      { id: "sii-5", prompt: "I'm energized by leading, persuading, or selling.", kind: "likert5" },
+      { id: "sii-6", prompt: "I prefer structured, detail-oriented, organized tasks.", kind: "likert5" },
+    ],
+    aiInterpretationTemplate:
+      "Score the client across the six RIASEC themes per Strong SII conventions. Report the 3-letter Holland code and propose 3-5 target O*NET occupations matching that code.",
+  },
+  {
+    id: "self-directed-search",
+    title: "Self-Directed Search (SDS)",
+    description:
+      "Holland's self-administered RIASEC inventory — activities, competencies, occupations, self-estimates.",
+    serviceIds: ["job-development-consulting"],
+    audiences: ["counselor", "client"],
+    counselorRoles: ["career"],
+    items: [
+      { id: "sds-1", prompt: "I'd enjoy: repairing engines, building furniture, working outdoors.", kind: "likert5" },
+      { id: "sds-2", prompt: "I'd enjoy: research, lab work, complex problem solving.", kind: "likert5" },
+      { id: "sds-3", prompt: "I'd enjoy: design, performing, creative writing.", kind: "likert5" },
+      { id: "sds-4", prompt: "I'd enjoy: teaching, counseling, community work.", kind: "likert5" },
+      { id: "sds-5", prompt: "I'd enjoy: managing a team, sales, public speaking.", kind: "likert5" },
+      { id: "sds-6", prompt: "I'd enjoy: bookkeeping, data entry, records management.", kind: "likert5" },
+    ],
+    aiInterpretationTemplate:
+      "Tabulate the SDS summary code per Holland's methodology. Cross-reference the Occupations Finder for matches at each Job Zone the client qualifies for.",
+  },
+  {
+    id: "career-scope",
+    title: "CareerScope Interest & Aptitude",
+    description:
+      "Computer-delivered interest + aptitude profile common in state VR (CareerScope methodology).",
+    serviceIds: ["job-development-consulting", "supported-employment-planning"],
+    audiences: ["counselor", "client"],
+    counselorRoles: ["career"],
+    items: [
+      { id: "cs-1", prompt: "I can follow multi-step verbal instructions.", kind: "likert5" },
+      { id: "cs-2", prompt: "I notice visual-detail differences quickly.", kind: "likert5" },
+      { id: "cs-3", prompt: "I can do mental arithmetic without paper.", kind: "likert5" },
+      { id: "cs-4", prompt: "I read for understanding at adult level.", kind: "likert5" },
+      { id: "cs-5", prompt: "I prefer working with people over working alone.", kind: "likert5" },
+      { id: "cs-6", prompt: "I'm comfortable making decisions under deadline pressure.", kind: "likert5" },
+    ],
+    aiInterpretationTemplate:
+      "Produce a CareerScope-style profile combining interest themes and aptitude domains. Recommend GOE work-group codes for further exploration.",
+  },
+  {
+    id: "differential-aptitude-tests",
+    title: "Differential Aptitude Tests (DAT)",
+    description:
+      "Eight-aptitude DAT proxy — verbal reasoning, numerical, abstract, mechanical, clerical, spatial, spelling, grammar.",
+    serviceIds: ["transferable-skills-analysis", "job-development-consulting"],
+    audiences: ["counselor", "client"],
+    counselorRoles: ["career", "cve"],
+    items: [
+      { id: "dat-1", prompt: "Verbal reasoning — comfortable with analogies, vocabulary.", kind: "likert5" },
+      { id: "dat-2", prompt: "Numerical reasoning — comfortable with applied math.", kind: "likert5" },
+      { id: "dat-3", prompt: "Abstract reasoning — pattern recognition, sequencing.", kind: "likert5" },
+      { id: "dat-4", prompt: "Mechanical reasoning — understands how things work.", kind: "likert5" },
+      { id: "dat-5", prompt: "Clerical speed/accuracy — fast, precise on detail tasks.", kind: "likert5" },
+      { id: "dat-6", prompt: "Spatial relations — comfortable with 3-D visualization.", kind: "likert5" },
+    ],
+    aiInterpretationTemplate:
+      "Report a DAT-style aptitude profile (high / average / low across the 8 domains). Recommend training tracks that match the client's strongest domains.",
+  },
+
+  // 2. Return-to-Work Coordinators ─────────────────────────────────────
+  {
+    id: "transferable-skills-analysis-tsa",
+    title: "Transferable Skills Analysis (TSA)",
+    description:
+      "Identifies portable skills from prior work and maps them to residual-capacity-compatible occupations.",
+    serviceIds: ["transferable-skills-analysis", "return-to-work-planning"],
+    audiences: ["counselor", "business", "vendor"],
+    counselorRoles: ["return-to-work", "forensic", "cve"],
+    items: [
+      { id: "tsa-1", prompt: "List the three most recent occupations held.", kind: "text" },
+      { id: "tsa-2", prompt: "For each, top 3 skills used (SkillTRAN / WORKER trait style).", kind: "text" },
+      { id: "tsa-3", prompt: "Current physical demand tolerance (sedentary / light / medium / heavy).", kind: "text" },
+      { id: "tsa-4", prompt: "Education + training completed.", kind: "text" },
+      { id: "tsa-5", prompt: "Geographic search radius (miles).", kind: "scale10" },
+    ],
+    aiInterpretationTemplate:
+      "Apply a TSA methodology (worker trait / SkillTRAN). Output 5-10 target SOC codes within residual capacity with transferability rationale and wage band per BLS.",
+  },
+  {
+    id: "functional-capacity-evaluation",
+    title: "Functional Capacity Evaluation (FCE)",
+    description:
+      "Standardized physical capacity screen — lift, carry, sit, stand, walk, sustained activity tolerances.",
+    serviceIds: ["return-to-work-planning", "earning-capacity-assessment"],
+    audiences: ["counselor", "client", "vendor"],
+    counselorRoles: ["return-to-work", "forensic"],
+    items: functionalChecklist("fce"),
+    aiInterpretationTemplate:
+      "Report FCE findings in DOT physical-demand strength categories (sedentary/light/medium/heavy). Identify positional restrictions and recommend JAN accommodations to reach competitive employment.",
+  },
+  {
+    id: "job-analysis",
+    title: "Job Analysis (JA)",
+    description:
+      "Essential-function decomposition of a specific role using O*NET task and worker-requirement framework.",
+    serviceIds: ["job-task-analysis", "reasonable-accommodation-plan"],
+    audiences: ["counselor", "business", "vendor"],
+    counselorRoles: ["return-to-work"],
+    items: [
+      { id: "ja-1", prompt: "Position title + O*NET SOC code.", kind: "text" },
+      { id: "ja-2", prompt: "Essential functions (list).", kind: "text" },
+      { id: "ja-3", prompt: "Physical demands (DOT codes).", kind: "text" },
+      { id: "ja-4", prompt: "Cognitive demands (sustained focus, multitasking, decisions).", kind: "text" },
+      { id: "ja-5", prompt: "Environmental conditions (noise, temperature, hazards).", kind: "text" },
+      { id: "ja-6", prompt: "Tools / equipment required.", kind: "text" },
+    ],
+    aiInterpretationTemplate:
+      "Output a job-analysis report distinguishing essential vs marginal functions, mapped to O*NET worker requirements. Flag any function that creates likely ADA concerns.",
+  },
+  {
+    id: "ergonomic-assessment-standardized",
+    title: "Ergonomic Assessment",
+    description:
+      "Onsite/remote ergonomic risk screen — postural, repetitive-motion, environmental factors.",
+    serviceIds: ["return-to-work-planning", "remote-work-safety"],
+    audiences: ["counselor", "business", "vendor"],
+    counselorRoles: ["return-to-work"],
+    items: ergonomicsChecklist("erg"),
+    aiInterpretationTemplate:
+      "Score the workstation against ANSI/HFES 100 and OSHA computer-workstation guidelines. Recommend equipment changes with JAN cost bands.",
+  },
+
+  // 3. Forensic Rehabilitation Specialists ─────────────────────────────
+  {
+    id: "earning-capacity-assessment",
+    title: "Earning Capacity Assessment",
+    description:
+      "Pre-injury vs residual earning capacity for litigation, workers' comp, and SSA proceedings.",
+    serviceIds: ["earning-capacity-assessment", "forensic-vocational-evaluation"],
+    audiences: ["counselor", "business", "vendor"],
+    counselorRoles: ["forensic"],
+    items: [
+      { id: "eca-1", prompt: "Pre-injury annual earnings (W-2 / 1099 documented).", kind: "text" },
+      { id: "eca-2", prompt: "Residual occupations within current capacity.", kind: "text" },
+      { id: "eca-3", prompt: "BLS wage band for residual occupations.", kind: "text" },
+      { id: "eca-4", prompt: "Worklife expectancy adjustment.", kind: "text" },
+      { id: "eca-5", prompt: "Future medical / training cost offsets.", kind: "text" },
+    ],
+    aiInterpretationTemplate:
+      "Produce an earning-capacity opinion grounded in BLS OEWS data with methodology citations. Report present value across worklife expectancy using Daubert-compatible methodology.",
+  },
+  {
+    id: "wide-range-achievement-test",
+    title: "Wide Range Achievement Test (WRAT)",
+    description:
+      "Standardized academic-skills screen — word reading, sentence comprehension, spelling, math computation.",
+    serviceIds: ["forensic-vocational-evaluation", "transferable-skills-analysis"],
+    audiences: ["counselor", "client"],
+    counselorRoles: ["forensic", "cve"],
+    items: [
+      { id: "wrat-1", prompt: "Reads aloud at grade-level fluency.", kind: "likert5" },
+      { id: "wrat-2", prompt: "Comprehends written instructions.", kind: "likert5" },
+      { id: "wrat-3", prompt: "Spells common workplace vocabulary.", kind: "likert5" },
+      { id: "wrat-4", prompt: "Performs basic computation (add/sub/mult/div).", kind: "likert5" },
+      { id: "wrat-5", prompt: "Reads at adult work level (12th grade+).", kind: "likert5" },
+    ],
+    aiInterpretationTemplate:
+      "Report estimated grade-equivalent scores per WRAT-5 norms across the four subtests. Flag training pathways that require remediation first.",
+  },
+  {
+    id: "labor-market-survey",
+    title: "Labor Market Survey (LMS)",
+    description:
+      "Local labor-market scan with sourcing notes per finding — employer calls, postings, openings density.",
+    serviceIds: ["labor-market-analysis", "forensic-vocational-evaluation"],
+    audiences: ["counselor", "business", "vendor"],
+    counselorRoles: ["forensic", "job-development"],
+    items: [
+      { id: "lms-1", prompt: "Target SOC codes surveyed.", kind: "text" },
+      { id: "lms-2", prompt: "Geographic search radius (miles).", kind: "scale10" },
+      { id: "lms-3", prompt: "Employers contacted / postings sourced.", kind: "scale10" },
+      { id: "lms-4", prompt: "Openings confirmed available.", kind: "scale10" },
+      { id: "lms-5", prompt: "Wage range observed (low / median / high).", kind: "text" },
+    ],
+    aiInterpretationTemplate:
+      "Produce an LMS narrative grounded in BLS QCEW + sourced employer contacts. Report findings as Rule 26 disclosure-ready with methodology and source list.",
+  },
+
+  // 4. Job Development & Placement Specialists ─────────────────────────
+  {
+    id: "situational-assessment",
+    title: "Situational Assessment (Community-Based)",
+    description:
+      "Real-work observation in a community setting — productivity, behavior, supervision needs.",
+    serviceIds: ["supported-employment-planning", "workplace-readiness-training"],
+    audiences: ["counselor", "client", "vendor"],
+    counselorRoles: ["job-development"],
+    items: [
+      { id: "sa-1", prompt: "Task completion rate at observed pace (% of standard).", kind: "scale10" },
+      { id: "sa-2", prompt: "Independence with multi-step tasks.", kind: "likert5" },
+      { id: "sa-3", prompt: "Response to supervisor feedback.", kind: "likert5" },
+      { id: "sa-4", prompt: "Interaction with co-workers.", kind: "likert5" },
+      { id: "sa-5", prompt: "Stamina across the observed shift.", kind: "likert5" },
+    ],
+    aiInterpretationTemplate:
+      "Summarize observed work behaviors in the situational setting. Recommend job-match parameters (pace, supervision ratio, social load) and any natural-supports strategies.",
+  },
+  {
+    id: "work-readiness-assessment",
+    title: "Work Readiness Assessment",
+    description:
+      "Soft-skill + workplace-behavior readiness profile across the major employer-rated dimensions.",
+    serviceIds: ["workplace-readiness-training", "supported-employment-planning"],
+    audiences: ["counselor", "client", "vendor"],
+    counselorRoles: ["job-development"],
+    items: softSkillsItems("wra"),
+    aiInterpretationTemplate:
+      "Score the client across the National Work Readiness employer competencies. Recommend targeted soft-skill curricula for the lowest-rated dimensions.",
+  },
+
+  // 5. Mental Health & Psychiatric Rehabilitation Counselors ───────────
+  {
+    id: "mmpi-3-screen",
+    title: "Minnesota Multiphasic Personality Inventory (MMPI-3)",
+    description:
+      "Brief MMPI-3-styled personality and psychopathology screen used in vocational planning.",
+    serviceIds: ["return-to-work-planning", "trauma-informed-workplace-training"],
+    audiences: ["counselor"],
+    counselorRoles: ["mental-health"],
+    items: [
+      { id: "mmpi-1", prompt: "Demonstrates emotional regulation under workplace stress.", kind: "likert5" },
+      { id: "mmpi-2", prompt: "Maintains effective interpersonal boundaries.", kind: "likert5" },
+      { id: "mmpi-3", prompt: "Reports somatic complaints that interfere with work.", kind: "likert5" },
+      { id: "mmpi-4", prompt: "Shows behavioral activation across daily life.", kind: "likert5" },
+      { id: "mmpi-5", prompt: "Reports thought-content disturbances impacting safety.", kind: "yesno" },
+    ],
+    aiInterpretationTemplate:
+      "Apply MMPI-3 framework (RC scales + validity scales) to draft a vocational-implication summary. Refer for full MMPI-3 administration when clinical indicators warrant.",
+  },
+  {
+    id: "beck-depression-anxiety",
+    title: "Beck Depression / Anxiety Inventory (BDI / BAI)",
+    description:
+      "BDI-II + BAI-style symptom severity screen used at intake and across the rehabilitation course.",
+    serviceIds: ["return-to-work-planning", "trauma-informed-workplace-training"],
+    audiences: ["counselor", "client"],
+    counselorRoles: ["mental-health"],
+    items: [
+      { id: "bdi-1", prompt: "Persistent sadness or loss of interest most days.", kind: "likert5" },
+      { id: "bdi-2", prompt: "Worthlessness, hopelessness, or guilt.", kind: "likert5" },
+      { id: "bdi-3", prompt: "Sleep disturbance (initiation / maintenance / early waking).", kind: "likert5" },
+      { id: "bai-1", prompt: "Racing heart, sweating, or trembling in workplace situations.", kind: "likert5" },
+      { id: "bai-2", prompt: "Fear of losing control or feeling unreal.", kind: "likert5" },
+      { id: "bai-3", prompt: "Avoidance of work demands due to anxious anticipation.", kind: "likert5" },
+    ],
+    aiInterpretationTemplate:
+      "Apply BDI-II + BAI severity bands (minimal / mild / moderate / severe). Recommend a vocational support tier appropriate to each scale and flag safety items requiring same-day follow-up.",
+  },
+  {
+    id: "whodas-2",
+    title: "WHO Disability Assessment Schedule (WHODAS 2.0)",
+    description:
+      "WHO's six-domain disability impact measure (cognition, mobility, self-care, getting along, life activities, participation).",
+    serviceIds: ["return-to-work-planning", "reasonable-accommodation-plan"],
+    audiences: ["counselor", "client"],
+    counselorRoles: ["mental-health", "return-to-work"],
+    items: [
+      { id: "whodas-1", prompt: "Cognition — concentration, decision-making.", kind: "likert5" },
+      { id: "whodas-2", prompt: "Mobility — moving around, transportation.", kind: "likert5" },
+      { id: "whodas-3", prompt: "Self-care — daily hygiene, dressing, medications.", kind: "likert5" },
+      { id: "whodas-4", prompt: "Getting along — interactions with people, conflict.", kind: "likert5" },
+      { id: "whodas-5", prompt: "Life activities — household tasks, work tasks.", kind: "likert5" },
+      { id: "whodas-6", prompt: "Participation — joining in community life.", kind: "likert5" },
+    ],
+    aiInterpretationTemplate:
+      "Report WHODAS 2.0 domain scores and a total disability score on the WHO scale. Translate findings into specific workplace accommodations per ICF framework.",
+  },
+  {
+    id: "coping-skills-assessment",
+    title: "Coping Skills Assessment",
+    description:
+      "Inventory of coping strategies — problem-focused, emotion-focused, social-support, avoidant.",
+    serviceIds: ["return-to-work-planning", "workplace-readiness-training"],
+    audiences: ["counselor", "client"],
+    counselorRoles: ["mental-health"],
+    items: [
+      { id: "cope-1", prompt: "I take direct action to solve problems at work.", kind: "likert5" },
+      { id: "cope-2", prompt: "I reframe difficult situations to find meaning.", kind: "likert5" },
+      { id: "cope-3", prompt: "I reach out to my support network when overwhelmed.", kind: "likert5" },
+      { id: "cope-4", prompt: "I use mindfulness or grounding techniques.", kind: "likert5" },
+      { id: "cope-5", prompt: "I avoid or withdraw when stress is high.", kind: "likert5" },
+      { id: "cope-6", prompt: "I use substances to manage difficult emotions.", kind: "likert5" },
+    ],
+    aiInterpretationTemplate:
+      "Profile the client's coping repertoire (adaptive vs maladaptive emphasis). Recommend specific coping-skill curricula (DBT distress tolerance, ACT defusion, CBT problem-solving) matched to gaps.",
+  },
+
+  // 6. Certified Vocational Evaluation Specialists (CVE) ───────────────
+  {
+    id: "wais-iv-screen",
+    title: "Wechsler Adult Intelligence Scale (WAIS-IV)",
+    description:
+      "Brief intelligence proxy across the WAIS-IV four index areas — VCI, PRI, WMI, PSI.",
+    serviceIds: ["transferable-skills-analysis", "forensic-vocational-evaluation"],
+    audiences: ["counselor"],
+    counselorRoles: ["cve"],
+    items: [
+      { id: "wais-1", prompt: "Verbal Comprehension (VCI) — vocabulary, similarities.", kind: "likert5" },
+      { id: "wais-2", prompt: "Perceptual Reasoning (PRI) — block design, matrix reasoning.", kind: "likert5" },
+      { id: "wais-3", prompt: "Working Memory (WMI) — digit span, arithmetic.", kind: "likert5" },
+      { id: "wais-4", prompt: "Processing Speed (PSI) — symbol search, coding.", kind: "likert5" },
+      { id: "wais-5", prompt: "Adaptive functioning observed in interview.", kind: "likert5" },
+    ],
+    aiInterpretationTemplate:
+      "Estimate index scores across VCI, PRI, WMI, PSI per WAIS-IV norms. Recommend training pathways suited to the strongest index. Refer for full WAIS-IV when high-stakes decisions require it.",
+  },
+  {
+    id: "work-sample-system",
+    title: "Work Sample System (Valpar / McCarron-Dial)",
+    description:
+      "Hands-on standardized work samples — fine motor, tool use, multi-step task sequencing, sustained attention.",
+    serviceIds: ["transferable-skills-analysis", "supported-employment-planning"],
+    audiences: ["counselor", "vendor"],
+    counselorRoles: ["cve"],
+    items: [
+      { id: "ws-1", prompt: "Fine-motor accuracy on small-parts assembly.", kind: "likert5" },
+      { id: "ws-2", prompt: "Tool-use proficiency (hand and power tools).", kind: "likert5" },
+      { id: "ws-3", prompt: "Multi-step task sequencing without re-instruction.", kind: "likert5" },
+      { id: "ws-4", prompt: "Sustained attention across the work sample period.", kind: "likert5" },
+      { id: "ws-5", prompt: "Productivity at observed pace vs. competitive standard.", kind: "scale10" },
+    ],
+    aiInterpretationTemplate:
+      "Score the work-sample performance per Valpar (or McCarron-Dial) norms. Translate findings into recommended SOC families and physical-demand strength category.",
+  },
+  {
+    id: "kbit-screen",
+    title: "Kaufman Brief Intelligence Test (KBIT)",
+    description:
+      "Brief verbal + nonverbal intelligence screen — quicker alternative to WAIS for vocational triage.",
+    serviceIds: ["transferable-skills-analysis"],
+    audiences: ["counselor"],
+    counselorRoles: ["cve"],
+    items: [
+      { id: "kbit-1", prompt: "Verbal — vocabulary, expressive language.", kind: "likert5" },
+      { id: "kbit-2", prompt: "Riddles — verbal reasoning under context.", kind: "likert5" },
+      { id: "kbit-3", prompt: "Matrices — nonverbal abstract reasoning.", kind: "likert5" },
+      { id: "kbit-4", prompt: "Speed of response across items.", kind: "likert5" },
+      { id: "kbit-5", prompt: "Observed test-taking behavior (attention, motivation).", kind: "likert5" },
+    ],
+    aiInterpretationTemplate:
+      "Estimate KBIT-2 IQ composite and verbal/nonverbal split. Use as a triage screen; recommend full WAIS-IV when decisions require comprehensive cognitive profile.",
+  },
+  {
+    id: "purdue-pegboard",
+    title: "Dexterity Test (Purdue Pegboard)",
+    description:
+      "Standardized fine- and gross-motor dexterity assessment for jobs requiring manual precision.",
+    serviceIds: ["transferable-skills-analysis", "return-to-work-planning"],
+    audiences: ["counselor", "vendor"],
+    counselorRoles: ["cve", "return-to-work"],
+    items: [
+      { id: "pp-1", prompt: "Right-hand pegs placed in 30 seconds (count).", kind: "scale10" },
+      { id: "pp-2", prompt: "Left-hand pegs placed in 30 seconds (count).", kind: "scale10" },
+      { id: "pp-3", prompt: "Both-hands pegs placed in 30 seconds.", kind: "scale10" },
+      { id: "pp-4", prompt: "Assembly task pegs + collars in 60 seconds.", kind: "scale10" },
+      { id: "pp-5", prompt: "Observed signs of fatigue or pain during trials.", kind: "yesno" },
+    ],
+    aiInterpretationTemplate:
+      "Compare scores to Purdue Pegboard norms by age + sex. Identify occupations with dexterity demands the client meets or fails. Recommend AT or task redesign where indicated.",
+  },
 ];
 
 // ─── Lookups ──────────────────────────────────────────────────────────
@@ -1167,4 +1582,8 @@ export function toolsForService(serviceId: string): AssessmentTool[] {
 
 export function toolsForAudience(audience: Audience): AssessmentTool[] {
   return ASSESSMENT_TOOLS.filter((a) => a.audiences.includes(audience));
+}
+
+export function toolsForCounselorRole(role: CounselorRole): AssessmentTool[] {
+  return ASSESSMENT_TOOLS.filter((a) => a.counselorRoles?.includes(role));
 }
