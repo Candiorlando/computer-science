@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { CounselorRolesExplorer } from "@/components/CounselorRolesExplorer";
 import { authenticate, registerClient, type Role } from "@/lib/users";
 import { loadSession, saveMode, saveSession } from "@/lib/session";
 
@@ -28,6 +29,7 @@ export default function HomePage() {
       <TrustBar />
       <HowItWorks />
       <SpecializedCounselors />
+      <TopRolesSection />
       <RoiMetrics />
       <Testimonial />
       <FinalCta />
@@ -176,6 +178,34 @@ const SPECIALIZED_COUNSELORS: CounselorSpec[] = [
   },
 ];
 
+function TopRolesSection() {
+  return (
+    <section
+      id="top-30-roles"
+      aria-labelledby="top-roles-heading"
+      className="border-b border-ink/10"
+    >
+      <div className="max-w-6xl mx-auto px-6 py-20">
+        <div className="max-w-2xl mb-10">
+          <p className="text-xs uppercase tracking-widest text-accent mb-2">
+            Who the platform serves
+          </p>
+          <h2 id="top-roles-heading" className="text-4xl tracking-tight">
+            Top 30 Vocational Rehabilitation Counseling Roles
+          </h2>
+          <p className="text-ink/75 mt-3">
+            A curated ranking of the roles and job titles Pathways Pro is
+            built for — strictly focused on career, employment, and
+            workplace-reintegration specialties. View by market tier, sort
+            by estimated salary, or group by required certification.
+          </p>
+        </div>
+        <CounselorRolesExplorer />
+      </div>
+    </section>
+  );
+}
+
 function SpecializedCounselors() {
   return (
     <section
@@ -198,13 +228,13 @@ function SpecializedCounselors() {
             counselor archetypes — each with distinct services, certifications,
             and the markets they serve.
           </p>
-          <Link
-            href="/counselor-roles"
+          <a
+            href="#top-30-roles"
             className="inline-block mt-3 text-sm font-semibold text-cyan-700 hover:underline"
           >
-            See the full top-30 role ranking — by tier, salary, and
-            certification →
-          </Link>
+            Jump to the full top-30 role ranking — by tier, salary, and
+            certification ↓
+          </a>
         </div>
 
         <ul
