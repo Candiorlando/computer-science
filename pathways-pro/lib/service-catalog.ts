@@ -17,7 +17,8 @@ export type ServiceCategory =
   | "recurring"
   | "one-time"
   | "client-services"
-  | "partner-coordination";
+  | "partner-coordination"
+  | "youth-services";
 
 export type PriceUnit =
   | "flat"
@@ -879,6 +880,137 @@ export const SERVICE_CATALOG: CatalogService[] = [
     aiTemplate:
       "Draft a customized recruitment framework: inclusive sourcing channel list (DOBE registries, RSA-211 EN list, community colleges), application accommodations, structured interview rubric, hiring committee composition, and a 90-day rollout plan with metrics.",
   },
+
+  // ─── SPECIALIZED YOUTH / EVALUATION / CLIENT SERVICES BATCH ────────
+  // WIOA § 113 Pre-ETS, comprehensive evaluation instruments, and the
+  // client-facing modification/AAC/reentry navigation services.
+
+  {
+    id: "pre-ets-cohort-training",
+    title: "Pre-ETS Cohort Training",
+    category: "youth-services",
+    description:
+      "Delivers the 5 required WIOA Pre-ETS components: job exploration, work-based learning, post-secondary counseling, workplace readiness, and self-advocacy — as a structured cohort.",
+    defaultPriceCents: F(180_000),
+    priceUnit: "flat",
+    availableTo: ["business", "partner", "vendor", "client"],
+    visibleToClient: true,
+    turnaround: "6-week cohort",
+    aiTemplate:
+      "Draft a Pre-ETS cohort curriculum covering all five WIOA § 113 required components (job exploration, work-based learning, post-secondary counseling, workplace readiness, self-advocacy). Include weekly session objectives, work-based learning placements, RSA-911 data-capture points, and a graduation portfolio each youth builds.",
+  },
+  {
+    id: "post-secondary-education-planning",
+    title: "Post-Secondary Education Planning",
+    category: "youth-services",
+    description:
+      "Assists transitioning youth with college selection, disability services office (DSO) registration, and academic accommodation planning.",
+    defaultPriceCents: F(95_000),
+    priceUnit: "flat",
+    availableTo: ["business", "partner", "vendor", "client"],
+    visibleToClient: true,
+    turnaround: "10 business days",
+    aiTemplate:
+      "Draft a post-secondary education plan: candidate schools matched to interests/aptitudes, DSO registration checklist per school, documentation each DSO requires (IEP, 504, psycho-ed evaluation), an academic accommodation menu with citation to Section 504 of the Rehabilitation Act, and a financial-aid + PASS-plan strategy.",
+  },
+  {
+    id: "comprehensive-vocational-evaluation",
+    title: "Comprehensive Vocational Evaluation (CVE)",
+    category: "data-evaluation",
+    description:
+      "A battery of psychometric, aptitude, and interest assessments to determine baseline vocational functioning and goal feasibility.",
+    defaultPriceCents: F(325_000),
+    priceUnit: "flat",
+    availableTo: ["business", "partner", "vendor", "client"],
+    visibleToClient: true,
+    turnaround: "15-20 business days",
+    aiTemplate:
+      "Draft a Comprehensive Vocational Evaluation report: cognitive index (WAIS-IV), academic achievement (WRAT), aptitudes (DAT), interests (SII/SDS/CareerScope), functional capacity (FCE-lite), and situational observations. Synthesize into a summary of vocational strengths, limitations, recommended SOC families, and IPE-ready goal statements.",
+  },
+  {
+    id: "situational-community-based-assessment",
+    title: "Situational Assessment / Community-Based Assessment (CBA)",
+    category: "data-evaluation",
+    description:
+      "Observational assessment of a client performing work duties in a competitive environment to measure soft skills and stamina.",
+    defaultPriceCents: F(155_000),
+    priceUnit: "flat",
+    availableTo: ["business", "partner", "vendor", "client"],
+    visibleToClient: true,
+    turnaround: "5-7 business days (per placement)",
+    aiTemplate:
+      "Draft a Situational / Community-Based Assessment report: worksite context, observed tasks and productivity ratings against competitive pace, soft-skills observations (communication, feedback response, teamwork), stamina profile across the shift, supervisor debrief input, and recommendations for job-match parameters and natural supports.",
+  },
+  {
+    id: "fce-coordination-review",
+    title: "Functional Capacity Evaluation (FCE) Coordination & Review",
+    category: "data-evaluation",
+    description:
+      "Coordination with physical therapists to execute an FCE, followed by a VR translation of physical limits into DOT job categories.",
+    defaultPriceCents: F(210_000),
+    priceUnit: "flat",
+    availableTo: ["business", "partner", "vendor", "client"],
+    visibleToClient: true,
+    turnaround: "10 business days after FCE completion",
+    aiTemplate:
+      "Draft an FCE Coordination & Review memo: PT/OT selection rationale, referral packet contents, FCE findings translated into DOT strength category (sedentary/light/medium/heavy), positional restrictions, cognitive demand implications, matched SOC families, and JAN-backed accommodations that expand the residual occupational set.",
+  },
+  {
+    id: "self-employment-feasibility-study",
+    title: "Self-Employment / Micro-Enterprise Feasibility Study",
+    category: "workforce-consulting",
+    description:
+      "Evaluates a client's business concept and market viability, resulting in a formal VR-fundable business plan.",
+    defaultPriceCents: F(285_000),
+    priceUnit: "flat",
+    availableTo: ["business", "partner", "vendor", "client"],
+    visibleToClient: true,
+    turnaround: "20 business days",
+    aiTemplate:
+      "Draft a Self-Employment / Micro-Enterprise Feasibility Study: business-concept fit against client's RIASEC + skills + accommodation profile, local market analysis, revenue model, three-year projections, startup cost breakdown (with AT line-items), risk register with red flags, and a VR-ready business plan meeting state-agency self-employment plan requirements.",
+  },
+  {
+    id: "home-vehicle-modification-coordination",
+    title: "Home & Vehicle Modification Coordination",
+    category: "ada-compliance",
+    description:
+      "Site surveys and vendor coordination for structural home modifications or adaptive driving equipment.",
+    defaultPriceCents: F(225_000),
+    priceUnit: "flat",
+    availableTo: ["business", "partner", "vendor", "client"],
+    visibleToClient: true,
+    turnaround: "21 business days",
+    aiTemplate:
+      "Draft a Home & Vehicle Modification Coordination plan: site survey findings, required modifications with itemized scope and cost estimates, adaptive-driving evaluator referral (or hand controls / left-foot accelerator / joystick recommendations), 2-3 vendor bids per line item, permit/insurance considerations, and a payment schedule the VR agency can authorize.",
+  },
+  {
+    id: "aac-evaluation",
+    title: "Augmentative and Alternative Communication (AAC) Evaluation",
+    category: "client-services",
+    description:
+      "Assessment to identify and implement speech-generating devices and communication supports for clients with expressive-communication needs.",
+    defaultPriceCents: F(165_000),
+    priceUnit: "flat",
+    availableTo: ["business", "partner", "vendor", "client"],
+    visibleToClient: true,
+    turnaround: "10 business days",
+    aiTemplate:
+      "Draft an AAC Evaluation report: communication profile (receptive/expressive), device trial results across candidates (dedicated SGD vs iPad + Proloquo2Go vs low-tech PECS), operational and linguistic competencies, vocabulary customization plan, training hours needed, funding pathway (VR + insurance + Medicaid), and a fidelity check-in cadence.",
+  },
+  {
+    id: "justice-involved-reentry-navigation",
+    title: "Justice-Involved Reentry Navigation",
+    category: "client-services",
+    description:
+      "Vocational counseling addressing the intersection of disability barriers and criminal-record barriers — record clearing, disclosure coaching, Ban-the-Box strategy.",
+    defaultPriceCents: F(135_000),
+    priceUnit: "monthly",
+    availableTo: ["business", "partner", "vendor", "client"],
+    visibleToClient: true,
+    turnaround: "Continuous (6-12 mo engagement)",
+    aiTemplate:
+      "Draft a Justice-Involved Reentry Navigation plan: criminal-history landscape (state expungement/sealing options), Ban-the-Box + Fair Chance jurisdiction map, disclosure script tuned to the target industry, WOTC + Federal Bonding Program eligibility, disability-related accommodations that intersect with parole conditions, and a 90-day placement + retention plan with community-based supports.",
+  },
 ];
 
 // ── Counselor pricing overrides ────────────────────────────────────────
@@ -1067,4 +1199,5 @@ export const CATEGORY_LABELS: Record<ServiceCategory, string> = {
   "one-time": "⭐ One-Time / Project-Based",
   "client-services": "🤝 Client-Facing Ancillary Services",
   "partner-coordination": "🔗 Employment Partner Coordination",
+  "youth-services": "🎓 Youth & Transition Services (Pre-ETS)",
 };

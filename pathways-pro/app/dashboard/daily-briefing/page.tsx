@@ -166,17 +166,17 @@ export default function DailyBriefingPage() {
                   return (
                     <li
                       key={t.id}
-                      className="flex items-baseline justify-between gap-2 text-sm border-b border-ink/10 pb-2 last:border-0"
+                      className="flex items-start justify-between gap-3 text-sm border-b border-ink/10 pb-2 last:border-0"
                     >
-                      <div>
+                      <div className="min-w-0 flex-1">
                         <div className="font-semibold">{counter?.name}</div>
-                        <div className="text-xs text-ink/55 truncate">
+                        <div className="text-xs text-ink/60 break-words line-clamp-2">
                           {t.lastMessagePreview}
                         </div>
                       </div>
                       <Link
                         href={`/messages?thread=${t.id}`}
-                        className="text-xs text-cyan-700 hover:underline"
+                        className="text-xs text-cyan-700 hover:underline shrink-0"
                       >
                         Reply →
                       </Link>
