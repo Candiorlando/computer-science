@@ -21,6 +21,9 @@ const PUBLIC_PREFIXES = [
   "/business",
   "/accessibility",
   "/privacy",
+  "/signin",
+  "/request-demo",
+  "/counselor-roles",
 ];
 
 function isPublicPath(pathname: string): boolean {
@@ -81,14 +84,19 @@ function ComplianceFooter() {
         </p>
         <p className="mb-2">
           <span className="font-semibold text-ink">🔒 Pathways Pro</span> ·
-          HIPAA-compliant · ADA Title I · Section 504 / 501 · WIOA Title IV ·
-          CRCC Code of Ethics
+          HIPAA-aligned architecture · ADA Title I · Section 504 / 501 ·
+          WIOA Title IV · CRCC Code of Ethics
         </p>
-        <p>
-          Data sources: BLS OOH 2024–34 · O*NET 28.3 · RSA WIOA FY2026 ·
-          Mini-IPIP (Donnellan et al., 2006) · O*NET Interest Profiler (public
-          domain).
-        </p>
+        <div className="mt-3 pt-3 border-t border-ink/10">
+          <h2 className="text-[11px] uppercase tracking-wider font-semibold text-ink/70 mb-1">
+            Methodology &amp; data sources
+          </h2>
+          <p>
+            BLS OOH 2024–34 · O*NET 28.3 · RSA WIOA FY2026 · Mini-IPIP
+            (Donnellan et al., 2006) · O*NET Interest Profiler (public
+            domain).
+          </p>
+        </div>
         <p className="mt-2 italic">
           Pathways Pro is an informational and case-management tool. It does
           not replace the professional judgment of a Certified Rehabilitation

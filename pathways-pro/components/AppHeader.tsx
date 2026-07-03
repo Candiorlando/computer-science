@@ -184,18 +184,24 @@ export function AppHeader() {
             </button>
           </div>
         ) : (
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <Link
               href="/business"
-              className="text-sm text-ink/60 hover:text-accent px-3 py-2"
+              className="text-sm text-ink/60 hover:text-accent px-3 py-2.5 min-h-[44px] inline-flex items-center"
             >
               For business
             </Link>
             <Link
-              href="/"
-              className="text-sm border border-ink/20 px-4 py-2 rounded hover:bg-ink/5"
+              href="/signin"
+              className="text-sm border border-ink/20 px-4 py-2.5 min-h-[44px] inline-flex items-center rounded hover:bg-ink/5"
             >
               Sign in
+            </Link>
+            <Link
+              href="/request-demo"
+              className="text-sm bg-accent text-cream font-semibold px-4 py-2.5 min-h-[44px] inline-flex items-center rounded-md hover:bg-accent/90 transition"
+            >
+              Request a Demo
             </Link>
           </div>
         )}

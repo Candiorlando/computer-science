@@ -1,36 +1,26 @@
-"use client";
-
+import type { Metadata } from "next";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { CounselorRolesExplorer } from "@/components/CounselorRolesExplorer";
-import { authenticate, registerClient, type Role } from "@/lib/users";
-import { loadSession, saveMode, saveSession } from "@/lib/session";
+import { HomeRedirect } from "@/components/HomeRedirect";
 
-type Tab = "signin" | "signup";
+export const metadata: Metadata = {
+  title: "Pathways Pro — AI Case Management for Vocational Rehabilitation",
+  description:
+    "Draft signature-ready IPEs in minutes, run validated career assessments, and keep WIOA documentation audit-ready — one HIPAA-aligned workspace for VR counselors, their clients, and employer partners.",
+};
 
 export default function HomePage() {
-  const router = useRouter();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-    const u = loadSession();
-    if (u) {
-      router.replace(u.role === "counselor" ? "/case-search" : "/portal");
-    }
-  }, [router]);
-
-  if (!mounted) return null;
-
   return (
     <div className="-mx-6 -mt-6 mb-[-2rem]">
+      <HomeRedirect />
       <Hero />
+      <AudienceSplit />
       <TrustBar />
       <HowItWorks />
       <SpecializedCounselors />
       <TopRolesSection />
       <RoiMetrics />
+      <AboutPlatform />
       <Testimonial />
       <FinalCta />
     </div>
@@ -293,50 +283,29 @@ function Hero() {
       <div className="max-w-6xl mx-auto px-6 py-20 grid md:grid-cols-2 gap-12 items-center">
         <div className="space-y-6">
           <p className="inline-block text-xs uppercase tracking-widest text-accent bg-accent/10 px-3 py-1 rounded-full">
-            For state VR agencies & community rehab providers
+            For VR counselors, agencies &amp; the employers they serve
           </p>
           <h1 className="text-5xl md:text-6xl tracking-tight leading-[1.05]">
-            Vocational Rehabilitation,{" "}
-            <em className="italic text-accent">unified</em>.
+            AI-powered case management for vocational rehabilitation.
           </h1>
           <p className="text-lg text-ink/85 prose-narrow font-medium">
-            Pathways Pro is an AI-powered vocational rehabilitation and
-            compliance platform that increases competitive integrated
-            employment for disabled individuals. It also provides
-            business-facing solutions — including inclusive hiring
-            assessments, job task analysis, retention risk reporting, and
-            ADA / Section 504 / EEO compliance consulting — creating a
-            unified ecosystem where clients, counselors, businesses, and
-            vendors collaborate to improve employment outcomes and
-            accessibility.
-          </p>
-          <p className="text-base text-ink/70 prose-narrow">
-            One WIOA-compliant platform replaces the patchwork of
-            spreadsheets, PDFs, and third-party portals. Generate
-            signature-ready IPEs in minutes, give every client a real
-            assessment, and surface live BLS labor-market data without
-            leaving the case.
+            Counselors close cases faster. Clients reach competitive
+            integrated employment sooner.
           </p>
 
           <div className="flex flex-wrap gap-3 pt-2">
-            <a
-              href="#demo"
-              className="bg-accent text-cream font-semibold px-6 py-3 rounded-md hover:bg-accent/90 transition"
+            <Link
+              href="/request-demo"
+              className="bg-accent text-cream font-semibold px-6 py-3 min-h-[44px] rounded-md hover:bg-accent/90 transition"
             >
-              Book a demo →
-            </a>
-            <a
-              href="#start"
-              className="border border-accent text-accent font-semibold px-6 py-3 rounded-md hover:bg-accent/5 transition"
+              Request a Demo →
+            </Link>
+            <Link
+              href="/signin"
+              className="border border-accent text-accent font-semibold px-6 py-3 min-h-[44px] rounded-md hover:bg-accent/5 transition"
             >
-              Start a pilot
-            </a>
-            <a
-              href="#signin"
-              className="text-ink/70 px-6 py-3 hover:text-accent transition"
-            >
-              Sign in →
-            </a>
+              Sign in
+            </Link>
           </div>
         </div>
 
@@ -384,6 +353,125 @@ function MiniStat({ label, value }: { label: string; value: string }) {
       </div>
       <div className="text-sm font-semibold text-accent">{value}</div>
     </div>
+  );
+}
+
+// ─────────────────────── Audience split ─────────────────────────────────
+
+function AudienceSplit() {
+  return (
+    <section aria-label="Who Pathways Pro serves" className="border-b border-ink/10">
+      <div className="max-w-6xl mx-auto px-6 py-14 grid md:grid-cols-2 gap-6">
+        <article className="border border-ink/15 bg-cream rounded-lg p-7 flex flex-col">
+          <p className="text-xs uppercase tracking-widest text-accent mb-2">
+            For Counselors &amp; Agencies
+          </p>
+          <h2 className="text-2xl tracking-tight mb-4">
+            Run the whole caseload from one record.
+          </h2>
+          <ul className="space-y-2.5 text-sm text-ink/80 flex-1">
+            <li className="flex gap-2">
+              <span className="text-accent font-bold" aria-hidden>✓</span>
+              <span>
+                Signature-ready, WIOA § 102(b)-complete IPEs drafted in
+                minutes — you review, edit, and sign.
+              </span>
+            </li>
+            <li className="flex gap-2">
+              <span className="text-accent font-bold" aria-hidden>✓</span>
+              <span>
+                Assessments, case notes, documents, and services on one case
+                file — no re-keying across systems.
+              </span>
+            </li>
+            <li className="flex gap-2">
+              <span className="text-accent font-bold" aria-hidden>✓</span>
+              <span>
+                RSA-911-mapped reporting without end-of-quarter spreadsheet
+                triage.
+              </span>
+            </li>
+          </ul>
+          <div className="pt-5">
+            <Link
+              href="/request-demo"
+              className="inline-block bg-accent text-cream font-semibold px-5 py-3 min-h-[44px] rounded-md hover:bg-accent/90 transition"
+            >
+              Request a demo →
+            </Link>
+          </div>
+        </article>
+
+        <article className="border border-ink/15 bg-cream rounded-lg p-7 flex flex-col">
+          <p className="text-xs uppercase tracking-widest text-accent mb-2">
+            For Employers
+          </p>
+          <h2 className="text-2xl tracking-tight mb-4">
+            Hire inclusively and stay defensible.
+          </h2>
+          <ul className="space-y-2.5 text-sm text-ink/80 flex-1">
+            <li className="flex gap-2">
+              <span className="text-accent font-bold" aria-hidden>✓</span>
+              <span>
+                ADA Title I / Section 504 compliance audits with a 90-day
+                corrective action plan.
+              </span>
+            </li>
+            <li className="flex gap-2">
+              <span className="text-accent font-bold" aria-hidden>✓</span>
+              <span>
+                Job task analysis and accommodation plans backed by JAN cost
+                data.
+              </span>
+            </li>
+            <li className="flex gap-2">
+              <span className="text-accent font-bold" aria-hidden>✓</span>
+              <span>
+                Retention-risk reporting plus WOTC and § 44 tax-credit
+                optimization.
+              </span>
+            </li>
+          </ul>
+          <div className="pt-5">
+            <Link
+              href="/business"
+              className="inline-block border border-accent text-accent font-semibold px-5 py-3 min-h-[44px] rounded-md hover:bg-accent/5 transition"
+            >
+              Explore employer solutions →
+            </Link>
+          </div>
+        </article>
+      </div>
+    </section>
+  );
+}
+
+// ─────────────────────── About the platform ─────────────────────────────
+// The long-form positioning paragraph relocated below the fold from the
+// old hero, per the UX audit.
+
+function AboutPlatform() {
+  return (
+    <section aria-labelledby="about-platform-heading" className="border-b border-ink/10">
+      <div className="max-w-4xl mx-auto px-6 py-16">
+        <p className="text-xs uppercase tracking-widest text-accent mb-2">
+          About the platform
+        </p>
+        <h2 id="about-platform-heading" className="text-3xl tracking-tight mb-4">
+          One ecosystem, every party at the table.
+        </h2>
+        <p className="text-ink/80 leading-relaxed">
+          Pathways Pro is an AI-powered vocational rehabilitation and
+          compliance platform that increases competitive integrated
+          employment for disabled individuals. It also provides
+          business-facing solutions — including inclusive hiring assessments,
+          job task analysis, retention risk reporting, and ADA / Section 504
+          / EEO compliance consulting — creating a unified ecosystem where
+          clients, counselors, businesses, and vendors collaborate to improve
+          employment outcomes and accessibility.
+        </p>
+      </div>
+    </section>
   );
 }
 
@@ -745,10 +833,12 @@ function Testimonial() {
 // ────────────────────────── Final CTA ───────────────────────────────────
 
 function FinalCta() {
-  const [tab, setTab] = useState<Tab>("signin");
   return (
     <section id="signin" className="bg-accent/5">
-      <div id="demo" className="max-w-5xl mx-auto px-6 py-20 grid md:grid-cols-2 gap-12 items-start">
+      <div
+        id="demo"
+        className="max-w-5xl mx-auto px-6 py-20 grid md:grid-cols-2 gap-12 items-start"
+      >
         <div id="start" className="space-y-5 pt-2">
           <p className="text-xs uppercase tracking-widest text-accent">
             Get started
@@ -757,378 +847,70 @@ function FinalCta() {
             See your caseload running on Pathways Pro this week.
           </h2>
           <p className="text-ink/75">
-            State VR agencies and community rehab providers can book a 30-minute
-            walkthrough with the founder, or stand up a 90-day pilot for up to
-            25 active cases — no procurement paperwork required.
+            State VR agencies and community rehab providers can book a
+            30-minute walkthrough, or stand up a 90-day pilot for up to 25
+            active cases — no procurement paperwork required.
           </p>
           <ul className="space-y-2 text-sm text-ink/80 pt-1">
             <li className="flex gap-2">
-              <span className="text-accent font-bold">✓</span>
+              <span className="text-accent font-bold" aria-hidden>✓</span>
               <span>Live demo against your real workflow questions</span>
             </li>
             <li className="flex gap-2">
-              <span className="text-accent font-bold">✓</span>
-              <span>HIPAA &amp; § 508 compliance documentation on request</span>
+              <span className="text-accent font-bold" aria-hidden>✓</span>
+              <span>
+                HIPAA-aligned architecture &amp; § 508 documentation on
+                request
+              </span>
             </li>
             <li className="flex gap-2">
-              <span className="text-accent font-bold">✓</span>
+              <span className="text-accent font-bold" aria-hidden>✓</span>
               <span>White-glove import of your existing caseload</span>
             </li>
           </ul>
           <div className="flex flex-wrap gap-3 pt-3">
-            <a
-              href="mailto:candace@pathwayspro.app?subject=Pathways%20Pro%20demo%20request"
-              className="bg-accent text-cream font-semibold px-5 py-3 rounded-md hover:bg-accent/90 transition"
+            <Link
+              href="/request-demo"
+              className="bg-accent text-cream font-semibold px-5 py-3 min-h-[44px] rounded-md hover:bg-accent/90 transition"
             >
-              Book a demo →
-            </a>
-            <a
-              href="mailto:candace@pathwayspro.app?subject=Pathways%20Pro%20pilot"
-              className="border border-accent text-accent font-semibold px-5 py-3 rounded-md hover:bg-accent/5 transition"
+              Request a Demo →
+            </Link>
+            <Link
+              href="/request-demo"
+              className="border border-accent text-accent font-semibold px-5 py-3 min-h-[44px] rounded-md hover:bg-accent/5 transition"
             >
               Start a 90-day pilot
-            </a>
+            </Link>
           </div>
         </div>
 
-        <div className="bg-cream border border-ink/15 rounded-lg shadow-sm overflow-hidden">
-          <div className="flex border-b border-ink/10">
-            <TabButton active={tab === "signin"} onClick={() => setTab("signin")}>
-              Sign in
-            </TabButton>
-            <TabButton active={tab === "signup"} onClick={() => setTab("signup")}>
-              New client? Sign up
-            </TabButton>
+        <div className="bg-cream border border-ink/15 rounded-lg shadow-sm p-7 space-y-4">
+          <h3 className="text-xl">Already using Pathways Pro?</h3>
+          <p className="text-sm text-ink/70">
+            Counselors and clients sign in to their workspace; employers,
+            vendors, and employment partners enter through the business
+            portal.
+          </p>
+          <div className="space-y-2">
+            <Link
+              href="/signin"
+              className="block text-center bg-accent text-cream font-semibold py-3 min-h-[44px] rounded-md hover:bg-accent/90 transition"
+            >
+              Counselor / client sign in →
+            </Link>
+            <Link
+              href="/business#signin"
+              className="block text-center border border-accent text-accent font-semibold py-3 min-h-[44px] rounded-md hover:bg-accent/5 transition"
+            >
+              Business / vendor sign in →
+            </Link>
           </div>
-          {tab === "signin" ? (
-            <SignInPanel />
-          ) : (
-            <SignUpPanel onDone={() => setTab("signin")} />
-          )}
+          <p className="text-xs text-ink/55 border-t border-ink/10 pt-3">
+            Demo account: <code className="bg-ink/5 px-1 rounded">demo.counselor@pathwayspro.app</code>{" "}
+            / <code className="bg-ink/5 px-1 rounded">demo1234</code>
+          </p>
         </div>
       </div>
-
     </section>
-  );
-}
-
-function TabButton({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`flex-1 px-4 py-3 text-sm font-semibold transition ${
-        active
-          ? "bg-cream text-accent border-b-2 border-accent"
-          : "bg-ink/5 text-ink/60 hover:text-ink"
-      }`}
-    >
-      {children}
-    </button>
-  );
-}
-
-// ── Auth panels (preserved from earlier sign-up implementation) ─────────
-
-function SignInPanel() {
-  const router = useRouter();
-  const [role, setRole] = useState<Role>("counselor");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError("");
-    const u = authenticate(email, password, role);
-    if (!u) {
-      setError("Invalid credentials. Try the demo account below.");
-      return;
-    }
-    saveSession(u);
-    if (u.role === "counselor" || u.role === "client") saveMode(u.role);
-    router.push(u.role === "counselor" ? "/case-search" : "/portal");
-  }
-
-  function demoLogin() {
-    const demoEmail =
-      role === "counselor"
-        ? "demo.counselor@pathwayspro.app"
-        : "demo.client@pathwayspro.app";
-    const u = authenticate(demoEmail, "demo1234", role);
-    if (u) {
-      saveSession(u);
-      if (u.role === "counselor" || u.role === "client") saveMode(u.role);
-      router.push(u.role === "counselor" ? "/case-search" : "/portal");
-    }
-  }
-
-  return (
-    <form onSubmit={handleSubmit} className="p-7 space-y-5">
-      <div className="flex bg-ink/5 rounded-md p-1">
-        <button
-          type="button"
-          onClick={() => setRole("counselor")}
-          className={`flex-1 px-3 py-2 text-sm rounded transition ${
-            role === "counselor"
-              ? "bg-cream shadow-sm text-accent font-semibold"
-              : "text-ink/60"
-          }`}
-        >
-          Counselor
-        </button>
-        <button
-          type="button"
-          onClick={() => setRole("client")}
-          className={`flex-1 px-3 py-2 text-sm rounded transition ${
-            role === "client"
-              ? "bg-cream shadow-sm text-accent font-semibold"
-              : "text-ink/60"
-          }`}
-        >
-          Client
-        </button>
-      </div>
-
-      {error && (
-        <div className="bg-accent/10 border border-accent/30 text-accent text-sm px-3 py-2 rounded">
-          {error}
-        </div>
-      )}
-
-      <Field label="Email">
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder={
-            role === "counselor" ? "counselor@agency.gov" : "you@example.com"
-          }
-          className="input"
-          autoComplete="username"
-        />
-      </Field>
-      <Field label="Password">
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="••••••••"
-          className="input"
-          autoComplete="current-password"
-        />
-      </Field>
-
-      <button
-        type="submit"
-        className="w-full bg-accent text-cream font-semibold py-2.5 rounded hover:bg-accent/90 transition"
-      >
-        Sign in as {role === "counselor" ? "Counselor" : "Client"}
-      </button>
-
-      <div className="border-t border-ink/10 pt-4 text-xs text-ink/60 space-y-1">
-        <div>
-          <strong className="text-ink/80">Demo account:</strong>
-        </div>
-        <div>
-          Email:{" "}
-          <code className="bg-ink/5 px-1 rounded">
-            {role === "counselor"
-              ? "demo.counselor@pathwayspro.app"
-              : "demo.client@pathwayspro.app"}
-          </code>
-        </div>
-        <div>
-          Password: <code className="bg-ink/5 px-1 rounded">demo1234</code>
-        </div>
-        <button
-          type="button"
-          onClick={demoLogin}
-          className="text-accent hover:underline mt-1"
-        >
-          → One-click demo login
-        </button>
-      </div>
-
-      <Styles />
-    </form>
-  );
-}
-
-function SignUpPanel({ onDone }: { onDone: () => void }) {
-  const router = useRouter();
-  const [firstName, setFirst] = useState("");
-  const [lastName, setLast] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [dob, setDob] = useState("");
-  const [goal, setGoal] = useState("");
-  const [error, setError] = useState("");
-
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError("");
-    const result = registerClient({
-      firstName,
-      lastName,
-      email,
-      password,
-      dob,
-      goal,
-    });
-    if (!result.ok) {
-      setError(result.error);
-      return;
-    }
-    saveSession(result.user);
-    saveMode("client");
-    router.push("/portal");
-  }
-
-  return (
-    <form onSubmit={handleSubmit} className="p-7 space-y-5">
-      <div>
-        <h3 className="text-xl mb-1">Create your client account</h3>
-        <p className="text-xs text-ink/60">
-          We&apos;ll assign you a case number and place you on the next
-          available counselor&apos;s caseload.
-        </p>
-      </div>
-
-      {error && (
-        <div className="bg-accent/10 border border-accent/30 text-accent text-sm px-3 py-2 rounded">
-          {error}
-        </div>
-      )}
-
-      <div className="grid grid-cols-2 gap-3">
-        <Field label="First name">
-          <input
-            type="text"
-            value={firstName}
-            onChange={(e) => setFirst(e.target.value)}
-            placeholder="Jordan"
-            className="input"
-            autoComplete="given-name"
-          />
-        </Field>
-        <Field label="Last name">
-          <input
-            type="text"
-            value={lastName}
-            onChange={(e) => setLast(e.target.value)}
-            placeholder="Hayes"
-            className="input"
-            autoComplete="family-name"
-          />
-        </Field>
-      </div>
-
-      <Field label="Email">
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="you@example.com"
-          className="input"
-          autoComplete="email"
-        />
-      </Field>
-
-      <Field label="Password (6+ characters)">
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="••••••••"
-          className="input"
-          autoComplete="new-password"
-        />
-      </Field>
-
-      <Field label="Date of birth">
-        <input
-          type="date"
-          value={dob}
-          onChange={(e) => setDob(e.target.value)}
-          className="input"
-          autoComplete="bday"
-        />
-      </Field>
-
-      <Field label="What are you hoping to do? (optional)">
-        <input
-          type="text"
-          value={goal}
-          onChange={(e) => setGoal(e.target.value)}
-          placeholder="e.g. Find a job in office administration"
-          className="input"
-        />
-      </Field>
-
-      <button
-        type="submit"
-        className="w-full bg-accent text-cream font-semibold py-2.5 rounded hover:bg-accent/90 transition"
-      >
-        Create account & assign case number →
-      </button>
-
-      <p className="text-xs text-ink/60 text-center">
-        Already have an account?{" "}
-        <button
-          type="button"
-          onClick={onDone}
-          className="text-accent underline"
-        >
-          Sign in
-        </button>
-      </p>
-
-      <Styles />
-    </form>
-  );
-}
-
-function Field({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <label className="block">
-      <span className="block text-xs uppercase tracking-wider text-ink/60 mb-1">
-        {label}
-      </span>
-      {children}
-    </label>
-  );
-}
-
-function Styles() {
-  return (
-    <style jsx>{`
-      :global(.input) {
-        width: 100%;
-        background: white;
-        border: 1px solid rgba(31, 29, 26, 0.2);
-        border-radius: 6px;
-        padding: 0.5rem 0.75rem;
-        font-size: 0.9rem;
-      }
-      :global(.input:focus) {
-        outline: none;
-        border-color: #b95c3c;
-      }
-    `}</style>
   );
 }
