@@ -30,6 +30,7 @@ function menuFor(user: AnyUser, unread: number): NavItem[] {
       { href: "/dashboard/business", label: "Business Clients", icon: "🏢" },
       { href: "/dashboard/partners", label: "Employment Partners", icon: "🤝" },
       { href: "/dashboard/service-orders", label: "Service Orders", icon: "📦" },
+      { href: "/dashboard/forensic", label: "Forensic", icon: "⚖️" },
       { href: "/dashboard/daily-briefing", label: "Daily Briefing", icon: "📰" },
       { href: "/dashboard/financials", label: "Financials (AR/AP)", icon: "💰" },
       { href: "/dashboard/reports", label: "Reports", icon: "📊" },
