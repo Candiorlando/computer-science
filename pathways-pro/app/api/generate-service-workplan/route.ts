@@ -16,6 +16,9 @@ const RequestSchema = z.object({
   jurisdiction: z.string().optional(),
   requesterNotes: z.string().optional(),
   counselorName: z.string().optional(),
+  // The engagement scenario the counselor selected (or wrote) —
+  // the plan must be tailored to this posture.
+  scenario: z.string().optional(),
 });
 
 const SYSTEM_PROMPT = `You are a senior Certified Rehabilitation Counselor
@@ -137,6 +140,12 @@ export async function POST(req: Request) {
   if (body.jurisdiction) ctx.push(`JURISDICTION: ${body.jurisdiction}`);
   if (body.requesterNotes) ctx.push(`REQUESTER NOTES: ${body.requesterNotes}`);
   if (body.counselorName) ctx.push(`COUNSELOR: ${body.counselorName}`);
+  if (body.scenario) {
+    ctx.push("");
+    ctx.push(
+      `ENGAGEMENT SCENARIO (tailor every checklist item, tool, and question to this posture): ${body.scenario}`,
+    );
+  }
   ctx.push("");
   ctx.push("Produce the work plan now via the tool call.");
 

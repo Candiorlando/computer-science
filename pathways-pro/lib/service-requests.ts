@@ -233,6 +233,11 @@ export interface ServiceRequest {
   workplanChecklist?: Record<string, boolean>;
   // Intake answers — question key -> counselor's recorded answer.
   workplanAnswers?: Record<string, string>;
+  // Top scenarios this service is requested for — AI-suggested list
+  // (serialized {title, description, custom?}[]) plus the counselor's
+  // selection. The selected scenario steers work-plan generation.
+  workplanScenariosJson?: string;
+  workplanSelectedScenario?: string;
 }
 
 const KEY = "pathways-pro:service-requests-v1";
@@ -450,6 +455,14 @@ export function saveDeliverableEdit(id: string, edited: string) {
     deliverableFinal: edited,
     deliverableFinalEditedAt: new Date().toISOString(),
   });
+}
+
+export function saveWorkplanScenarios(id: string, json: string) {
+  updateServiceRequest(id, { workplanScenariosJson: json });
+}
+
+export function saveSelectedScenario(id: string, title: string) {
+  updateServiceRequest(id, { workplanSelectedScenario: title });
 }
 
 export function saveWorkplan(id: string, json: string, model: string) {

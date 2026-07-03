@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { loadSession } from "@/lib/session";
 import type { CounselorUser } from "@/lib/users";
@@ -17,8 +17,10 @@ import {
   saveCounselorSignature,
   saveDeliverableDraft,
   saveDeliverableEdit,
+  saveSelectedScenario,
   saveWorkplan,
   saveWorkplanProgress,
+  saveWorkplanScenarios,
   sendToClient,
   type ServiceRequest,
 } from "@/lib/service-requests";
@@ -769,6 +771,21 @@ const TOOL_KIND_LABELS: Record<string, string> = {
   "interview-protocol": "Interview protocol",
 };
 
+interface Scenario {
+  title: string;
+  description: string;
+  custom?: boolean;
+}
+
+function parseScenarios(json?: string): Scenario[] {
+  if (!json) return [];
+  try {
+    return JSON.parse(json) as Scenario[];
+  } catch {
+    return [];
+  }
+}
+
 function WorkPlanSection({
   order,
   serviceDescription,
@@ -789,6 +806,162 @@ function WorkPlanSection({
   const answers = order.workplanAnswers ?? {};
   const [draftAnswers, setDraftAnswers] = useState<Record<string, string>>(answers);
 
+  // ── Top scenarios ──
+  const scenarios = parseScenarios(order.workplanScenariosJson);
+  const selectedScenario = order.workplanSelectedScenario;
+  const [scenBusy, setScenBusy] = useState(false);
+  const [scenError, setScenError] = useState<string | null>(null);
+  const [customTitle, setCustomTitle] = useState("");
+  const scenFetchedRef = useRef(false);
+
+  async function fetchScenarios(keepCustom: boolean) {
+    setScenBusy(true);
+    setScenError(null);
+    try {
+      const resp = await fetch("/api/generate-service-scenarios", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          serviceTitle: order.serviceTitle,
+          serviceCategory: getService(order.serviceId)?.category ?? "one-time",
+          serviceDescription,
+          requesterOrgName: order.requesterOrgName,
+          matterCaption: order.matterCaption,
+          requesterNotes: order.notes,
+        }),
+      });
+      if (!resp.ok) {
+        const j = (await resp.json().catch(() => ({}))) as { error?: string };
+        throw new Error(j.error ?? `Request failed (${resp.status})`);
+      }
+      const j = (await resp.json()) as { scenarios: Scenario[] };
+      const custom = keepCustom ? scenarios.filter((s) => s.custom) : [];
+      saveWorkplanScenarios(order.id, JSON.stringify([...j.scenarios, ...custom]));
+      onChange();
+    } catch (e) {
+      setScenError(e instanceof Error ? e.message : "Network error");
+    } finally {
+      setScenBusy(false);
+    }
+  }
+
+  // Load scenarios once per order on first open of this section.
+  useEffect(() => {
+    if (scenarios.length === 0 && !scenFetchedRef.current) {
+      scenFetchedRef.current = true;
+      fetchScenarios(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  function selectScenario(title: string) {
+    saveSelectedScenario(order.id, title);
+    onChange();
+  }
+
+  function addCustomScenario() {
+    const title = customTitle.trim();
+    if (!title) return;
+    const next: Scenario[] = [
+      ...scenarios,
+      { title, description: "Counselor-defined scenario.", custom: true },
+    ];
+    saveWorkplanScenarios(order.id, JSON.stringify(next));
+    saveSelectedScenario(order.id, title);
+    setCustomTitle("");
+    onChange();
+  }
+
+  const selectedScenarioText = (() => {
+    if (!selectedScenario) return undefined;
+    const m = scenarios.find((s) => s.title === selectedScenario);
+    return m ? `${m.title} — ${m.description}` : selectedScenario;
+  })();
+
+  const scenarioSection = (
+    <div>
+      <div className="flex items-baseline justify-between gap-2 mb-2 flex-wrap">
+        <h3 className="text-sm font-semibold uppercase tracking-wider text-cyan-700">
+          Top scenarios requested for this service
+        </h3>
+        <button
+          onClick={() => fetchScenarios(true)}
+          disabled={scenBusy}
+          className="text-xs border border-ink/15 px-3 py-1.5 rounded-md hover:bg-ink/5 disabled:opacity-50"
+        >
+          {scenBusy ? "Loading…" : "↻ Regenerate scenarios"}
+        </button>
+      </div>
+      {scenBusy && scenarios.length === 0 ? (
+        <div className="border border-dashed border-ink/20 rounded-md p-4 text-center text-xs text-ink/55 italic">
+          Asking Claude Opus 4.8 for the most common engagement scenarios…
+        </div>
+      ) : (
+        <ul role="list" className="grid sm:grid-cols-2 gap-2">
+          {scenarios.map((s) => {
+            const active = selectedScenario === s.title;
+            return (
+              <li key={s.title}>
+                <button
+                  onClick={() => selectScenario(s.title)}
+                  aria-pressed={active}
+                  className={`text-left w-full border-2 rounded-md p-3 transition ${
+                    active
+                      ? "border-cyan-500 bg-cyan-50/50"
+                      : "border-ink/15 bg-white hover:border-cyan-300"
+                  }`}
+                >
+                  <span className="flex items-baseline justify-between gap-2">
+                    <strong className="text-sm">{s.title}</strong>
+                    {s.custom && (
+                      <span className="text-[9px] uppercase tracking-wider bg-purple-100 text-purple-900 px-1.5 py-0.5 rounded-full font-semibold shrink-0">
+                        Yours
+                      </span>
+                    )}
+                    {active && !s.custom && (
+                      <span aria-hidden className="text-cyan-700 shrink-0">✓</span>
+                    )}
+                  </span>
+                  <span className="block text-xs text-ink/65 mt-0.5">
+                    {s.description}
+                  </span>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+      {scenError && (
+        <div role="alert" className="mt-2 text-xs border border-rose-300 bg-rose-50 text-rose-900 rounded-md p-2">
+          {scenError}
+        </div>
+      )}
+      <div className="mt-3 flex gap-2 items-center flex-wrap">
+        <input
+          value={customTitle}
+          onChange={(e) => setCustomTitle(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") addCustomScenario();
+          }}
+          placeholder="Or describe your own scenario…"
+          className="flex-1 min-w-[220px] bg-white border border-ink/15 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:border-cyan-500"
+        />
+        <button
+          onClick={addCustomScenario}
+          disabled={!customTitle.trim()}
+          className="text-xs border border-cyan-500 text-cyan-700 px-3 py-1.5 rounded-md hover:bg-cyan-50 font-semibold disabled:opacity-40"
+        >
+          + Add &amp; select
+        </button>
+      </div>
+      <p className="text-xs text-ink/55 italic mt-2">
+        {selectedScenario
+          ? `Scenario locked in: "${selectedScenario}" — the work plan tailors to it. Changed your pick? Hit ${plan ? "↻ Regenerate plan" : "Generate AI work plan"} below.`
+          : "Pick the scenario that matches this engagement (or add your own) — the AI tailors the checklist, tools, and questions to it."}
+      </p>
+    </div>
+  );
+
   async function generate() {
     setBusy(true);
     setError(null);
@@ -808,6 +981,7 @@ function WorkPlanSection({
           jurisdiction: order.jurisdiction,
           requesterNotes: order.notes,
           counselorName,
+          scenario: selectedScenarioText,
         }),
       });
       if (!resp.ok) {
@@ -839,26 +1013,29 @@ function WorkPlanSection({
 
   if (!plan) {
     return (
-      <>
-        <p className="text-sm text-ink/65 mb-3">
-          Let the AI determine what information to collect, which assessment
-          and collection tools this service needs, and the intake questions
-          to answer while you work. Your answers ground the drafted findings
-          in Step 4.
-        </p>
-        <button
-          onClick={generate}
-          disabled={busy}
-          className="grad-tealblue text-white font-semibold px-4 py-2 rounded-md text-sm disabled:opacity-50"
-        >
-          {busy ? "Planning with Claude Opus 4.8…" : "✨ Generate AI work plan"}
-        </button>
-        {error && (
-          <div role="alert" className="mt-3 text-sm border border-rose-300 bg-rose-50 text-rose-900 p-3 rounded">
-            {error}
-          </div>
-        )}
-      </>
+      <div className="space-y-5">
+        {scenarioSection}
+        <div className="border-t border-ink/10 pt-4">
+          <p className="text-sm text-ink/65 mb-3">
+            Let the AI determine what information to collect, which assessment
+            and collection tools this service needs, and the intake questions
+            to answer while you work. Your answers ground the drafted findings
+            in Step 4.
+          </p>
+          <button
+            onClick={generate}
+            disabled={busy}
+            className="grad-tealblue text-white font-semibold px-4 py-2 rounded-md text-sm disabled:opacity-50"
+          >
+            {busy ? "Planning with Claude Opus 4.8…" : "✨ Generate AI work plan"}
+          </button>
+          {error && (
+            <div role="alert" className="mt-3 text-sm border border-rose-300 bg-rose-50 text-rose-900 p-3 rounded">
+              {error}
+            </div>
+          )}
+        </div>
+      </div>
     );
   }
 
@@ -871,7 +1048,8 @@ function WorkPlanSection({
 
   return (
     <div className="space-y-5">
-      <div className="flex items-baseline justify-between gap-3 flex-wrap">
+      {scenarioSection}
+      <div className="flex items-baseline justify-between gap-3 flex-wrap border-t border-ink/10 pt-4">
         <p className="text-sm italic text-ink/75 border-l-2 border-cyan-400 pl-3 flex-1 min-w-[240px]">
           {plan.rationale}
         </p>
