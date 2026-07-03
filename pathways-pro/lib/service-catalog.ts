@@ -998,6 +998,34 @@ export const SERVICE_CATALOG: CatalogService[] = [
       "Draft an AAC Evaluation report: communication profile (receptive/expressive), device trial results across candidates (dedicated SGD vs iPad + Proloquo2Go vs low-tech PECS), operational and linguistic competencies, vocabulary customization plan, training hours needed, funding pathway (VR + insurance + Medicaid), and a fidelity check-in cadence.",
   },
   {
+    id: "expert-testimony-deposition",
+    title: "Expert Testimony & Deposition Support",
+    category: "data-evaluation",
+    description:
+      "Vocational expert testimony at deposition or trial — FRCP 26 disclosures, testimony list maintenance, and Daubert/Frye-hardened opinion defense.",
+    defaultPriceCents: F(42_500),
+    priceUnit: "hourly",
+    availableTo: ["business", "partner", "vendor"],
+    visibleToClient: false,
+    turnaround: "Scheduled per counsel",
+    aiTemplate:
+      "Draft a testimony-preparation brief: opinions offered with record basis for each, anticipated cross-examination themes with response frames, methodology definitions in plain language (DOT, O*NET, OEWS, ORS, capacity model), Rule 26 disclosure completeness check, and exhibits list.",
+  },
+  {
+    id: "forensic-file-review-rebuttal",
+    title: "VE File Review & Rebuttal Report",
+    category: "data-evaluation",
+    description:
+      "Critical review of an opposing vocational expert's report — methodology audit, data-source verification, and a written rebuttal opinion.",
+    defaultPriceCents: F(295_000),
+    priceUnit: "flat",
+    availableTo: ["business", "partner", "vendor"],
+    visibleToClient: false,
+    turnaround: "10-14 business days",
+    aiTemplate:
+      "Draft a rebuttal report: opposing expert's opinions inventoried, methodology audit against Daubert factors (tested, peer-reviewed, error rate, general acceptance), data-source verification (were cited wages/openings reproducible?), unsupported leaps identified with record citations, and the rebuttal opinion with its own defensible basis.",
+  },
+  {
     id: "justice-involved-reentry-navigation",
     title: "Justice-Involved Reentry Navigation",
     category: "client-services",

@@ -221,6 +221,18 @@ export interface ServiceRequest {
   counselorSignatureName?: string;        // printed name shown under the signature line
   counselorSignatureCredentials?: string; // credentials line shown under printed name
   signedAt?: string;
+
+  // ── AI work plan (information & collection tooling) ──
+  // Serialized JSON plan from /api/generate-service-workplan: what
+  // information to collect, which instruments to use, and the intake
+  // questions to answer during the engagement.
+  workplanJson?: string;
+  workplanGeneratedAt?: string;
+  workplanModel?: string;
+  // Collection progress — info-item key -> collected yes/no.
+  workplanChecklist?: Record<string, boolean>;
+  // Intake answers — question key -> counselor's recorded answer.
+  workplanAnswers?: Record<string, string>;
 }
 
 const KEY = "pathways-pro:service-requests-v1";
@@ -437,6 +449,31 @@ export function saveDeliverableEdit(id: string, edited: string) {
   updateServiceRequest(id, {
     deliverableFinal: edited,
     deliverableFinalEditedAt: new Date().toISOString(),
+  });
+}
+
+export function saveWorkplan(id: string, json: string, model: string) {
+  updateServiceRequest(id, {
+    workplanJson: json,
+    workplanGeneratedAt: new Date().toISOString(),
+    workplanModel: model,
+    workplanChecklist: {},
+    workplanAnswers: {},
+  });
+}
+
+export function saveWorkplanProgress(
+  id: string,
+  patch: {
+    checklist?: Record<string, boolean>;
+    answers?: Record<string, string>;
+  },
+) {
+  const r = loadServiceRequests().find((x) => x.id === id);
+  if (!r) return;
+  updateServiceRequest(id, {
+    workplanChecklist: patch.checklist ?? r.workplanChecklist,
+    workplanAnswers: patch.answers ?? r.workplanAnswers,
   });
 }
 

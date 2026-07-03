@@ -24,6 +24,11 @@ const RequestSchema = z.object({
 
   counselorName: z.string(),
   counselorCredentials: z.string().optional(),
+
+  // Findings the counselor collected via the AI work plan — intake
+  // answers plus which checklist items were obtained. When present,
+  // the draft must be grounded in this material.
+  collectedInformation: z.string().optional(),
 });
 
 const SYSTEM_PROMPT = `You are a senior Certified Rehabilitation Counselor (CRC)
@@ -125,6 +130,13 @@ export async function POST(req: Request) {
   if (body.urgency) ctx.push(`URGENCY: ${body.urgency}`);
   if (body.dueDate) ctx.push(`DUE BY: ${body.dueDate}`);
   if (body.requesterNotes) ctx.push(`\nREQUESTER NOTES:\n${body.requesterNotes}`);
+  if (body.collectedInformation) {
+    ctx.push("");
+    ctx.push(
+      "COLLECTED FINDINGS (from the counselor's work plan — ground the deliverable in these; do not contradict them):",
+    );
+    ctx.push(body.collectedInformation);
+  }
   ctx.push("");
   ctx.push(`COUNSELOR OF RECORD: ${body.counselorName}${body.counselorCredentials ? `, ${body.counselorCredentials}` : ""}`);
   ctx.push("");

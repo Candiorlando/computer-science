@@ -70,6 +70,32 @@ const FORENSIC_SERVICES: ForensicService[] = [
     ],
   },
   {
+    catalogId: "expert-testimony-deposition",
+    title: "Expert Testimony & Deposition Support",
+    useCase:
+      "Live vocational-expert testimony at deposition or trial, with disclosure hygiene and opinion defense preparation.",
+    standards: [
+      "FRE 702/703/705 — opinions based on facts of record or facts experts in the field reasonably rely on; basis disclosable on cross.",
+      "Rule 26 report is the ceiling — no new opinions at deposition that were not disclosed in the written report.",
+      "Testimony list (prior 4 years) and compensation disclosure current and produced on request.",
+      "Methodology terms defined in plain language for the finder of fact — DOT, O*NET, OEWS, ORS, and the capacity model used.",
+      "ABVE Code of Ethics — no advocacy; the opinion serves the trier of fact, not the retaining party.",
+    ],
+  },
+  {
+    catalogId: "forensic-file-review-rebuttal",
+    title: "VE File Review & Rebuttal Report",
+    useCase:
+      "Methodology audit of an opposing vocational expert's report and a written rebuttal opinion with its own defensible basis.",
+    standards: [
+      "Opposing opinions inventoried verbatim with page cites before critique — rebut what was said, not a paraphrase.",
+      "Daubert-factor audit — was the method tested, peer-reviewed, error-rate-known, generally accepted, and reliably applied?",
+      "Data-source verification — cited wages, openings, and transferability runs re-pulled and checked for reproducibility.",
+      "Unsupported analytical leaps identified with record citations (ipse dixit flagged per GE v. Joiner).",
+      "Rebuttal opinion carries its own Rule 26-compliant basis — a critique alone is not an opinion.",
+    ],
+  },
+  {
     catalogId: "transferable-skills-analysis",
     title: "Transferable Skills Analysis (Litigation)",
     useCase:

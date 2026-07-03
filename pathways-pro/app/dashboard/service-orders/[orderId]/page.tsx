@@ -17,6 +17,8 @@ import {
   saveCounselorSignature,
   saveDeliverableDraft,
   saveDeliverableEdit,
+  saveWorkplan,
+  saveWorkplanProgress,
   sendToClient,
   type ServiceRequest,
 } from "@/lib/service-requests";
@@ -127,6 +129,7 @@ export default function ServiceOrderDetail() {
           dueDate: order.dueDate,
           counselorName: user!.name,
           counselorCredentials: user!.credentials,
+          collectedInformation: buildCollectedInfo(order),
         }),
       });
       if (!resp.ok) {
@@ -282,10 +285,24 @@ export default function ServiceOrderDetail() {
         </Section>
       )}
 
+      {/* AI work plan — information & collection tooling */}
+      {order.status !== "pending-counselor-review" &&
+        order.status !== "declined" && (
+          <Section title="Step 2 · AI work plan — information & collection">
+            <WorkPlanSection
+              order={order}
+              serviceDescription={service?.description}
+              aiTemplate={service?.aiTemplate}
+              counselorName={user!.name}
+              onChange={() => setBump((n) => n + 1)}
+            />
+          </Section>
+        )}
+
       {/* Embedded assessment tools */}
       {order.status !== "pending-counselor-review" &&
         order.status !== "declined" && (
-          <Section title={`Step 2 · Embedded assessment tools (${tools.length})`}>
+          <Section title={`Step 3 · Embedded assessment tools (${tools.length})`}>
             <p className="text-sm text-ink/65 mb-3">
               Assessments wired specifically to <strong>{order.serviceTitle}</strong>.
               Each one stores responses inside the requester&apos;s case file
@@ -313,7 +330,7 @@ export default function ServiceOrderDetail() {
       {/* AI-drafted deliverable */}
       {order.status !== "pending-counselor-review" &&
         order.status !== "declined" && (
-          <Section title="Step 3 · AI-drafted deliverable">
+          <Section title="Step 4 · AI-drafted findings & summary report">
             {!order.deliverableDraft ? (
               <>
                 <p className="text-sm text-ink/65 mb-3">
@@ -464,7 +481,7 @@ export default function ServiceOrderDetail() {
 
       {/* Sign deliverable */}
       {order.deliverableFinal && order.status !== "delivered" && (
-        <Section title="Step 4 · Sign deliverable">
+        <Section title="Step 5 · Sign deliverable">
           {!order.signedAt ? (
             <>
               <p className="text-sm text-ink/65 mb-3">
@@ -545,7 +562,7 @@ export default function ServiceOrderDetail() {
 
       {/* Send to client */}
       {order.deliverableFinal && order.status !== "delivered" && (
-        <Section title="Step 5 · Send to client">
+        <Section title="Step 6 · Send to client">
           <p className="text-sm text-ink/65 mb-3">
             Sending releases the deliverable into{" "}
             <strong>{order.requesterOrgName}</strong>&apos;s portal with your
@@ -559,14 +576,14 @@ export default function ServiceOrderDetail() {
             title={
               order.signedAt
                 ? undefined
-                : "Apply your signature in Step 4 before sending"
+                : "Apply your signature in Step 5 before sending"
             }
           >
             🚀 Send to client
           </button>
           {!order.signedAt && (
             <p className="text-xs text-ink/55 mt-2 italic">
-              Apply your signature in Step 4 before sending.
+              Apply your signature in Step 5 before sending.
             </p>
           )}
         </Section>
@@ -696,6 +713,286 @@ function Row({ label, value }: { label: string; value: string }) {
     <div>
       <dt className="text-[10px] uppercase tracking-wider text-ink/55">{label}</dt>
       <dd className="text-sm font-semibold mt-0.5">{value}</dd>
+    </div>
+  );
+}
+
+// ── AI Work Plan ──────────────────────────────────────────────────────
+
+interface Workplan {
+  rationale: string;
+  informationChecklist: { item: string; why: string; source: string }[];
+  recommendedTools: { name: string; purpose: string; kind: string }[];
+  intakeQuestions: { prompt: string; hint?: string }[];
+}
+
+function parseWorkplan(json?: string): Workplan | null {
+  if (!json) return null;
+  try {
+    return JSON.parse(json) as Workplan;
+  } catch {
+    return null;
+  }
+}
+
+// Serializes collected work-plan progress into the findings block the
+// deliverable endpoint grounds the draft in.
+function buildCollectedInfo(order: ServiceRequest): string | undefined {
+  const plan = parseWorkplan(order.workplanJson);
+  if (!plan) return undefined;
+  const lines: string[] = [];
+  const checklist = order.workplanChecklist ?? {};
+  const collected = plan.informationChecklist.filter((_, i) => checklist[`c${i}`]);
+  const missing = plan.informationChecklist.filter((_, i) => !checklist[`c${i}`]);
+  if (collected.length) {
+    lines.push("Records/data collected: " + collected.map((c) => c.item).join("; "));
+  }
+  if (missing.length) {
+    lines.push(
+      "Not yet obtained (note as limitation if material): " +
+        missing.map((c) => c.item).join("; "),
+    );
+  }
+  const answers = order.workplanAnswers ?? {};
+  plan.intakeQuestions.forEach((q, i) => {
+    const a = answers[`q${i}`]?.trim();
+    if (a) lines.push(`${q.prompt} — ${a}`);
+  });
+  return lines.length ? lines.join("\n") : undefined;
+}
+
+const TOOL_KIND_LABELS: Record<string, string> = {
+  "standardized-assessment": "Standardized assessment",
+  survey: "Survey",
+  observation: "Observation",
+  "records-review": "Records review",
+  "interview-protocol": "Interview protocol",
+};
+
+function WorkPlanSection({
+  order,
+  serviceDescription,
+  aiTemplate,
+  counselorName,
+  onChange,
+}: {
+  order: ServiceRequest;
+  serviceDescription?: string;
+  aiTemplate?: string;
+  counselorName: string;
+  onChange: () => void;
+}) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const plan = parseWorkplan(order.workplanJson);
+  const checklist = order.workplanChecklist ?? {};
+  const answers = order.workplanAnswers ?? {};
+  const [draftAnswers, setDraftAnswers] = useState<Record<string, string>>(answers);
+
+  async function generate() {
+    setBusy(true);
+    setError(null);
+    try {
+      const resp = await fetch("/api/generate-service-workplan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          serviceTitle: order.serviceTitle,
+          serviceCategory: getService(order.serviceId)?.category ?? "one-time",
+          serviceDescription,
+          aiTemplate,
+          requesterOrgName: order.requesterOrgName,
+          requesterName: order.requesterName,
+          subjectClientName: order.subjectClientName,
+          matterCaption: order.matterCaption,
+          jurisdiction: order.jurisdiction,
+          requesterNotes: order.notes,
+          counselorName,
+        }),
+      });
+      if (!resp.ok) {
+        const j = (await resp.json().catch(() => ({}))) as { error?: string };
+        throw new Error(j.error ?? `Request failed (${resp.status})`);
+      }
+      const j = (await resp.json()) as { workplan: Workplan; model: string };
+      saveWorkplan(order.id, JSON.stringify(j.workplan), j.model);
+      setDraftAnswers({});
+      onChange();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Network error");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function toggleItem(key: string) {
+    const next = { ...checklist, [key]: !checklist[key] };
+    saveWorkplanProgress(order.id, { checklist: next });
+    onChange();
+  }
+
+  function saveAnswer(key: string) {
+    const next = { ...answers, [key]: draftAnswers[key] ?? "" };
+    saveWorkplanProgress(order.id, { answers: next });
+    onChange();
+  }
+
+  if (!plan) {
+    return (
+      <>
+        <p className="text-sm text-ink/65 mb-3">
+          Let the AI determine what information to collect, which assessment
+          and collection tools this service needs, and the intake questions
+          to answer while you work. Your answers ground the drafted findings
+          in Step 4.
+        </p>
+        <button
+          onClick={generate}
+          disabled={busy}
+          className="grad-tealblue text-white font-semibold px-4 py-2 rounded-md text-sm disabled:opacity-50"
+        >
+          {busy ? "Planning with Claude Opus 4.8…" : "✨ Generate AI work plan"}
+        </button>
+        {error && (
+          <div role="alert" className="mt-3 text-sm border border-rose-300 bg-rose-50 text-rose-900 p-3 rounded">
+            {error}
+          </div>
+        )}
+      </>
+    );
+  }
+
+  const collectedCount = plan.informationChecklist.filter(
+    (_, i) => checklist[`c${i}`],
+  ).length;
+  const answeredCount = plan.intakeQuestions.filter((_, i) =>
+    (answers[`q${i}`] ?? "").trim(),
+  ).length;
+
+  return (
+    <div className="space-y-5">
+      <div className="flex items-baseline justify-between gap-3 flex-wrap">
+        <p className="text-sm italic text-ink/75 border-l-2 border-cyan-400 pl-3 flex-1 min-w-[240px]">
+          {plan.rationale}
+        </p>
+        <button
+          onClick={generate}
+          disabled={busy}
+          className="text-xs border border-ink/15 px-3 py-1.5 rounded-md hover:bg-ink/5 shrink-0"
+        >
+          {busy ? "Regenerating…" : "↻ Regenerate plan"}
+        </button>
+      </div>
+
+      <div>
+        <div className="flex items-baseline justify-between gap-2 mb-2">
+          <h3 className="text-sm font-semibold uppercase tracking-wider text-cyan-700">
+            Information to collect
+          </h3>
+          <span className="text-xs text-ink/55">
+            {collectedCount} / {plan.informationChecklist.length} obtained
+          </span>
+        </div>
+        <ul role="list" className="space-y-2">
+          {plan.informationChecklist.map((c, i) => {
+            const key = `c${i}`;
+            const done = Boolean(checklist[key]);
+            return (
+              <li key={key} className={`border rounded-md p-3 ${done ? "border-emerald-300 bg-emerald-50/40" : "border-ink/15 bg-white"}`}>
+                <label className="flex gap-3 items-start cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={done}
+                    onChange={() => toggleItem(key)}
+                    className="mt-1 rounded"
+                  />
+                  <span className="text-sm flex-1">
+                    <strong className={done ? "line-through text-ink/55" : ""}>{c.item}</strong>
+                    <span className="block text-xs text-ink/65 mt-0.5">{c.why}</span>
+                    <span className="block text-[10px] uppercase tracking-wider text-ink/50 mt-1">
+                      Source: {c.source}
+                    </span>
+                  </span>
+                </label>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+
+      <div>
+        <h3 className="text-sm font-semibold uppercase tracking-wider text-cyan-700 mb-2">
+          Recommended tools
+        </h3>
+        <ul role="list" className="grid sm:grid-cols-2 gap-2">
+          {plan.recommendedTools.map((t, i) => (
+            <li key={i} className="border border-ink/15 bg-white rounded-md p-3">
+              <div className="flex items-baseline justify-between gap-2">
+                <strong className="text-sm">{t.name}</strong>
+                <span className="text-[10px] uppercase tracking-wider bg-cyan-100 text-cyan-900 px-1.5 py-0.5 rounded-full font-semibold shrink-0">
+                  {TOOL_KIND_LABELS[t.kind] ?? t.kind}
+                </span>
+              </div>
+              <p className="text-xs text-ink/65 mt-1">{t.purpose}</p>
+            </li>
+          ))}
+        </ul>
+        <p className="text-xs text-ink/55 italic mt-2">
+          Standardized instruments live in Step 3 below — launch them there so
+          results store case-isolated with an AI-drafted interpretation.
+        </p>
+      </div>
+
+      <div>
+        <div className="flex items-baseline justify-between gap-2 mb-2">
+          <h3 className="text-sm font-semibold uppercase tracking-wider text-cyan-700">
+            Data collection — record findings as you work
+          </h3>
+          <span className="text-xs text-ink/55">
+            {answeredCount} / {plan.intakeQuestions.length} answered
+          </span>
+        </div>
+        <ol role="list" className="space-y-3">
+          {plan.intakeQuestions.map((q, i) => {
+            const key = `q${i}`;
+            const saved = (answers[key] ?? "").trim().length > 0;
+            return (
+              <li key={key} className="border border-ink/15 bg-white rounded-md p-3">
+                <label className="block">
+                  <span className="text-sm font-semibold">
+                    {i + 1}. {q.prompt}
+                    {saved && <span className="text-emerald-600 ml-1" aria-label="answered">✓</span>}
+                  </span>
+                  {q.hint && (
+                    <span className="block text-xs text-ink/55 mt-0.5">{q.hint}</span>
+                  )}
+                  <textarea
+                    value={draftAnswers[key] ?? answers[key] ?? ""}
+                    onChange={(e) =>
+                      setDraftAnswers((d) => ({ ...d, [key]: e.target.value }))
+                    }
+                    onBlur={() => saveAnswer(key)}
+                    rows={2}
+                    className="w-full mt-2 bg-cream/40 border border-ink/15 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-cyan-500"
+                    placeholder="Record your finding…"
+                  />
+                </label>
+              </li>
+            );
+          })}
+        </ol>
+        <p className="text-xs text-ink/55 italic mt-2">
+          Answers save when you click away. Everything recorded here — plus
+          the checklist state — feeds the AI findings draft in Step 4, and
+          uncollected items get flagged as limitations.
+        </p>
+      </div>
+
+      {error && (
+        <div role="alert" className="text-sm border border-rose-300 bg-rose-50 text-rose-900 p-3 rounded">
+          {error}
+        </div>
+      )}
     </div>
   );
 }
