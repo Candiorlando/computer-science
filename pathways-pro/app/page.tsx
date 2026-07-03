@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { authenticate, registerClient, type Role } from "@/lib/users";
@@ -197,6 +198,13 @@ function SpecializedCounselors() {
             counselor archetypes — each with distinct services, certifications,
             and the markets they serve.
           </p>
+          <Link
+            href="/counselor-roles"
+            className="inline-block mt-3 text-sm font-semibold text-cyan-700 hover:underline"
+          >
+            See the full top-30 role ranking — by tier, salary, and
+            certification →
+          </Link>
         </div>
 
         <ul
