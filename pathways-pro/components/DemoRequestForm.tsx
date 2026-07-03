@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type Audience = "counselor-agency" | "employer";
 
@@ -38,6 +38,12 @@ export function DemoRequestForm({
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // The submit button ships disabled in the server HTML and enables
+  // once React hydrates. Without this, a click during the hydration
+  // window falls through to a native GET form submission — the page
+  // reloads and the JS validation alert never renders.
+  const [ready, setReady] = useState(false);
+  useEffect(() => setReady(true), []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -210,7 +216,7 @@ export function DemoRequestForm({
 
       <button
         type="submit"
-        disabled={busy}
+        disabled={busy || !ready}
         className="w-full bg-accent text-cream font-semibold py-3 min-h-[44px] rounded-md hover:bg-accent/90 transition disabled:opacity-50"
       >
         {busy ? "Sending…" : "Request a Demo →"}

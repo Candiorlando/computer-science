@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type Key = "goals" | "tasks" | "assessments" | "advocacy";
 const teal = "#0ea5a4",
@@ -106,6 +106,45 @@ function Modal({
   onClose: () => void;
   children: React.ReactNode;
 }) {
+  const panelRef = useRef<HTMLDivElement | null>(null);
+  const closeRef = useRef<HTMLButtonElement | null>(null);
+
+  // Focus management: move focus into the dialog on open, trap Tab
+  // inside it, dismiss on Escape, and restore focus to the opener
+  // when the dialog closes.
+  useEffect(() => {
+    const opener = document.activeElement as HTMLElement | null;
+    closeRef.current?.focus();
+
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        e.stopPropagation();
+        onClose();
+        return;
+      }
+      if (e.key !== "Tab" || !panelRef.current) return;
+      const focusables = panelRef.current.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+      );
+      if (focusables.length === 0) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+
+    document.addEventListener("keydown", onKeyDown, true);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown, true);
+      opener?.focus?.();
+    };
+  }, [onClose]);
+
   return (
     <div
       onClick={onClose}
@@ -119,6 +158,10 @@ function Modal({
       }}
     >
       <div
+        ref={panelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
         onClick={(e) => e.stopPropagation()}
         style={{
           background: paper,
@@ -133,12 +176,16 @@ function Modal({
         <div style={{ display: "flex", justifyContent: "space-between" }}>
           <h3 style={{ margin: 0, color: ink }}>{title}</h3>
           <button
+            ref={closeRef}
             onClick={onClose}
+            aria-label={`Close ${title} dialog`}
             style={{
               border: "none",
               background: "none",
               fontSize: 22,
               cursor: "pointer",
+              minWidth: 44,
+              minHeight: 44,
             }}
           >
             ×

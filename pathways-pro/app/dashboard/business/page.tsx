@@ -630,9 +630,10 @@ function DocumentInbox({
               <button
                 disabled
                 className="border border-ink/15 px-3 py-1.5 rounded text-xs text-ink/50"
-                title="Document viewer not wired in demo"
+                title="The in-app document viewer ships in an upcoming release"
+                aria-label="View document — coming soon"
               >
-                View document
+                View document · Coming Soon
               </button>
             </div>
           </article>

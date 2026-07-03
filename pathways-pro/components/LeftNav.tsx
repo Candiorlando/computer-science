@@ -35,6 +35,7 @@ function menuFor(user: AnyUser, unread: number): NavItem[] {
       { href: "/dashboard/financials", label: "Financials (AR/AP)", icon: "💰" },
       { href: "/dashboard/reports", label: "Reports", icon: "📊" },
       { href: "/dashboard/services-catalog", label: "Service Catalog", icon: "💼" },
+      { href: "/ce", label: "CE Tracker", icon: "🎓" },
       { href: "/settings", label: "Settings", icon: "⚙️" },
     ];
   }
@@ -44,6 +45,8 @@ function menuFor(user: AnyUser, unread: number): NavItem[] {
       { href: "/progress", label: "My Progress", icon: "📈" },
       { href: "/ipe", label: "My IPE Plan", icon: "📋" },
       { href: "/assessment", label: "Assessments", icon: "📝" },
+      { href: "/my-assessments", label: "My Assessments", icon: "🗂️" },
+      { href: "/transferable-skills", label: "My Skills", icon: "🧰" },
       { href: "/report", label: "Documents", icon: "📄" },
       { href: "/messages", label: "Messages", icon: "✉️", badge: unread },
       { href: "/case-notes", label: "Case Notes", icon: "🗒️" },
