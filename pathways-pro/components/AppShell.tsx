@@ -43,6 +43,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     setUser(loadSession());
   }, [pathname]);
 
+  // The homepage ships its own dark header + footer (full-bleed
+  // landing design) — render it bare, no shared chrome.
+  if (pathname === "/") {
+    return <>{children}</>;
+  }
+
   // Public landing pages — keep the existing top header + centered main.
   if (!mounted || !user || isPublicPath(pathname)) {
     return (
