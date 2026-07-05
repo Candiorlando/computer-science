@@ -6,8 +6,8 @@
 // relevant case rather than showing any content cross-case.
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { loadSession } from "@/lib/session";
 import type { CounselorUser } from "@/lib/users";
 import {
@@ -46,9 +46,20 @@ function loadRecents(counselorEmail: string): string[] {
 }
 
 export default function CaseSearchPage() {
+  return (
+    <Suspense fallback={null}>
+      <CaseSearchInner />
+    </Suspense>
+  );
+}
+
+function CaseSearchInner() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [user, setUser] = useState<CounselorUser | null>(null);
-  const [query, setQuery] = useState("");
+  // Accepts ?q= handoffs from other pages (e.g. a caseload search
+  // that found no roster match) so the query carries over.
+  const [query, setQuery] = useState(searchParams.get("q") ?? "");
   const [filter, setFilter] = useState<"all" | CaseType>("all");
 
   useEffect(() => {
