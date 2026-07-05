@@ -2,10 +2,10 @@
 import { useEffect, useRef, useState } from "react";
 
 type Key = "goals" | "tasks" | "assessments" | "advocacy";
-const teal = "#0ea5a4",
-  ink = "#1f2937",
-  line = "#d8d2c4",
-  paper = "#fffdf8";
+const teal = "#2DD4BF",
+  ink = "#E6EAF2",
+  line = "rgba(255,255,255,0.14)",
+  paper = "#111827";
 
 const CARDS: { key: Key; icon: string; label: string }[] = [
   { key: "goals", icon: "🎯", label: "Goals Identified" },
@@ -41,7 +41,7 @@ export default function InteractiveProgress() {
   }, [open]);
 
   return (
-    <section style={{ fontFamily: "Georgia, serif" }}>
+    <section style={{ fontFamily: "Inter, system-ui, sans-serif" }}>
       <h2 style={{ color: ink }}>What you&rsquo;ve done</h2>
       <div
         style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}
@@ -71,7 +71,7 @@ export default function InteractiveProgress() {
             <div
               style={{
                 letterSpacing: 1,
-                color: "#6b7280",
+                color: "#94A3B8",
                 textTransform: "uppercase",
                 fontSize: 13,
               }}
@@ -170,7 +170,7 @@ function Modal({
           width: "min(640px,92vw)",
           maxHeight: "88vh",
           overflow: "auto",
-          fontFamily: "Georgia, serif",
+          fontFamily: "Inter, system-ui, sans-serif",
         }}
       >
         <div style={{ display: "flex", justifyContent: "space-between" }}>
@@ -285,7 +285,7 @@ function GoalApparatus() {
         ] as const
       ).map(([k, label]) => (
         <label key={k} style={{ display: "block", margin: "8px 0" }}>
-          <div style={{ fontSize: 14, color: "#6b7280" }}>{label}</div>
+          <div style={{ fontSize: 14, color: "#94A3B8" }}>{label}</div>
           <input
             value={goal[k]}
             onChange={(e) => setGoal((g) => ({ ...g, [k]: e.target.value }))}
@@ -325,7 +325,7 @@ function GoalApparatus() {
               }}
             >
               <strong>{g.specific}</strong>
-              <div style={{ color: "#6b7280", fontSize: 14 }}>
+              <div style={{ color: "#94A3B8", fontSize: 14 }}>
                 {g.area} · by {g.timebound || "—"}
               </div>
             </div>

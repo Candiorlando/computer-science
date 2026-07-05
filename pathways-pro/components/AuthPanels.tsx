@@ -337,8 +337,8 @@ function Styles() {
     <style jsx>{`
       :global(.input) {
         width: 100%;
-        background: white;
-        border: 1px solid rgba(31, 29, 26, 0.2);
+        background: #1E293B;
+        border: 1px solid rgba(230, 234, 242, 0.2);
         border-radius: 6px;
         padding: 0.65rem 0.75rem;
         font-size: 0.9rem;
@@ -346,7 +346,7 @@ function Styles() {
       }
       :global(.input:focus) {
         outline: none;
-        border-color: #b95c3c;
+        border-color: #6366F1;
       }
     `}</style>
   );

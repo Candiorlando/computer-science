@@ -499,20 +499,20 @@ function OccupationCard({
 
       <style jsx>{`
         :global(.link-btn-money) {
-          background-color: rgba(185, 92, 60, 0.08);
-          border-color: rgba(185, 92, 60, 0.35) !important;
+          background-color: rgba(99, 102, 241, 0.08);
+          border-color: rgba(99, 102, 241, 0.35) !important;
         }
         :global(.link-btn-money:hover) {
-          background-color: rgba(185, 92, 60, 0.15);
+          background-color: rgba(99, 102, 241, 0.15);
         }
         :global(.link-btn) {
-          border: 1px solid rgba(31, 29, 26, 0.2);
+          border: 1px solid rgba(230, 234, 242, 0.2);
           padding: 0.35rem 0.75rem;
           border-radius: 4px;
         }
         :global(.link-btn:hover) {
-          border-color: #b95c3c;
-          color: #b95c3c;
+          border-color: #6366F1;
+          color: #6366F1;
         }
       `}</style>
     </article>

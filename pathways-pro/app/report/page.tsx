@@ -563,7 +563,7 @@ function ReportDocument({
         .report-page .r-bar .r-bar-fill span {
           display: block;
           height: 100%;
-          background: #b95c3c;
+          background: #6366F1;
         }
         .report-page .r-bar .r-bar-val {
           text-align: right;
@@ -582,7 +582,7 @@ function ReportDocument({
           place-items: center;
           font-weight: bold;
           font-size: 14pt;
-          background: #b95c3c;
+          background: #6366F1;
           color: white;
         }
         .report-page .holland-letter.s2 {
@@ -610,7 +610,7 @@ function ReportDocument({
           font-variant-numeric: tabular-nums;
         }
         .report-page .match-row .m-fit {
-          color: #b95c3c;
+          color: #6366F1;
           font-weight: bold;
         }
         .report-page .skill-card {
@@ -949,7 +949,7 @@ function ClientGoalsBlock({ report }: { report: ClientReport }) {
           <p
             style={{
               fontStyle: "italic",
-              borderLeft: "3pt solid #b95c3c",
+              borderLeft: "3pt solid #6366F1",
               paddingLeft: "10px",
               margin: "6px 0",
             }}
@@ -1552,7 +1552,7 @@ function AssessmentBlock({
       <h2>Personality &amp; Interest Profile</h2>
       <h3>
         Holland Code:{" "}
-        <span style={{ color: "#b95c3c", fontWeight: "bold" }}>{hollandCode}</span>
+        <span style={{ color: "#6366F1", fontWeight: "bold" }}>{hollandCode}</span>
       </h3>
       <div className="holland-row">
         {hollandCode.split("").map((l, i) => (

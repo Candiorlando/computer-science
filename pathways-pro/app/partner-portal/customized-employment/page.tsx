@@ -417,8 +417,8 @@ function NewEngagementModal({
         <style jsx>{`
           :global(.input) {
             width: 100%;
-            background: white;
-            border: 1px solid rgba(31, 29, 26, 0.15);
+            background: #1E293B;
+            border: 1px solid rgba(230, 234, 242, 0.15);
             border-radius: 8px;
             padding: 0.5rem 0.75rem;
             font-size: 0.9rem;
