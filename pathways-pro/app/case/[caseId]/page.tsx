@@ -1,19 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { Suspense, useEffect, useMemo, useState } from "react";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { loadSession } from "@/lib/session";
 import type { CounselorUser } from "@/lib/users";
 import { CLIENTS } from "@/lib/users";
 import { loadCaseNotes, notesForClient } from "@/lib/case-notes";
 import { CaseNotesPanel } from "@/components/CaseNotesPanel";
-import { loadAccommodationLetters } from "@/lib/accommodation-letters";
 import {
-  loadProblemAnalysisReports,
-  loadEEOCCharges,
-  loadOCRComplaints,
-} from "@/lib/self-advocacy";
+  documentsForCase,
+  CASE_DOCUMENT_KIND_LABELS,
+} from "@/lib/case-documents";
 import { threadsForUser } from "@/lib/messages";
 import { buildProgress } from "@/lib/positive-psychology";
 import { recordCaseOpen } from "@/lib/recent-cases";
@@ -28,12 +26,36 @@ type Tab =
   | "assessments"
   | "progress";
 
+const VALID_TABS: Tab[] = [
+  "overview",
+  "documents",
+  "case-notes",
+  "messages",
+  "timeline",
+  "assessments",
+  "progress",
+];
+
 export default function CaseFilePage() {
+  return (
+    <Suspense fallback={null}>
+      <CaseFileInner />
+    </Suspense>
+  );
+}
+
+function CaseFileInner() {
   const router = useRouter();
   const params = useParams();
+  const searchParams = useSearchParams();
   const caseId = String(params.caseId);
   const [user, setUser] = useState<CounselorUser | null>(null);
-  const [tab, setTab] = useState<Tab>("overview");
+  // ?tab= deep links (e.g. a Documents-tab entry pointing back at the
+  // Assessments tab) land on the right tab directly.
+  const [tab, setTab] = useState<Tab>(() => {
+    const t = searchParams.get("tab") as Tab | null;
+    return t && VALID_TABS.includes(t) ? t : "overview";
+  });
 
   useEffect(() => {
     const s = loadSession();
@@ -215,78 +237,68 @@ function OverviewTab({
 }
 
 function DocumentsTab({ caseId }: { caseId: string }) {
-  const letters = loadAccommodationLetters().filter((l) => l.caseId === caseId);
-  const reports = loadProblemAnalysisReports().filter((r) => r.caseId === caseId);
-  const eeoc = loadEEOCCharges().filter((c) => c.caseId === caseId);
-  const ocr = loadOCRComplaints().filter((c) => c.caseId === caseId);
+  const docs = documentsForCase(caseId);
 
-  const groups: { label: string; items: { id: string; title: string; date: string }[] }[] = [
-    {
-      label: "Accommodation letters",
-      items: letters.map((l) => ({
-        id: l.id,
-        title: l.workplaceProblem.slice(0, 60),
-        date: l.createdAt,
-      })),
-    },
-    {
-      label: "Problem Analysis Reports",
-      items: reports.map((r) => ({
-        id: r.id,
-        title: r.employerName,
-        date: r.createdAt,
-      })),
-    },
-    {
-      label: "EEOC charges",
-      items: eeoc.map((c) => ({
-        id: c.id,
-        title: `${c.employerName} — ${c.basesOfDiscrimination.join(", ")}`,
-        date: c.createdAt,
-      })),
-    },
-    {
-      label: "OCR / DOJ complaints",
-      items: ocr.map((c) => ({
-        id: c.id,
-        title: `${c.respondentName} — ${c.agency}`,
-        date: c.createdAt,
-      })),
-    },
-  ];
-
-  const total = groups.reduce((s, g) => s + g.items.length, 0);
-
-  if (total === 0) {
+  if (docs.length === 0) {
     return (
       <div className="saas-card text-center text-ink/55 italic">
-        No documents generated for this case yet.
+        No documents generated for this case yet. Anything produced for
+        this client — completed assessments, the signed IPE, letters,
+        reports, complaints, business plans — files here automatically.
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
-      {groups
-        .filter((g) => g.items.length > 0)
-        .map((g) => (
-          <section key={g.label} className="saas-card">
-            <h2 className="text-lg font-semibold mb-3">{g.label}</h2>
-            <ol role="list" className="space-y-1.5">
-              {g.items.map((it) => (
-                <li
-                  key={it.id}
-                  className="flex items-baseline justify-between gap-2 text-sm border-b border-ink/10 pb-1.5 last:border-0"
+    <div className="space-y-3">
+      <p className="text-xs text-ink/55">
+        {docs.length} document{docs.length === 1 ? "" : "s"} on file —
+        every deliverable generated for this client, newest first.
+      </p>
+      <ol role="list" className="space-y-2">
+        {docs.map((d) => (
+          <li key={d.id} className="saas-card">
+            <div className="flex items-baseline justify-between gap-3 flex-wrap">
+              <div className="min-w-0">
+                <span className="text-[10px] uppercase tracking-wider bg-cyan-500/15 text-cyan-300 px-2 py-0.5 rounded-full font-semibold">
+                  {CASE_DOCUMENT_KIND_LABELS[d.kind]}
+                </span>
+                <h3 className="font-semibold mt-1.5">{d.title}</h3>
+                <p className="text-xs text-ink/55 mt-0.5">
+                  {new Date(d.createdAt).toLocaleDateString(undefined, {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                  })}
+                  {d.createdByName && <> · by {d.createdByName}</>}
+                  {d.status && (
+                    <>
+                      {" · "}
+                      <span
+                        className={
+                          d.status === "Approved" || d.status === "Signed"
+                            ? "text-emerald-400 font-semibold"
+                            : "text-amber-300 font-semibold"
+                        }
+                      >
+                        {d.status}
+                      </span>
+                    </>
+                  )}
+                </p>
+              </div>
+              {d.href && (
+                <Link
+                  href={d.href}
+                  className="text-xs text-cyan-400 hover:underline shrink-0 py-2"
                 >
-                  <span className="truncate">{it.title}</span>
-                  <span className="text-xs text-ink/55">
-                    {new Date(it.date).toLocaleDateString()}
-                  </span>
-                </li>
-              ))}
-            </ol>
-          </section>
+                  Open →
+                </Link>
+              )}
+            </div>
+          </li>
         ))}
+      </ol>
     </div>
   );
 }
