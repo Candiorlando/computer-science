@@ -10,6 +10,10 @@ import {
   markComplete,
   type Assignment,
 } from "@/lib/assignments";
+import {
+  pendingAssignmentsForCase,
+  type AssessmentAssignment,
+} from "@/lib/assessment-assignments";
 
 export default function MyAssessmentsPage() {
   const router = useRouter();
@@ -74,6 +78,11 @@ export default function MyAssessmentsPage() {
 
   const pending = assignments.filter((a) => !a.isComplete);
   const completed = assignments.filter((a) => a.isComplete);
+  const activeCaseId =
+    role === "client" ? client?.caseId : counselorPickedCaseId;
+  const instrumentAssignments: AssessmentAssignment[] = activeCaseId
+    ? pendingAssignmentsForCase(activeCaseId)
+    : [];
 
   return (
     <div className="space-y-6">
@@ -93,6 +102,44 @@ export default function MyAssessmentsPage() {
           </p>
         )}
       </header>
+
+      {instrumentAssignments.length > 0 && (
+        <section
+          aria-label="Assessments assigned by your counselor"
+          className="saas-card border-cyan-500/40"
+        >
+          <h2 className="text-2xl mb-1">
+            📤 Assigned to you ({instrumentAssignments.length})
+          </h2>
+          <p className="text-sm text-ink/65 mb-4">
+            Your counselor asked you to complete these. They take a few
+            minutes each — your answers go straight to your case file for
+            your counselor to review.
+          </p>
+          <ul role="list" className="space-y-3">
+            {instrumentAssignments.map((a) => (
+              <li
+                key={a.id}
+                className="border border-ink/15 bg-white rounded-lg p-4 flex items-center justify-between gap-4 flex-wrap"
+              >
+                <div className="min-w-0">
+                  <div className="font-semibold">{a.toolTitle}</div>
+                  <div className="text-xs text-ink/55 mt-0.5">
+                    Assigned by {a.assignedByName} ·{" "}
+                    {new Date(a.assignedAt).toLocaleDateString()}
+                  </div>
+                </div>
+                <Link
+                  href={`/my-assessments/assigned/${a.id}`}
+                  className="grad-tealblue text-white text-sm font-semibold px-4 py-2.5 min-h-[44px] inline-flex items-center rounded-md shrink-0"
+                >
+                  Start →
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {(!previewClient || assignments.length === 0) && (
         <section className="border border-dashed border-ink/20 rounded-lg p-8 text-center text-ink/60">

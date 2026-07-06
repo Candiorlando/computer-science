@@ -17,6 +17,7 @@ import {
 import InteractiveProgress from "./InteractiveProgress";
 import { loadServiceRequests } from "@/lib/service-requests";
 import { getService } from "@/lib/service-catalog";
+import { pendingAssignmentsForCase } from "@/lib/assessment-assignments";
 
 interface RecentDoc {
   id: string;
@@ -48,6 +49,9 @@ export default function ClientHome() {
             .slice(0, 6)
         : [];
     const myCaseId = "caseId" in user ? user.caseId : null;
+    const assignedAssessments = myCaseId
+      ? pendingAssignmentsForCase(myCaseId)
+      : [];
     const activeServices = myCaseId
       ? loadServiceRequests()
           .filter(
@@ -103,7 +107,14 @@ export default function ClientHome() {
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
       )
       .slice(0, 4);
-    return { unread, threads, recentNotes, recentDocs, activeServices };
+    return {
+      unread,
+      threads,
+      recentNotes,
+      recentDocs,
+      activeServices,
+      assignedAssessments,
+    };
   }, [user]);
 
   if (!user || !data) return null;
@@ -143,6 +154,33 @@ export default function ClientHome() {
           </Link>
         </div>
       </section>
+
+      {data.assignedAssessments.length > 0 && (
+        <section className="saas-card border-cyan-500/50" role="status">
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div>
+              <h2 className="text-lg font-semibold">
+                📤 {data.assignedAssessments.length} assessment
+                {data.assignedAssessments.length === 1 ? "" : "s"} waiting for
+                you
+              </h2>
+              <p className="text-sm text-ink/65 mt-0.5">
+                {data.assignedAssessments[0].assignedByName} assigned{" "}
+                {data.assignedAssessments.length === 1
+                  ? `"${data.assignedAssessments[0].toolTitle}"`
+                  : "assessments"}{" "}
+                for you to complete.
+              </p>
+            </div>
+            <Link
+              href="/my-assessments"
+              className="grad-tealblue text-white font-semibold px-4 py-2.5 min-h-[44px] inline-flex items-center rounded-md text-sm shrink-0"
+            >
+              Start now →
+            </Link>
+          </div>
+        </section>
+      )}
 
       {isClient && (
         <section className="saas-card">

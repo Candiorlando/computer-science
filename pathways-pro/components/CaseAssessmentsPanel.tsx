@@ -13,6 +13,12 @@ import {
   type CaseAssessment,
   type CaseScopeKind,
 } from "@/lib/case-assessments";
+import {
+  assignAssessment,
+  cancelAssignment,
+  pendingAssignmentsForCase,
+} from "@/lib/assessment-assignments";
+import { getAllClients } from "@/lib/users";
 import { AddServiceAssessmentDropdown } from "@/components/AddServiceAssessmentDropdown";
 
 interface Props {
@@ -24,6 +30,9 @@ interface Props {
   filterServiceId?: string;
   // Counselor email — required for approval
   counselorEmail?: string;
+  // Counselor display name — used when assigning an assessment to the
+  // client so the portal shows who assigned it.
+  counselorName?: string;
   // Where to route when an assessment is launched
   launchRoute?: (toolId: string) => string;
   // Whether to render the "Launch an assessment" tool catalog
@@ -39,13 +48,47 @@ export function CaseAssessmentsPanel({
   audience,
   filterServiceId,
   counselorEmail,
+  counselorName,
   launchRoute,
   showLauncher = true,
 }: Props) {
+  const [bump, setBump] = useState(0);
   const existing = useMemo(
     () => assessmentsForScope(scopeKind, scopeId),
-    [scopeKind, scopeId],
+    [scopeKind, scopeId, bump],
   );
+
+  // Assign-to-client is only meaningful on a client case file.
+  const canAssign = scopeKind === "client-case" && Boolean(counselorEmail);
+  const clientName = useMemo(() => {
+    if (scopeKind !== "client-case") return scopeId;
+    return (
+      Object.values(getAllClients()).find((c) => c.caseId === scopeId)?.name ??
+      scopeId
+    );
+  }, [scopeKind, scopeId]);
+  const pending = useMemo(
+    () =>
+      scopeKind === "client-case" ? pendingAssignmentsForCase(scopeId) : [],
+    [scopeKind, scopeId, bump],
+  );
+  const pendingToolIds = useMemo(
+    () => new Set(pending.map((p) => p.toolId)),
+    [pending],
+  );
+
+  function assign(toolId: string, toolTitle: string) {
+    if (!counselorEmail) return;
+    assignAssessment({
+      toolId,
+      toolTitle,
+      caseId: scopeId,
+      clientName,
+      assignedByEmail: counselorEmail,
+      assignedByName: counselorName ?? counselorEmail,
+    });
+    setBump((n) => n + 1);
+  }
 
   const launchableTools = useMemo(() => {
     return ASSESSMENT_TOOLS.filter(
@@ -80,6 +123,47 @@ export function CaseAssessmentsPanel({
         )}
       </section>
 
+      {canAssign && pending.length > 0 && (
+        <section
+          aria-label="Assessments assigned to the client"
+          className="saas-card border-cyan-500/40"
+        >
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-cyan-400 mb-2">
+            📤 Assigned to {clientName} — awaiting completion ({pending.length})
+          </h2>
+          <ul role="list" className="space-y-1.5">
+            {pending.map((p) => (
+              <li
+                key={p.id}
+                className="flex items-baseline justify-between gap-3 text-sm flex-wrap"
+              >
+                <span>
+                  <strong>{p.toolTitle}</strong>
+                  <span className="text-ink/55 text-xs">
+                    {" "}
+                    · assigned {new Date(p.assignedAt).toLocaleDateString()}
+                  </span>
+                </span>
+                <button
+                  onClick={() => {
+                    cancelAssignment(p.id);
+                    setBump((n) => n + 1);
+                  }}
+                  className="text-xs text-ink/55 hover:text-rose-400 underline"
+                >
+                  Cancel
+                </button>
+              </li>
+            ))}
+          </ul>
+          <p className="text-xs text-ink/55 italic mt-2">
+            These appear in the client&apos;s portal under My Assessments →
+            Assigned to you. Results land back on this tab for your review
+            and approval.
+          </p>
+        </section>
+      )}
+
       {showLauncher && (
         <section>
           <header className="mb-3 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
@@ -90,25 +174,62 @@ export function CaseAssessmentsPanel({
               <p className="text-xs text-ink/55">
                 {launchableTools.length} tool{launchableTools.length === 1 ? "" : "s"} embedded for{" "}
                 {filterServiceId ? "the selected service" : "this case type"}.
+                {canAssign &&
+                  " Run it live in session, or assign it to the client to complete from their portal."}
               </p>
             </div>
             <AddServiceAssessmentDropdown />
           </header>
           <ul role="list" className="grid sm:grid-cols-2 gap-2">
-            {launchableTools.map((t) => (
-              <li key={t.id}>
-                <Link
-                  href={launchRoute ? launchRoute(t.id) : `/case/${scopeId}/assessment/${t.id}`}
-                  className="saas-card block hover:no-underline"
-                >
+            {launchableTools.map((t) => {
+              const runHref = launchRoute
+                ? launchRoute(t.id)
+                : `/case/${scopeId}/assessment/${t.id}`;
+              if (!canAssign) {
+                return (
+                  <li key={t.id}>
+                    <Link href={runHref} className="saas-card block hover:no-underline">
+                      <h3 className="font-semibold text-sm">{t.title}</h3>
+                      <p className="text-xs text-ink/65 mt-1">{t.description}</p>
+                      <p className="text-[10px] uppercase tracking-wider text-cyan-700 mt-2">
+                        {t.items.length} items
+                      </p>
+                    </Link>
+                  </li>
+                );
+              }
+              const isAssigned = pendingToolIds.has(t.id);
+              return (
+                <li key={t.id} className="saas-card">
                   <h3 className="font-semibold text-sm">{t.title}</h3>
                   <p className="text-xs text-ink/65 mt-1">{t.description}</p>
                   <p className="text-[10px] uppercase tracking-wider text-cyan-700 mt-2">
                     {t.items.length} items
                   </p>
-                </Link>
-              </li>
-            ))}
+                  <div className="flex gap-2 mt-3 flex-wrap items-center">
+                    <Link
+                      href={runHref}
+                      className="text-xs grad-tealblue text-white font-semibold px-3 py-1.5 rounded-md"
+                    >
+                      Run now →
+                    </Link>
+                    {isAssigned ? (
+                      <span className="text-[10px] uppercase tracking-wider bg-cyan-500/15 text-cyan-300 px-2 py-1 rounded-full font-semibold">
+                        📤 Assigned · awaiting client
+                      </span>
+                    ) : (
+                      <button
+                        onClick={() => assign(t.id, t.title)}
+                        className="text-xs border border-cyan-500/60 text-cyan-300 px-3 py-1.5 rounded-md hover:bg-cyan-500/10 font-semibold"
+                        title={`Send this assessment to ${clientName}'s portal to complete on their own`}
+                      >
+                        📤 Assign to client
+                      </button>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         </section>
       )}

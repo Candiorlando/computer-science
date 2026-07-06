@@ -135,6 +135,7 @@ export default function CaseFilePage() {
           scopeId={caseId}
           audience="counselor"
           counselorEmail={user.email}
+          counselorName={user.name}
           launchRoute={(toolId) => `/case/${caseId}/assessment/${toolId}`}
         />
       )}
