@@ -292,14 +292,16 @@ export default function CareersPage() {
           Pathways Pro helps rehabilitation professionals explore these career
           specialties, compare job titles and responsibilities, identify the
           education and certifications each path requires, and build an
-          individualized professional development plan.
+          individualized professional development plan. Want to see where{" "}
+          <em>you</em> fit? Take the free Interest Profiler and Personality
+          Inventory in the course — no sign-up, instant results.
         </p>
         <div className="flex flex-wrap gap-3">
           <Link
-            href="/training"
+            href="/training#assessment-top"
             className="bg-accent text-cream font-semibold px-6 py-3 rounded-md hover:bg-accent/90 transition"
           >
-            View the full course →
+            Take the free assessment →
           </Link>
           <Link
             href="/about"

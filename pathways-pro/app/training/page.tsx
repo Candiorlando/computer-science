@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { CareerAssessmentDemo } from "@/components/CareerAssessmentDemo";
 
 export const metadata: Metadata = {
   title: "Course 1 — Rehabilitation Counselor Services & Careers | Pathways Pro",
@@ -180,18 +181,29 @@ export default function TrainingPage() {
         </div>
       </section>
 
-      <section className="space-y-5">
-        <h2 className="text-3xl tracking-tight">Interactive activities</h2>
-        <ol className="space-y-2">
+      <section className="space-y-6">
+        <header className="space-y-2 max-w-2xl">
+          <p className="text-xs uppercase tracking-widest text-accent">
+            Interactive activities
+          </p>
+          <h2 className="text-3xl tracking-tight">Do it here — take the assessments</h2>
+          <p className="text-ink/70">
+            These activities come to life with real instruments. Take the Interest
+            Profiler and Personality Inventory below and get your results
+            instantly — a free taste of the Pathways Pro experience.
+          </p>
+        </header>
+        <ol className="grid sm:grid-cols-2 gap-x-6 gap-y-2">
           {ACTIVITIES.map((a, i) => (
             <li key={a} className="flex items-center gap-3">
               <span className="flex-none w-7 h-7 grid place-items-center rounded-md bg-ink/10 text-ink text-xs font-bold tabular-nums">
                 {i + 1}
               </span>
-              <span className="text-ink/85">{a}</span>
+              <span className="text-ink/85 text-sm">{a}</span>
             </li>
           ))}
         </ol>
+        <CareerAssessmentDemo />
       </section>
 
       <section className="saas-card !bg-accent/5 border-accent/30 space-y-3">
