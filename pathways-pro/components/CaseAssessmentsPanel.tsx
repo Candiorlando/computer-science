@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { generateAssessmentReport } from "@/lib/assessment-reports";
 import {
   ASSESSMENT_TOOLS,
   getAssessmentTool,
@@ -52,11 +54,24 @@ export function CaseAssessmentsPanel({
   launchRoute,
   showLauncher = true,
 }: Props) {
+  const router = useRouter();
   const [bump, setBump] = useState(0);
   const existing = useMemo(
     () => assessmentsForScope(scopeKind, scopeId),
     [scopeKind, scopeId, bump],
   );
+
+  // Consolidated report generation — client case files only, once at
+  // least one assessment is on file.
+  const canGenerateReport =
+    scopeKind === "client-case" &&
+    Boolean(counselorEmail) &&
+    existing.length > 0;
+
+  function generateReport() {
+    generateAssessmentReport(scopeId, counselorName ?? counselorEmail ?? "");
+    router.push(`/case/${scopeId}/document/assessment-report-${scopeId}`);
+  }
 
   // Assign-to-client is only meaningful on a client case file.
   const canAssign = scopeKind === "client-case" && Boolean(counselorEmail);
@@ -101,10 +116,19 @@ export function CaseAssessmentsPanel({
   return (
     <div className="space-y-5">
       <section>
-        <header className="flex items-baseline justify-between gap-3 mb-3">
+        <header className="flex items-baseline justify-between gap-3 mb-3 flex-wrap">
           <h2 className="text-lg font-semibold">
             Assessments on file ({existing.length})
           </h2>
+          {canGenerateReport && (
+            <button
+              onClick={generateReport}
+              className="grad-tealblue text-white text-xs font-semibold px-3 py-2 min-h-[44px] inline-flex items-center rounded-md"
+              title="Compile all completed assessments into one printable report, filed in Documents"
+            >
+              📄 Generate assessment report →
+            </button>
+          )}
         </header>
         {existing.length === 0 ? (
           <div className="border border-dashed border-ink/20 rounded-lg p-4 text-center text-ink/55 text-sm italic">

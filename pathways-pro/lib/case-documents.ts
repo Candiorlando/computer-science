@@ -17,9 +17,11 @@ import {
 } from "./self-advocacy";
 import { loadBusinessPlans, loadConceptMatches } from "./entrepreneurship";
 import { loadClientReport } from "./client-report";
+import { loadAssessmentReport } from "./assessment-reports";
 
 export type CaseDocumentKind =
   | "assessment"
+  | "assessment-report"
   | "ipe"
   | "career-report"
   | "accommodation-letter"
@@ -31,6 +33,7 @@ export type CaseDocumentKind =
 
 export const CASE_DOCUMENT_KIND_LABELS: Record<CaseDocumentKind, string> = {
   assessment: "Assessment result",
+  "assessment-report": "Assessment Summary Report",
   ipe: "IPE — Individualized Plan for Employment",
   "career-report": "Career assessment report",
   "accommodation-letter": "Accommodation letter",
@@ -58,6 +61,22 @@ export function documentsForCase(
 ): CaseDocument[] {
   const docs: CaseDocument[] = [];
   const isClient = viewer === "client";
+
+  // Consolidated Assessment Summary Report (counselor-generated).
+  const assessmentReport = loadAssessmentReport(caseId);
+  if (assessmentReport) {
+    docs.push({
+      id: `assessment-report-${caseId}`,
+      caseId,
+      kind: "assessment-report",
+      title: "Assessment Summary Report",
+      createdAt: assessmentReport.generatedAt,
+      createdByName: assessmentReport.generatedByName,
+      href: isClient
+        ? "/my-assessments"
+        : `/case/${caseId}/document/assessment-report-${caseId}`,
+    });
+  }
 
   // Completed assessments (in-session or client-completed via
   // assignment) — all live in the case-isolated assessment store.
@@ -211,6 +230,50 @@ export function renderDocument(
   caseId: string,
   docId: string,
 ): RenderedDocument | null {
+  // Consolidated Assessment Summary Report — compiled live from every
+  // completed assessment on the case.
+  if (docId === `assessment-report-${caseId}`) {
+    const marker = loadAssessmentReport(caseId);
+    const assessments = assessmentsForScope("client-case", caseId);
+    if (!marker || assessments.length === 0) return null;
+    const approved = assessments.filter((a) => a.counselorApproved).length;
+    return {
+      title: "Assessment Summary Report",
+      subtitle: "Consolidated Vocational Assessment Findings",
+      meta: [
+        { label: "Case", value: caseId },
+        { label: "Prepared by", value: marker.generatedByName },
+        {
+          label: "Generated",
+          value: new Date(marker.generatedAt).toLocaleString(),
+        },
+        {
+          label: "Instruments",
+          value: `${assessments.length} completed · ${approved} approved`,
+        },
+      ],
+      sections: [
+        {
+          heading: "Overview",
+          body: `This report consolidates ${assessments.length} assessment${assessments.length === 1 ? "" : "s"} completed for this client, with the counselor's interpretation of each. It is intended to inform IPE goal-setting and service planning.`,
+        },
+        ...assessments.map((a) => ({
+          heading: `${a.toolTitle}${a.counselorApproved ? " (approved)" : " (awaiting approval)"}`,
+          body:
+            `Administered by ${a.administeredByName} on ${new Date(a.administeredAt).toLocaleDateString()}.\n\n` +
+            "Responses:\n" +
+            a.responses
+              .map((r, i) => `${i + 1}. ${r.itemId}: ${String(r.value)}`)
+              .join("\n") +
+            "\n\nInterpretation:\n" +
+            (a.counselorEditedInterpretation ??
+              a.aiDraftInterpretation ??
+              "No interpretation recorded."),
+        })),
+      ],
+    };
+  }
+
   // IPE — full plan
   if (docId === `ipe-${caseId}`) {
     const ipe = loadIPE(caseId);
