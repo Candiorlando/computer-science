@@ -21,6 +21,9 @@ const PUBLIC_PREFIXES = [
   "/business",
   "/accessibility",
   "/privacy",
+  "/careers",
+  "/training",
+  "/about",
 ];
 
 function isPublicPath(pathname: string): boolean {
