@@ -19,6 +19,10 @@ import {
 } from "@/lib/client-report";
 import { loadProfile } from "@/lib/storage";
 import { loadTSA } from "@/lib/tsa-storage";
+import {
+  documentsForCase,
+  CASE_DOCUMENT_KIND_LABELS,
+} from "@/lib/case-documents";
 import { rankOccupations } from "@/lib/onet-data";
 import { riasecNames, traitNames } from "@/lib/assessments";
 import { analyzeHollandCode } from "@/lib/holland-analysis";
@@ -349,6 +353,7 @@ function ReportDocument({
             </button>
           )}
           <h1 className="text-2xl">Assessment Report</h1>
+          <ClientDocumentsFolder caseId={caseId} isClient={isClient} />
         </div>
         <div className="flex gap-2 flex-wrap">
           {!isClient && ipeFullySigned && (
@@ -646,6 +651,59 @@ function ReportDocument({
           }
         }
       `}</style>
+    </div>
+  );
+}
+
+function ClientDocumentsFolder({
+  caseId,
+  isClient,
+}: {
+  caseId: string;
+  isClient?: boolean;
+}) {
+  const docs = documentsForCase(caseId, isClient ? "client" : "counselor");
+  const [open, setOpen] = useState(false);
+  if (docs.length === 0) return null;
+  return (
+    <div className="mt-2">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        className="text-xs text-accent hover:underline font-semibold"
+      >
+        📁 Documents on file ({docs.length}){" "}
+        <span aria-hidden>{open ? "▲" : "▼"}</span>
+      </button>
+      {open && (
+        <ul role="list" className="mt-2 space-y-1.5 max-w-md">
+          {docs.map((d) => (
+            <li
+              key={d.id}
+              className="flex items-baseline justify-between gap-3 text-sm border-b border-ink/10 pb-1.5 last:border-0"
+            >
+              <span className="min-w-0">
+                <span className="text-[10px] uppercase tracking-wider text-accent mr-1.5">
+                  {CASE_DOCUMENT_KIND_LABELS[d.kind]}
+                </span>
+                <span className="truncate">{d.title}</span>
+              </span>
+              {d.href ? (
+                <Link
+                  href={d.href}
+                  className="text-xs text-accent hover:underline shrink-0"
+                >
+                  Open →
+                </Link>
+              ) : (
+                <span className="text-xs text-ink/40 shrink-0">
+                  {new Date(d.createdAt).toLocaleDateString()}
+                </span>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
