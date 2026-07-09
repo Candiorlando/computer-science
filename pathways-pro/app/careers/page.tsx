@@ -127,18 +127,109 @@ const CREDENTIALS = [
   "Certified Disability Management Specialist (CDMS)",
 ];
 
-const LADDER = [
-  "Rehabilitation Counselor I",
-  "Rehabilitation Counselor II",
-  "Senior Rehabilitation Counselor",
-  "Supervisor",
-  "Regional Manager",
-  "Bureau Chief",
-  "Policy Director",
-  "Executive Leadership",
-  "Private Consultant",
-  "Professor",
-  "Researcher",
+// Practice areas within vocational counseling, each with example job titles.
+const FIELDS: { name: string; examples: string[] }[] = [
+  {
+    name: "Vocational Evaluation & Assessment",
+    examples: [
+      "Vocational Evaluator",
+      "Certified Vocational Evaluator (CVE)",
+      "Work Adjustment Specialist",
+      "Assessment Specialist",
+    ],
+  },
+  {
+    name: "Job Placement & Supported Employment",
+    examples: [
+      "Supported Employment Specialist",
+      "Job Placement Specialist",
+      "Employment Specialist",
+      "IPS Employment Specialist",
+      "Job Coach",
+    ],
+  },
+  {
+    name: "Clinical & Mental Health Rehabilitation",
+    examples: [
+      "Psychiatric Rehabilitation Specialist",
+      "Behavioral Health Rehabilitation Counselor",
+      "Licensed Professional Counselor (LPC)",
+      "ACT Team Vocational Specialist",
+    ],
+  },
+  {
+    name: "Disability Management & Return-to-Work",
+    examples: [
+      "Disability Case Manager",
+      "Return-to-Work Specialist",
+      "Workers' Compensation Rehabilitation Counselor",
+      "Certified Disability Management Specialist (CDMS)",
+    ],
+  },
+  {
+    name: "Forensic & Vocational Expert",
+    examples: [
+      "Vocational Expert",
+      "Forensic Rehabilitation Consultant",
+      "Life Care Planner",
+      "Expert Witness",
+    ],
+  },
+  {
+    name: "Transition & Youth Services",
+    examples: [
+      "Transition Specialist",
+      "School Transition Coordinator",
+      "Pre-ETS Counselor",
+      "Postsecondary Disability Coordinator",
+    ],
+  },
+  {
+    name: "Independent Living & Benefits",
+    examples: [
+      "Independent Living Specialist",
+      "Community Rehabilitation Provider",
+      "Benefits Counselor (WIPA / CWIC)",
+      "Peer Support Specialist",
+    ],
+  },
+  {
+    name: "Assistive Technology & Accessibility",
+    examples: [
+      "Assistive Technology Specialist",
+      "Rehabilitation Technologist",
+      "Accessibility Consultant",
+      "Digital Accessibility Specialist",
+    ],
+  },
+  {
+    name: "Business & Employer Services",
+    examples: [
+      "ADA Coordinator",
+      "Disability Inclusion Manager",
+      "Employer Consultant",
+      "DEI Accessibility Consultant",
+    ],
+  },
+  {
+    name: "Administration, Policy & Leadership",
+    examples: [
+      "Rehabilitation Supervisor",
+      "Regional Administrator",
+      "Program Manager",
+      "Bureau Chief",
+      "Policy Analyst / Director",
+    ],
+  },
+  {
+    name: "Research & Education",
+    examples: [
+      "Rehabilitation Counselor Educator",
+      "Professor",
+      "Researcher",
+      "Quality Assurance Specialist",
+    ],
+  },
 ];
 
 const EMERGING = [
@@ -250,22 +341,39 @@ export default function CareersPage() {
         </div>
       </section>
 
-      <section className="space-y-5">
-        <h2 className="text-3xl tracking-tight">How the career grows</h2>
-        <p className="text-ink/70 prose-narrow">
-          A typical advancement path — you can branch into leadership, policy,
-          consulting, or academia at any point.
-        </p>
-        <ol className="space-y-2">
-          {LADDER.map((step, i) => (
-            <li key={step} className="flex items-center gap-3">
-              <span className="flex-none w-7 h-7 grid place-items-center rounded-md bg-accent text-cream text-xs font-bold tabular-nums">
-                {i + 1}
-              </span>
-              <span className="text-ink/85">{step}</span>
-            </li>
+      <section className="space-y-6">
+        <header className="space-y-2 max-w-2xl">
+          <p className="text-xs uppercase tracking-widest text-accent">
+            Specialties
+          </p>
+          <h2 className="text-3xl tracking-tight">
+            Fields of vocational counseling
+          </h2>
+          <p className="text-ink/70">
+            Beyond the employer setting, counselors specialize by the kind of
+            work they do. Here are example job titles and positions across the
+            profession&apos;s major practice areas.
+          </p>
+        </header>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {FIELDS.map((field) => (
+            <div key={field.name} className="saas-card">
+              <h3 className="text-lg font-semibold text-ink mb-3">
+                {field.name}
+              </h3>
+              <ul className="space-y-1.5">
+                {field.examples.map((role) => (
+                  <li
+                    key={role}
+                    className="text-sm text-ink/70 border-b border-ink/5 pb-1.5 last:border-0"
+                  >
+                    {role}
+                  </li>
+                ))}
+              </ul>
+            </div>
           ))}
-        </ol>
+        </div>
       </section>
 
       <section className="space-y-5">

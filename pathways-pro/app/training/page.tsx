@@ -87,7 +87,7 @@ const MODULES: Module[] = [
       "Policy Director → Executive Leadership",
       "Private Consultant, Professor, Researcher",
     ],
-    link: { href: "/careers", label: "See the full career ladder →" },
+    link: { href: "/careers", label: "See roles across every field →" },
   },
   {
     n: 6,
