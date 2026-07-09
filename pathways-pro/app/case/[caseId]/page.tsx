@@ -12,6 +12,7 @@ import {
   documentsForCase,
   CASE_DOCUMENT_KIND_LABELS,
 } from "@/lib/case-documents";
+import { loadIPE } from "@/lib/ipe";
 import { threadsForUser } from "@/lib/messages";
 import { buildProgress } from "@/lib/positive-psychology";
 import { recordCaseOpen } from "@/lib/recent-cases";
@@ -23,6 +24,7 @@ type Tab =
   | "case-notes"
   | "messages"
   | "timeline"
+  | "ipe"
   | "assessments"
   | "progress";
 
@@ -32,6 +34,7 @@ const VALID_TABS: Tab[] = [
   "case-notes",
   "messages",
   "timeline",
+  "ipe",
   "assessments",
   "progress",
 ];
@@ -130,6 +133,9 @@ function CaseFileInner() {
         <TabBtn active={tab === "timeline"} onClick={() => setTab("timeline")}>
           Activity Timeline
         </TabBtn>
+        <TabBtn active={tab === "ipe"} onClick={() => setTab("ipe")}>
+          IPE
+        </TabBtn>
         <TabBtn active={tab === "assessments"} onClick={() => setTab("assessments")}>
           Assessments
         </TabBtn>
@@ -151,6 +157,7 @@ function CaseFileInner() {
         <MessagesTab userEmail={user.email} clientEmail={client.email} />
       )}
       {tab === "timeline" && <TimelineTab caseId={caseId} />}
+      {tab === "ipe" && <IpeTab caseId={caseId} />}
       {tab === "assessments" && (
         <CaseAssessmentsPanel
           scopeKind="client-case"
@@ -299,6 +306,102 @@ function DocumentsTab({ caseId }: { caseId: string }) {
           </li>
         ))}
       </ol>
+    </div>
+  );
+}
+
+function IpeTab({ caseId }: { caseId: string }) {
+  const [bump, setBump] = useState(0);
+  const ipe = useMemo(() => loadIPE(caseId), [caseId, bump]);
+
+  const statusMeta = (() => {
+    if (!ipe)
+      return { label: "Not started", cls: "bg-ink/10 text-ink/60" };
+    if (ipe.status === "draft")
+      return { label: "Draft", cls: "bg-amber-500/15 text-amber-300" };
+    if (ipe.status === "pending-client-signature")
+      return {
+        label: "Awaiting client signature",
+        cls: "bg-amber-500/15 text-amber-300",
+      };
+    return { label: "Signed", cls: "bg-emerald-500/15 text-emerald-300" };
+  })();
+
+  return (
+    <div className="space-y-4">
+      <section className="saas-card">
+        <div className="flex items-baseline justify-between gap-3 flex-wrap">
+          <div>
+            <h2 className="text-lg font-semibold">
+              Individualized Plan for Employment
+            </h2>
+            <p className="text-xs text-ink/55 mt-0.5">
+              WIOA Title IV § 102(b){ipe && ` · updated ${new Date(ipe.updatedAt).toLocaleDateString()}`}
+            </p>
+          </div>
+          <span
+            className={`text-[10px] uppercase tracking-wider px-2 py-1 rounded-full font-semibold ${statusMeta.cls}`}
+          >
+            {statusMeta.label}
+          </span>
+        </div>
+
+        {ipe ? (
+          <div className="mt-4 space-y-3">
+            <div className="grid sm:grid-cols-2 gap-3 text-sm">
+              <KV label="Employment goal" value={ipe.employmentGoal || "—"} />
+              <KV label="SOC code" value={ipe.goalSocCode || "—"} />
+              <KV
+                label="Timeline"
+                value={`${ipe.timelineMonths} months`}
+              />
+              <KV
+                label="Counselor signature"
+                value={ipe.counselorSignature.signed ? "✓ Signed" : "Pending"}
+              />
+              <KV
+                label="Client signature"
+                value={ipe.clientSignature.signed ? "✓ Signed" : "Pending"}
+              />
+              <KV
+                label="Services listed"
+                value={String(ipe.vrServices.length)}
+              />
+            </div>
+            <div className="flex gap-2 flex-wrap pt-1">
+              <Link
+                href={`/ipe?case=${caseId}`}
+                className="grad-tealblue text-white text-sm font-semibold px-4 py-2.5 min-h-[44px] inline-flex items-center rounded-md"
+              >
+                {ipe.status === "draft"
+                  ? "✏️ Continue IPE draft →"
+                  : "Open IPE →"}
+              </Link>
+              <Link
+                href={`/case/${caseId}/document/ipe-${caseId}`}
+                className="border border-ink/20 text-sm px-4 py-2.5 min-h-[44px] inline-flex items-center rounded-md hover:bg-ink/5"
+              >
+                🖨️ View / print
+              </Link>
+            </div>
+          </div>
+        ) : (
+          <div className="mt-4">
+            <p className="text-sm text-ink/65 mb-3">
+              No IPE has been started for this client yet. Draft the plan —
+              the builder pulls in the interest profile, transferable skills,
+              screener results, and case notes, then drafts every § 102(b)
+              section for you to review and sign.
+            </p>
+            <Link
+              href={`/ipe?case=${caseId}`}
+              className="grad-tealblue text-white text-sm font-semibold px-4 py-2.5 min-h-[44px] inline-flex items-center rounded-md"
+            >
+              ✨ Start IPE draft →
+            </Link>
+          </div>
+        )}
+      </section>
     </div>
   );
 }

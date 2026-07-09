@@ -211,6 +211,74 @@ export function renderDocument(
   caseId: string,
   docId: string,
 ): RenderedDocument | null {
+  // IPE — full plan
+  if (docId === `ipe-${caseId}`) {
+    const ipe = loadIPE(caseId);
+    if (!ipe) return null;
+    const list = (arr: string[]) =>
+      arr.length ? arr.map((x) => `• ${x}`).join("\n") : "—";
+    return {
+      title: `Individualized Plan for Employment — ${ipe.clientName}`,
+      subtitle:
+        ipe.status === "draft"
+          ? "IPE Draft (WIOA Title IV § 102(b))"
+          : "IPE (WIOA Title IV § 102(b))",
+      meta: [
+        { label: "Case", value: caseId },
+        { label: "Counselor", value: ipe.counselorName },
+        {
+          label: "Employment goal",
+          value: ipe.employmentGoal || "—",
+        },
+        { label: "SOC code", value: ipe.goalSocCode || "—" },
+        { label: "Timeline", value: `${ipe.timelineMonths} months` },
+        {
+          label: "Status",
+          value:
+            ipe.status === "signed" || ipe.status === "active"
+              ? "Signed by both parties"
+              : ipe.status === "draft"
+                ? "Draft"
+                : "Awaiting client signature",
+        },
+      ],
+      sections: [
+        { heading: "Goal rationale", body: ipe.goalRationale || "—" },
+        {
+          heading: "Functional limitations",
+          body: list(ipe.functionalLimitations),
+        },
+        { heading: "VR services", body: list(ipe.vrServices) },
+        {
+          heading: "Workplace accommodations",
+          body: list(ipe.accommodations.workplace),
+        },
+        {
+          heading: "Assistive technology",
+          body: list(ipe.accommodations.assistiveTech),
+        },
+        {
+          heading: "Agency responsibilities",
+          body: list(ipe.agencyResponsibilities),
+        },
+        {
+          heading: "Client responsibilities",
+          body: list(ipe.clientResponsibilities),
+        },
+        {
+          heading: "Evaluation criteria",
+          body: list(ipe.evaluationCriteria),
+        },
+        {
+          heading: "Signatures",
+          body:
+            `Counselor: ${ipe.counselorSignature.signed ? `signed ${ipe.counselorSignature.signedBy ?? ""}` : "________________"}\n` +
+            `Client: ${ipe.clientSignature.signed ? `signed ${ipe.clientSignature.signedBy ?? ""}` : "________________"}`,
+        },
+      ],
+    };
+  }
+
   // Assessment result
   if (docId.startsWith("assessment-")) {
     const aid = docId.slice("assessment-".length);
