@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
+import { EthicalFrameworkAccordion } from "@/components/EthicalFrameworkAccordion";
 
 export const metadata: Metadata = {
   title: "About Pathways Pro & Founder Candace Metcalf",
@@ -160,6 +161,8 @@ export default function AboutPage() {
           </Link>
         </div>
       </section>
+
+      <EthicalFrameworkAccordion />
     </div>
   );
 }
