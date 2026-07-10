@@ -1,9 +1,10 @@
 "use client";
 
 // A free, no-login taste of the Pathways Pro assessment experience, embedded in
-// the Course 1 "Interactive activities" section. It runs two real instruments —
-// the O*NET-style RIASEC Interest Profiler and the Mini-IPIP Big Five personality
-// inventory — and scores them instantly with the same library the full app uses.
+// the Course 1 "Interactive activities" section. It runs three real inputs —
+// the O*NET-style RIASEC Interest Profiler, the Mini-IPIP Big Five personality
+// inventory, and a short work-environment preferences check — and returns
+// instant results: trait/interest bars plus best-fit "dream job" occupations.
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
@@ -59,10 +60,127 @@ const TRAIT_BLURB: Record<BigFiveTrait, { high: string; low: string }> = {
   },
 };
 
+// Work-environment preferences — optional, but they refine the job matches.
+type PrefKey = "team" | "structure" | "setting" | "pace" | "contact" | "impact";
+const PREFERENCES: {
+  id: PrefKey;
+  q: string;
+  options: { v: string; label: string }[];
+}[] = [
+  {
+    id: "team",
+    q: "How do you prefer to work?",
+    options: [
+      { v: "team", label: "On a team" },
+      { v: "mix", label: "A mix" },
+      { v: "solo", label: "Independently" },
+    ],
+  },
+  {
+    id: "structure",
+    q: "What kind of day suits you?",
+    options: [
+      { v: "structured", label: "Structured routine" },
+      { v: "flexible", label: "Variety & flexibility" },
+    ],
+  },
+  {
+    id: "setting",
+    q: "Where do you like to work?",
+    options: [
+      { v: "office", label: "Office / indoors" },
+      { v: "field", label: "Out in the field" },
+      { v: "remote", label: "Remote / flexible" },
+    ],
+  },
+  {
+    id: "pace",
+    q: "What pace energizes you?",
+    options: [
+      { v: "steady", label: "Steady & predictable" },
+      { v: "fast", label: "Fast & changing" },
+    ],
+  },
+  {
+    id: "contact",
+    q: "How much people contact do you want?",
+    options: [
+      { v: "high", label: "Lots of people contact" },
+      { v: "low", label: "Mostly focused solo work" },
+    ],
+  },
+  {
+    id: "impact",
+    q: "What feels most rewarding?",
+    options: [
+      { v: "helping", label: "Helping people directly" },
+      { v: "technical", label: "Solving technical problems" },
+      { v: "leading", label: "Building or leading ventures" },
+    ],
+  },
+];
+
+// Curated "dream job" occupations tagged with their Holland interest areas and
+// work-style traits, so matches reflect both interests and preferences. The
+// vocational-rehabilitation roles are included so a helping/social profile
+// surfaces this profession as one of its best matches.
+type Occupation = {
+  title: string;
+  types: RiasecType[];
+  helping?: boolean;
+  leading?: boolean;
+  technical?: boolean;
+  team?: boolean;
+  voc?: boolean; // a vocational-rehabilitation / counseling role
+};
+
+const OCCUPATIONS: Occupation[] = [
+  // Social / helping — incl. vocational rehabilitation
+  { title: "Vocational Rehabilitation Counselor", types: ["S", "I", "E"], helping: true, team: true, voc: true },
+  { title: "Rehabilitation Counselor", types: ["S", "I"], helping: true, team: true, voc: true },
+  { title: "Supported Employment Specialist", types: ["S", "E"], helping: true, team: true, voc: true },
+  { title: "Case Manager", types: ["S", "C"], helping: true, team: true, voc: true },
+  { title: "School Counselor", types: ["S", "A"], helping: true, team: true },
+  { title: "Social Worker", types: ["S", "I"], helping: true, team: true },
+  { title: "Speech-Language Pathologist", types: ["S", "I"], helping: true },
+  { title: "Occupational Therapist", types: ["S", "R", "I"], helping: true },
+  { title: "Registered Nurse", types: ["S", "I"], helping: true, team: true },
+  { title: "Teacher / Instructor", types: ["S", "A"], helping: true, team: true },
+  // Investigative
+  { title: "Data Analyst", types: ["I", "C"], technical: true },
+  { title: "Research Scientist", types: ["I", "R"], technical: true },
+  { title: "Psychologist", types: ["I", "S"], helping: true, technical: true },
+  { title: "Epidemiologist", types: ["I", "C"], technical: true },
+  { title: "Software Developer", types: ["I", "C"], technical: true, team: true },
+  // Realistic
+  { title: "Civil Engineering Technician", types: ["R", "I"], technical: true, team: true },
+  { title: "Electrician", types: ["R", "C"], technical: true },
+  { title: "Physical Therapist Assistant", types: ["R", "S"], helping: true },
+  // Artistic
+  { title: "UX / Product Designer", types: ["A", "I"], technical: true, team: true },
+  { title: "Graphic Designer", types: ["A", "E"] },
+  { title: "Writer / Content Strategist", types: ["A", "I"] },
+  { title: "Art Therapist", types: ["A", "S"], helping: true, voc: true },
+  // Enterprising / leadership
+  { title: "Program Manager", types: ["E", "C"], leading: true, team: true },
+  { title: "Disability Inclusion Manager", types: ["E", "S"], leading: true, helping: true, team: true, voc: true },
+  { title: "Business Consultant", types: ["E", "I"], leading: true },
+  { title: "Human Resources Manager", types: ["E", "S", "C"], leading: true, team: true },
+  { title: "Small-Business Owner / Entrepreneur", types: ["E", "A"], leading: true },
+  // Conventional
+  { title: "Accountant", types: ["C", "E"], technical: true },
+  { title: "Benefits Counselor", types: ["C", "S"], helping: true, voc: true },
+  { title: "Operations Coordinator", types: ["C", "E"], team: true },
+  { title: "Compliance Specialist", types: ["C", "I"], technical: true },
+  { title: "Medical Records Specialist", types: ["C", "I"], technical: true },
+];
+
 type Answers = Record<string, number>;
+type Prefs = Partial<Record<PrefKey, string>>;
 
 export function CareerAssessmentDemo() {
   const [answers, setAnswers] = useState<Answers>({});
+  const [prefs, setPrefs] = useState<Prefs>({});
   const [submitted, setSubmitted] = useState(false);
 
   const totalItems = riasecItems.length + bigFiveItems.length;
@@ -72,6 +190,9 @@ export function CareerAssessmentDemo() {
   function setAnswer(id: string, v: number) {
     setAnswers((prev) => ({ ...prev, [id]: v }));
   }
+  function setPref(id: PrefKey, v: string) {
+    setPrefs((prev) => ({ ...prev, [id]: v }));
+  }
 
   const results = useMemo(() => {
     if (!submitted) return null;
@@ -79,12 +200,12 @@ export function CareerAssessmentDemo() {
     const code = hollandCode(riasec);
     const big = scoreBigFive(answers);
     const topType = code[0] as RiasecType;
-    return { riasec, code, big, topType };
-  }, [submitted, answers]);
+    const matches = matchOccupations(riasec, prefs);
+    return { riasec, code, big, topType, matches };
+  }, [submitted, answers, prefs]);
 
   function handleSubmit() {
     setSubmitted(true);
-    // Move focus/scroll to results on the next paint.
     requestAnimationFrame(() => {
       document.getElementById("assessment-results")?.scrollIntoView({
         behavior: "smooth",
@@ -95,6 +216,7 @@ export function CareerAssessmentDemo() {
 
   function handleReset() {
     setAnswers({});
+    setPrefs({});
     setSubmitted(false);
     requestAnimationFrame(() => {
       document.getElementById("assessment-top")?.scrollIntoView({
@@ -112,12 +234,13 @@ export function CareerAssessmentDemo() {
         </p>
         <h3 className="text-2xl tracking-tight">Try the assessments yourself</h3>
         <p className="text-ink/75 prose-narrow">
-          Take the same two instruments Pathways Pro uses with clients — the{" "}
-          <strong>Interest Profiler</strong> (RIASEC) and the{" "}
-          <strong>Personality Inventory</strong> (Big Five / Mini-IPIP) — and get
-          your results instantly. Whether you&apos;re advancing your own career or
-          exploring the platform, this is a real taste of what clients and
-          counselors experience inside Pathways Pro.
+          Take the same instruments Pathways Pro uses with clients — the{" "}
+          <strong>Interest Profiler</strong> (RIASEC), the{" "}
+          <strong>Personality Inventory</strong> (Big Five / Mini-IPIP), and a
+          quick <strong>work-environment</strong> check — and get your results
+          instantly, including the <strong>careers that best match you</strong>.
+          A real taste of what clients and counselors experience inside Pathways
+          Pro.
         </p>
       </div>
 
@@ -165,6 +288,48 @@ export function CareerAssessmentDemo() {
         </div>
       </section>
 
+      {/* Work-environment preferences */}
+      <section className="space-y-4">
+        <div className="flex items-baseline justify-between gap-3 flex-wrap">
+          <h4 className="text-xl tracking-tight">
+            3 · Work Environment Preferences
+          </h4>
+          <span className="text-xs uppercase tracking-wider text-ink/50">
+            Optional · sharpens your matches
+          </span>
+        </div>
+        <div className="grid sm:grid-cols-2 gap-3">
+          {PREFERENCES.map((p) => (
+            <div
+              key={p.id}
+              className="border border-ink/10 rounded-lg bg-white px-4 py-3"
+            >
+              <div className="text-ink/85 mb-2">{p.q}</div>
+              <div className="flex flex-wrap gap-1.5">
+                {p.options.map((opt) => {
+                  const active = prefs[p.id] === opt.v;
+                  return (
+                    <button
+                      key={opt.v}
+                      type="button"
+                      aria-pressed={active}
+                      onClick={() => setPref(p.id, opt.v)}
+                      className={`text-xs px-2.5 py-1.5 rounded-md border transition ${
+                        active
+                          ? "bg-accent text-cream border-accent"
+                          : "border-ink/15 text-ink/60 hover:border-accent/50 hover:text-ink"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* Submit bar */}
       <div className="sticky bottom-0 bg-cream/95 backdrop-blur border-t border-ink/10 py-3 flex items-center justify-between gap-4 flex-wrap">
         <span className="text-sm text-ink/60 tabular-nums">
@@ -184,7 +349,7 @@ export function CareerAssessmentDemo() {
             disabled={answeredCount === 0}
             className="bg-accent text-cream font-semibold px-6 py-2.5 rounded-md hover:bg-accent/90 transition disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            {allAnswered ? "See my results →" : "See results so far →"}
+            {allAnswered ? "See my matches →" : "See matches so far →"}
           </button>
         </div>
       </div>
@@ -194,7 +359,7 @@ export function CareerAssessmentDemo() {
         <div id="assessment-results" className="space-y-6 scroll-mt-6">
           <header className="space-y-1">
             <p className="text-xs uppercase tracking-widest text-accent">
-              Your results
+              Your matches
             </p>
             <h3 className="text-3xl tracking-tight">
               Holland Code:{" "}
@@ -204,10 +369,76 @@ export function CareerAssessmentDemo() {
               <p className="text-sm text-ink/60">
                 Based on the {answeredCount} question
                 {answeredCount === 1 ? "" : "s"} you answered — finish the rest
-                for a sharper profile.
+                for sharper matches.
               </p>
             )}
           </header>
+
+          {/* Best-fit "dream job" occupations */}
+          <div className="saas-card space-y-3">
+            <h4 className="text-lg font-semibold text-ink">
+              Careers that best match you
+            </h4>
+            <p className="text-sm text-ink/60">
+              Occupations that fit your interests
+              {Object.keys(prefs).length > 0
+                ? " and work-environment preferences"
+                : ""}
+              . Roles marked{" "}
+              <span className="text-accent font-semibold">Vocational Rehab</span>{" "}
+              are careers in this very field.
+            </p>
+            <ol className="space-y-2">
+              {results.matches.map((m, i) => (
+                <li
+                  key={m.title}
+                  className="flex items-start gap-3 border-b border-ink/5 pb-2 last:border-0"
+                >
+                  <span className="flex-none w-6 h-6 grid place-items-center rounded-md bg-accent text-cream text-xs font-bold tabular-nums mt-0.5">
+                    {i + 1}
+                  </span>
+                  <div className="min-w-0">
+                    <div className="text-ink font-medium flex items-center gap-2 flex-wrap">
+                      {m.title}
+                      {m.voc && (
+                        <span className="text-[10px] uppercase tracking-wider text-accent border border-accent/40 bg-accent/5 rounded-full px-2 py-0.5">
+                          Vocational Rehab
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-xs text-ink/55">
+                      {m.types.map((t) => riasecNames[t]).join(" · ")}
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ol>
+            <p className="text-xs text-ink/50">
+              Drawn to helping others reach meaningful work?{" "}
+              <Link href="/careers" className="text-accent underline">
+                Explore careers in vocational rehabilitation →
+              </Link>
+            </p>
+          </div>
+
+          {/* Ideal work environment summary */}
+          {Object.keys(prefs).length > 0 && (
+            <div className="saas-card space-y-2">
+              <h4 className="text-lg font-semibold text-ink">
+                Your ideal work environment
+              </h4>
+              <div className="flex flex-wrap gap-2">
+                {prefSummary(prefs).map((s) => (
+                  <span
+                    key={s}
+                    className="text-sm border border-ink/15 bg-cream rounded-full px-3 py-1 text-ink/80"
+                  >
+                    {s}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Top interest narrative */}
           <div className="saas-card space-y-3">
@@ -234,21 +465,6 @@ export function CareerAssessmentDemo() {
               <span className="font-semibold text-ink">Work style: </span>
               {RIASEC_PROFILES[results.topType].workStyle}
             </p>
-            <div>
-              <div className="text-xs uppercase tracking-wider text-ink/50 mb-1">
-                Career categories that often fit
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {RIASEC_PROFILES[results.topType].jobCategories.map((j) => (
-                  <span
-                    key={j}
-                    className="text-sm border border-ink/15 bg-cream rounded-full px-3 py-1 text-ink/80"
-                  >
-                    {j}
-                  </span>
-                ))}
-              </div>
-            </div>
           </div>
 
           {/* Interest bars */}
@@ -289,7 +505,7 @@ export function CareerAssessmentDemo() {
               This is just the start of the Pathways Pro experience
             </h4>
             <p className="text-ink/75 prose-narrow">
-              Inside Pathways Pro, results like these become matched career paths
+              Inside Pathways Pro, matches like these become full career paths
               with live labor-market data, a signature-ready plan, transferable-
               skills analysis, and more. Explore the full client experience:
             </p>
@@ -323,6 +539,53 @@ export function CareerAssessmentDemo() {
       )}
     </div>
   );
+}
+
+// Scores every occupation by how well its interest areas match the user's
+// RIASEC profile, then nudges by the optional work-environment preferences.
+function matchOccupations(
+  riasec: Record<RiasecType, number>,
+  prefs: Prefs,
+): Occupation[] {
+  return OCCUPATIONS.map((o) => {
+    const interestFit =
+      o.types.reduce((sum, t) => sum + riasec[t], 0) / o.types.length;
+    let score = interestFit;
+    if (prefs.impact === "helping" && o.helping) score += 22;
+    if (prefs.impact === "technical" && o.technical) score += 22;
+    if (prefs.impact === "leading" && o.leading) score += 22;
+    if (prefs.team === "team" && o.team) score += 10;
+    if (prefs.team === "solo" && o.team === false) score += 10;
+    if (prefs.contact === "high" && o.helping) score += 8;
+    if (prefs.contact === "low" && o.technical) score += 8;
+    return { o, score };
+  })
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 8)
+    .map((x) => x.o);
+}
+
+function prefSummary(prefs: Prefs): string[] {
+  const map: Record<string, string> = {
+    team: "Team-based",
+    mix: "Team & solo mix",
+    solo: "Independent work",
+    structured: "Structured routine",
+    flexible: "Variety & flexibility",
+    office: "Office / indoors",
+    field: "Out in the field",
+    remote: "Remote / flexible",
+    steady: "Steady pace",
+    fast: "Fast & changing",
+    high: "People-facing",
+    low: "Focused solo work",
+    helping: "Helping people directly",
+    technical: "Solving technical problems",
+    leading: "Building / leading ventures",
+  };
+  return (Object.values(prefs) as string[])
+    .map((v) => map[v])
+    .filter(Boolean);
 }
 
 function ItemRow({

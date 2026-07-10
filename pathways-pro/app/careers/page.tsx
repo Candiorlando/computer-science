@@ -90,7 +90,6 @@ const SECTORS: { name: string; roles: string[] }[] = [
       "Disability Inclusion Manager",
       "Accessibility Consultant",
       "Employee Accommodation Specialist",
-      "DEI Accessibility Consultant",
     ],
   },
   {
@@ -208,7 +207,7 @@ const FIELDS: { name: string; examples: string[] }[] = [
       "ADA Coordinator",
       "Disability Inclusion Manager",
       "Employer Consultant",
-      "DEI Accessibility Consultant",
+      "Accessibility Consultant",
     ],
   },
   {
@@ -338,6 +337,94 @@ export default function CareersPage() {
               {c}
             </span>
           ))}
+        </div>
+      </section>
+
+      <section className="space-y-6">
+        <header className="space-y-2 max-w-2xl">
+          <p className="text-xs uppercase tracking-widest text-accent">
+            Local, state, federal & beyond
+          </p>
+          <h2 className="text-3xl tracking-tight">
+            Where the work happens
+          </h2>
+          <p className="text-ink/70">
+            The same job title can look very different depending on who employs
+            you. Here&apos;s how the major employment settings differ.
+          </p>
+        </header>
+        <div className="grid sm:grid-cols-2 gap-4">
+          <div className="saas-card">
+            <h3 className="text-lg font-semibold text-ink mb-2">
+              Local &amp; county government
+            </h3>
+            <p className="text-sm text-ink/70">
+              School districts, county health and human-services departments,
+              and local workforce boards. Counselors here often work directly
+              inside schools and community programs — including transition
+              planning for students moving from special education into
+              adulthood.
+            </p>
+          </div>
+          <div className="saas-card">
+            <h3 className="text-lg font-semibold text-ink mb-2">
+              State government
+            </h3>
+            <p className="text-sm text-ink/70">
+              State Vocational Rehabilitation (VR) agencies are the largest
+              single employer of rehabilitation counselors — caseload-based
+              roles delivering WIOA-funded services, from intake and
+              assessment through job placement and case closure.
+            </p>
+          </div>
+          <div className="saas-card">
+            <h3 className="text-lg font-semibold text-ink mb-2">
+              Federal government
+            </h3>
+            <p className="text-sm text-ink/70">
+              The Department of Veterans Affairs, Social Security
+              Administration, and Department of Labor employ rehabilitation
+              professionals for veteran readjustment, disability
+              determination, and national workforce policy.
+            </p>
+          </div>
+          <div className="saas-card">
+            <h3 className="text-lg font-semibold text-ink mb-2">
+              Community Rehabilitation Providers (CRPs)
+            </h3>
+            <p className="text-sm text-ink/70">
+              Nonprofit or for-profit organizations contracted by state VR
+              agencies to deliver hands-on services — job coaching, supported
+              employment, and work-readiness training. Many CRPs specialize in{" "}
+              <strong>transition-age youth</strong> (roughly 14–21), helping
+              students with disabilities move from high school into work,
+              further education, or independent living, often in close
+              partnership with a student&apos;s{" "}
+              <strong>Individualized Education Program (IEP)</strong> team.
+            </p>
+          </div>
+          <div className="saas-card">
+            <h3 className="text-lg font-semibold text-ink mb-2">
+              Nonprofit organizations
+            </h3>
+            <p className="text-sm text-ink/70">
+              Independent living centers, disability advocacy organizations,
+              and mission-driven employment agencies — often the most flexible
+              setting for innovative, client-centered program design.
+            </p>
+          </div>
+          <div className="saas-card">
+            <h3 className="text-lg font-semibold text-ink mb-2">
+              Higher education
+            </h3>
+            <p className="text-sm text-ink/70">
+              College and university disability services offices support
+              students with accommodations and accessible learning; graduate
+              rehabilitation counseling programs also employ counselor
+              educators and researchers who train the next generation of the
+              field.
+            </p>
+          </div>
         </div>
       </section>
 
