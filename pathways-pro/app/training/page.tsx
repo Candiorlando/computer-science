@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { CareerAssessmentDemo } from "@/components/CareerAssessmentDemo";
+import { BLUEPRINT_PAGES } from "@/lib/blueprint";
 
 export const metadata: Metadata = {
   title: "Course 1 — Rehabilitation Counselor Services & Careers | Pathways Pro",
@@ -266,23 +268,51 @@ export default function TrainingPage() {
         </div>
       </section>
 
-      <section className="space-y-4">
+      <section className="space-y-6">
         <header className="space-y-2 max-w-2xl">
           <p className="text-xs uppercase tracking-widest text-accent">
             Course resources
           </p>
           <h2 className="text-3xl tracking-tight">Go deeper</h2>
+          <p className="text-ink/70">
+            The Rehabilitation Systems Blueprint — a 13-part visual reference
+            on how rehabilitation systems are structured, from the legislation
+            and the VR lifecycle to credentials, life care planning, and where
+            technology is taking the field. Browse it here or download the
+            original.
+          </p>
         </header>
+
+        <div className="grid sm:grid-cols-2 gap-4">
+          {BLUEPRINT_PAGES.map((p) => (
+            <figure className="infographic !my-0" key={p.n}>
+              <Image
+                src={p.src}
+                alt={p.alt}
+                width={1600}
+                height={894}
+                sizes="(max-width: 640px) 100vw, 512px"
+                style={{ width: "100%", height: "auto" }}
+              />
+              <figcaption>
+                <span className="tabular-nums text-ink/40">
+                  {String(p.n).padStart(2, "0")}
+                </span>{" "}
+                · {p.caption}
+              </figcaption>
+            </figure>
+          ))}
+        </div>
+
         <div className="saas-card flex flex-col sm:flex-row sm:items-center gap-4">
           <div className="flex-1 space-y-1">
             <h3 className="text-lg font-semibold text-ink">
               The Rehabilitation Systems Blueprint
             </h3>
             <p className="text-sm text-ink/70">
-              A comprehensive reference on how rehabilitation systems are
-              structured — the deep dive behind the course.
+              Prefer it as a document? Download the original deck.
             </p>
-            <p className="text-xs text-ink/50">PDF · 146 pages · 15 MB</p>
+            <p className="text-xs text-ink/50">PDF · 13 pages · 15 MB</p>
           </div>
           <a
             href="/resources/rehabilitation-systems-blueprint.pdf"

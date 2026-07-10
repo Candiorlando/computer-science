@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
+import { BLUEPRINT_PAGES } from "@/lib/blueprint";
 
 const INFOGRAPHICS: {
   src: string;
@@ -364,6 +365,21 @@ export default function CareersPage() {
             >
               {c}
             </span>
+          ))}
+        </div>
+        <div className="grid sm:grid-cols-2 gap-4 pt-2">
+          {[BLUEPRINT_PAGES[8], BLUEPRINT_PAGES[9]].map((p) => (
+            <figure className="infographic !my-0" key={p.n}>
+              <Image
+                src={p.src}
+                alt={p.alt}
+                width={1600}
+                height={894}
+                sizes="(max-width: 640px) 100vw, 512px"
+                style={{ width: "100%", height: "auto" }}
+              />
+              <figcaption>{p.caption}</figcaption>
+            </figure>
           ))}
         </div>
       </section>
