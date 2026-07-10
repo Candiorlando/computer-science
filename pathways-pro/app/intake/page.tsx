@@ -315,11 +315,11 @@ export default function IntakePage() {
           font-family: inherit;
         }
         :global(.input:focus) {
-          outline: 2px solid #b95c3c;
+          outline: 2px solid #0F6B54;
           outline-offset: -1px;
         }
         :global(.btn-primary) {
-          background: #b95c3c;
+          background: #0F6B54;
           color: white;
           padding: 0.6rem 1.2rem;
           border-radius: 6px;

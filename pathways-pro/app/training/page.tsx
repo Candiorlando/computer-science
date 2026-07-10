@@ -130,6 +130,33 @@ const ACTIVITIES = [
   "Career advancement planning exercise",
 ];
 
+const VIDEOS: { title: string; description: string; src: string }[] = [
+  {
+    title: "The Hidden World of Rehabilitation Counseling",
+    description:
+      "An inside look at what rehabilitation counselors do day to day and the people they help.",
+    src: "/videos/hidden-world-of-rehabilitation-counseling.mp4",
+  },
+  {
+    title: "Decoding Rehab Counseling Credentials",
+    description:
+      "The certifications that define the field — CRC and beyond — and what each one means for your career.",
+    src: "/videos/decoding-rehab-counseling-credentials.mp4",
+  },
+  {
+    title: "The Architecture of Modern US Workforce Training",
+    description:
+      "How today’s U.S. workforce training and vocational rehabilitation systems fit together.",
+    src: "/videos/architecture-of-modern-us-workforce-training.mp4",
+  },
+  {
+    title: "Why Therapists Redrew the Ethical Boundary",
+    description:
+      "The story behind the profession’s shifting ethical boundaries and what it means for practice today.",
+    src: "/videos/why-therapists-redrew-the-ethical-boundary.mp4",
+  },
+];
+
 export default function TrainingPage() {
   return (
     <div className="space-y-16 pb-8">
@@ -204,6 +231,69 @@ export default function TrainingPage() {
           ))}
         </ol>
         <CareerAssessmentDemo />
+      </section>
+
+      <section className="space-y-6">
+        <header className="space-y-2 max-w-2xl">
+          <p className="text-xs uppercase tracking-widest text-accent">
+            Watch &amp; learn
+          </p>
+          <h2 className="text-3xl tracking-tight">Short explainers</h2>
+          <p className="text-ink/70">
+            Quick videos on the profession — what the work involves, the
+            credentials, and the systems behind it.
+          </p>
+        </header>
+        <div className="videogrid">
+          {VIDEOS.map((v) => (
+            <figure key={v.src} className="space-y-2 m-0">
+              <video controls preload="none" playsInline>
+                <source src={v.src} type="video/mp4" />
+                Your browser can’t play this video.{" "}
+                <a href={v.src} className="text-accent underline">
+                  Download it
+                </a>
+                .
+              </video>
+              <figcaption className="space-y-0.5">
+                <span className="block font-semibold text-ink">{v.title}</span>
+                <span className="block text-sm text-ink/60">
+                  {v.description}
+                </span>
+              </figcaption>
+            </figure>
+          ))}
+        </div>
+      </section>
+
+      <section className="space-y-4">
+        <header className="space-y-2 max-w-2xl">
+          <p className="text-xs uppercase tracking-widest text-accent">
+            Course resources
+          </p>
+          <h2 className="text-3xl tracking-tight">Go deeper</h2>
+        </header>
+        <div className="saas-card flex flex-col sm:flex-row sm:items-center gap-4">
+          <div className="flex-1 space-y-1">
+            <h3 className="text-lg font-semibold text-ink">
+              The Rehabilitation Systems Blueprint
+            </h3>
+            <p className="text-sm text-ink/70">
+              A comprehensive reference on how rehabilitation systems are
+              structured — the deep dive behind the course.
+            </p>
+            <p className="text-xs text-ink/50">PDF · 146 pages · 15 MB</p>
+          </div>
+          <a
+            href="/resources/rehabilitation-systems-blueprint.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            download
+            className="flex-none bg-gold text-ink font-semibold px-6 py-3 rounded-md hover:bg-gold-soft transition text-center"
+          >
+            Download PDF ↓
+          </a>
+        </div>
       </section>
 
       <section className="saas-card !bg-accent/5 border-accent/30 space-y-3">

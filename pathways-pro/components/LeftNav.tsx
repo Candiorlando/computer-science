@@ -100,10 +100,10 @@ function menuFor(user: AnyUser, unread: number): NavItem[] {
 function roleBadge(role: AnyUser["role"]): { label: string; bg: string } {
   return {
     counselor: { label: "Counselor", bg: "bg-emerald-100 text-emerald-900" },
-    client: { label: "Client", bg: "bg-blue-100 text-blue-900" },
-    business: { label: "Business", bg: "bg-purple-100 text-purple-900" },
+    client: { label: "Client", bg: "bg-emerald-100 text-emerald-900" },
+    business: { label: "Business", bg: "bg-emerald-100 text-emerald-900" },
     vendor: { label: "Vendor", bg: "bg-amber-100 text-amber-900" },
-    partner: { label: "Partner", bg: "bg-cyan-100 text-cyan-900" },
+    partner: { label: "Partner", bg: "bg-emerald-100 text-emerald-900" },
   }[role];
 }
 
@@ -172,7 +172,7 @@ export function LeftNav() {
               <Link
                 href={it.href}
                 aria-current={active ? "page" : undefined}
-                className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 ${
+                className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 ${
                   active
                     ? "grad-tealblue text-white font-semibold"
                     : "text-ink/75 hover:bg-ink/5"
@@ -187,7 +187,7 @@ export function LeftNav() {
                     className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
                       active
                         ? "bg-white/25 text-white"
-                        : "bg-cyan-500 text-white"
+                        : "bg-emerald-500 text-white"
                     }`}
                   >
                     {it.badge}
@@ -224,7 +224,7 @@ export function LeftNav() {
           }
         }
         :global(.grad-tealblue) {
-          background-image: linear-gradient(135deg, #14b8a6 0%, #06b6d4 50%, #3b82f6 100%);
+          background-image: linear-gradient(135deg, #2E9E7E 0%, #0F6B54 50%, #2E9E7E 100%);
         }
       `}</style>
     </aside>

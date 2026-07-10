@@ -1,5 +1,33 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
+
+const INFOGRAPHICS: {
+  src: string;
+  alt: string;
+  caption: string;
+}[] = [
+  {
+    src: "/infographics/vocational-rehabilitation-journey.png",
+    caption: "How vocational rehabilitation works — from eligibility to employment.",
+    alt:
+      "The vocational rehabilitation journey: eligibility determination within 60 days, the Individualized Plan for Employment, holistic service delivery, the Certified Rehabilitation Counselor role, and foundational legislation (1920 Civilian Rehab Act, 1973 Rehabilitation Act, 2014 WIOA).",
+  },
+  {
+    src: "/infographics/vocational-rehabilitation-career-roadmap.png",
+    caption:
+      "The path to becoming a Certified Rehabilitation Counselor — steps, specializations, and pay.",
+    alt:
+      "Career roadmap for vocational rehabilitation: graduate-level education, the CRC certification, a 600-hour supervised field experience, specialized tracks, and a salary comparison from $44,040 for general counselors to $73,851 for CRCs.",
+  },
+  {
+    src: "/infographics/healthcare-rehab-tech-talent-outlook.png",
+    caption:
+      "Where the field is heading: market growth, technology, and the evolving workforce (2025–2035).",
+    alt:
+      "2025 to 2035 outlook for healthcare rehabilitation: a $499 billion global market by 2035, AI-VR recovery, 3.5 billion people needing assistive tech, 88% of tech roles fully remote, and rising demand for non-clinical specialists.",
+  },
+];
 
 export const metadata: Metadata = {
   title: "Careers in Vocational Rehabilitation — Pathways Pro",
@@ -477,6 +505,34 @@ export default function CareersPage() {
             >
               {e}
             </span>
+          ))}
+        </div>
+      </section>
+
+      <section className="space-y-6">
+        <header className="space-y-2 max-w-2xl">
+          <p className="text-xs uppercase tracking-widest text-accent">
+            Visual guides
+          </p>
+          <h2 className="text-3xl tracking-tight">See the field at a glance</h2>
+          <p className="text-ink/70">
+            Three visual guides to rehabilitation counseling — the journey, the
+            career roadmap, and where the profession is headed.
+          </p>
+        </header>
+        <div className="space-y-4">
+          {INFOGRAPHICS.map((g) => (
+            <figure className="infographic" key={g.src}>
+              <Image
+                src={g.src}
+                alt={g.alt}
+                width={2752}
+                height={1536}
+                sizes="(max-width: 1024px) 100vw, 1024px"
+                style={{ width: "100%", height: "auto" }}
+              />
+              <figcaption>{g.caption}</figcaption>
+            </figure>
           ))}
         </div>
       </section>

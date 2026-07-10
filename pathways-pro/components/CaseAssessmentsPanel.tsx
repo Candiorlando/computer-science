@@ -91,7 +91,7 @@ export function CaseAssessmentsPanel({
               >
                 <h3 className="font-semibold text-sm">{t.title}</h3>
                 <p className="text-xs text-ink/65 mt-1">{t.description}</p>
-                <p className="text-[10px] uppercase tracking-wider text-cyan-700 mt-2">
+                <p className="text-[10px] uppercase tracking-wider text-emerald-700 mt-2">
                   {t.items.length} items
                 </p>
               </Link>
@@ -160,7 +160,7 @@ function AssessmentRow({
       </p>
 
       <details className="mt-2 text-xs">
-        <summary className="cursor-pointer text-ink/65 hover:text-cyan-700">
+        <summary className="cursor-pointer text-ink/65 hover:text-emerald-700">
           {assessment.responses.length} responses recorded
         </summary>
         <ul className="mt-2 space-y-1 text-ink/75">
@@ -174,7 +174,7 @@ function AssessmentRow({
       </details>
 
       <div className="mt-3">
-        <div className="text-xs uppercase tracking-wider text-cyan-700 font-semibold mb-1">
+        <div className="text-xs uppercase tracking-wider text-emerald-700 font-semibold mb-1">
           Interpretation {assessment.counselorApproved ? "(approved)" : "(draft)"}
         </div>
         {editing ? (
@@ -194,7 +194,7 @@ function AssessmentRow({
               {editing ? (
                 <button
                   onClick={saveEdit}
-                  className="text-xs bg-cyan-600 text-white px-3 py-1.5 rounded-md font-semibold"
+                  className="text-xs bg-emerald-600 text-white px-3 py-1.5 rounded-md font-semibold"
                 >
                   Save edits
                 </button>

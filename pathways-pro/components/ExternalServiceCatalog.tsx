@@ -135,11 +135,11 @@ export function ExternalServiceCatalog({
                   )}
                   Requested {new Date(r.requestedAt).toLocaleDateString()}
                   {r.urgency !== "routine" && (
-                    <span className="text-cyan-700"> · {r.urgency}</span>
+                    <span className="text-emerald-700"> · {r.urgency}</span>
                   )}
                 </p>
                 {r.decisionNotes && (
-                  <div className="text-xs italic mt-1 border-l-2 border-cyan-300 pl-3">
+                  <div className="text-xs italic mt-1 border-l-2 border-emerald-300 pl-3">
                     Counselor: &ldquo;{r.decisionNotes}&rdquo;
                   </div>
                 )}
@@ -193,7 +193,7 @@ function ServiceCard({
           <strong>Turnaround:</strong> {service.turnaround}
         </li>
         {service.visibleToClient && (
-          <li className="text-cyan-700">
+          <li className="text-emerald-700">
             👁️ Affected client receives a read-only view
           </li>
         )}
@@ -377,7 +377,7 @@ function RequestModal({
             font-size: 0.875rem;
           }
           :global(.input:focus-visible) {
-            outline: 2px solid #06b6d4;
+            outline: 2px solid #0F6B54;
             outline-offset: -1px;
           }
         `}</style>
@@ -419,7 +419,7 @@ function Pill({
       className={`text-xs px-3 py-1.5 rounded-full font-semibold transition ${
         active
           ? "grad-tealblue text-white"
-          : "border border-ink/15 text-ink/70 hover:border-cyan-500"
+          : "border border-ink/15 text-ink/70 hover:border-emerald-500"
       }`}
     >
       {label}
@@ -430,10 +430,10 @@ function Pill({
 function StatusChip({ status }: { status: ServiceRequest["status"] }) {
   const styles: Record<ServiceRequest["status"], string> = {
     "pending-counselor-review": "bg-amber-100 text-amber-900",
-    "approved-in-progress": "bg-blue-100 text-blue-900",
-    "draft-awaiting-release": "bg-purple-100 text-purple-900",
+    "approved-in-progress": "bg-emerald-100 text-emerald-900",
+    "draft-awaiting-release": "bg-emerald-100 text-emerald-900",
     delivered: "bg-emerald-100 text-emerald-900",
-    declined: "bg-rose-100 text-rose-900",
+    declined: "bg-amber-100 text-amber-900",
   };
   return (
     <span

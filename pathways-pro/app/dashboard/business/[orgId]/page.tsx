@@ -90,7 +90,7 @@ export default function CounselorBusinessCaseFile() {
       <div className="space-y-3">
         <Link
           href="/dashboard/business"
-          className="text-xs text-cyan-700 hover:underline"
+          className="text-xs text-emerald-700 hover:underline"
         >
           ← Business Clients
         </Link>
@@ -104,13 +104,13 @@ export default function CounselorBusinessCaseFile() {
       <header>
         <Link
           href="/dashboard/business"
-          className="text-xs text-cyan-700 hover:underline mb-1 inline-block"
+          className="text-xs text-emerald-700 hover:underline mb-1 inline-block"
         >
           ← Business Clients
         </Link>
         <div className="flex items-baseline justify-between gap-3 flex-wrap mt-1">
           <h1 className="text-3xl font-semibold">{data.org.legalName}</h1>
-          <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full font-semibold bg-purple-100 text-purple-900">
+          <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full font-semibold bg-emerald-100 text-emerald-900">
             Business · {data.org.status}
           </span>
         </div>
@@ -263,7 +263,7 @@ function OverviewTab({
               <li key={e.id} className="saas-card">
                 <div className="flex items-baseline justify-between gap-3 flex-wrap">
                   <h3 className="font-semibold">{e.matterCaption}</h3>
-                  <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full font-semibold bg-blue-100 text-blue-900">
+                  <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full font-semibold bg-emerald-100 text-emerald-900">
                     {e.status}
                   </span>
                 </div>
@@ -386,7 +386,7 @@ function TimelineTab({ activity }: { activity: ActivityEntry[] }) {
       {activity.slice(0, 30).map((a) => (
         <li
           key={a.id}
-          className="flex items-start gap-3 border-l-2 border-cyan-300 pl-3 py-1"
+          className="flex items-start gap-3 border-l-2 border-emerald-300 pl-3 py-1"
         >
           <time
             dateTime={a.occurredAt}
@@ -417,13 +417,13 @@ function Stat({
 }) {
   return (
     <div
-      className={`saas-card ${alert && value > 0 ? "border-rose-300 bg-rose-50/40" : ""}`}
+      className={`saas-card ${alert && value > 0 ? "border-amber-300 bg-amber-50/40" : ""}`}
     >
       <div className="text-[10px] uppercase tracking-wider text-ink/55">
         {label}
       </div>
       <div
-        className={`text-2xl font-bold mt-1 ${alert && value > 0 ? "text-rose-700" : "text-ink"}`}
+        className={`text-2xl font-bold mt-1 ${alert && value > 0 ? "text-amber-700" : "text-ink"}`}
       >
         {value}
       </div>

@@ -62,7 +62,7 @@ export default function PartnerHome() {
       <section className="saas-card grad-tealblue-soft">
         <div className="flex items-baseline justify-between gap-4 flex-wrap">
           <div>
-            <span className="text-[10px] uppercase tracking-wider font-semibold bg-cyan-100 text-cyan-900 px-2 py-0.5 rounded-full">
+            <span className="text-[10px] uppercase tracking-wider font-semibold bg-emerald-100 text-emerald-900 px-2 py-0.5 rounded-full">
               Employment Partner
             </span>
             <h1 className="text-4xl mt-2 font-semibold">
@@ -73,7 +73,7 @@ export default function PartnerHome() {
               {user.participatesInCustomizedEmployment && (
                 <>
                   {" · "}
-                  <span className="text-cyan-700 font-semibold">
+                  <span className="text-emerald-700 font-semibold">
                     🎯 Customized Employment partner
                   </span>
                 </>
@@ -166,7 +166,7 @@ export default function PartnerHome() {
                     <div className="text-xs text-ink/65">
                       {p.opportunityTitle} · {p.hoursPerWeek} hrs/wk
                       {p.isCustomizedEmployment && (
-                        <span className="ml-2 text-cyan-700 font-semibold">
+                        <span className="ml-2 text-emerald-700 font-semibold">
                           🎯 CE
                         </span>
                       )}
@@ -200,7 +200,7 @@ export default function PartnerHome() {
                           </span>
                         )}
                       </h3>
-                      <span className="text-[10px] uppercase tracking-wider font-semibold bg-cyan-100 text-cyan-800 px-2 py-0.5 rounded-full">
+                      <span className="text-[10px] uppercase tracking-wider font-semibold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">
                         {e.currentStage.replaceAll("-", " ")}
                       </span>
                     </div>
@@ -250,7 +250,7 @@ export default function PartnerHome() {
                     🔔{" "}
                     <Link
                       href="/messages"
-                      className="text-cyan-700 hover:underline"
+                      className="text-emerald-700 hover:underline"
                     >
                       {data.unread} new message{data.unread === 1 ? "" : "s"}
                     </Link>
@@ -340,7 +340,7 @@ function QuickAction({
   return (
     <Link
       href={href}
-      className="border border-ink/10 rounded-lg p-3 text-xs text-center hover:border-cyan-500 hover:bg-cyan-50/50 transition"
+      className="border border-ink/10 rounded-lg p-3 text-xs text-center hover:border-emerald-500 hover:bg-emerald-50/50 transition"
     >
       <div className="text-xl mb-1">{icon}</div>
       <div className="font-semibold">{label}</div>
@@ -361,7 +361,7 @@ function SectionHeader({
     <div className="flex items-baseline justify-between gap-3 pt-2">
       <h2 className="text-xl font-semibold">{title}</h2>
       {link && linkLabel && (
-        <Link href={link} className="text-xs text-cyan-700 hover:underline">
+        <Link href={link} className="text-xs text-emerald-700 hover:underline">
           {linkLabel}
         </Link>
       )}

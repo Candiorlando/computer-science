@@ -983,7 +983,7 @@ function Styles() {
       }
       :global(.input:focus) {
         outline: none;
-        border-color: #b95c3c;
+        border-color: #0F6B54;
       }
     `}</style>
   );

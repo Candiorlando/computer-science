@@ -53,7 +53,7 @@ export default function CustomizedEmploymentPage() {
     <div className="space-y-6">
       <header className="flex items-baseline justify-between gap-3 flex-wrap">
         <div>
-          <p className="text-xs uppercase tracking-widest text-cyan-700 font-semibold mb-1">
+          <p className="text-xs uppercase tracking-widest text-emerald-700 font-semibold mb-1">
             🎯 Customized Employment Workspace
           </p>
           <h1 className="text-3xl font-semibold">
@@ -184,7 +184,7 @@ function EngagementCard({
             {new Date(e.updatedAt).toLocaleDateString()}
           </p>
         </div>
-        <span className="text-[10px] uppercase tracking-wider font-semibold bg-cyan-100 text-cyan-900 px-2 py-0.5 rounded-full">
+        <span className="text-[10px] uppercase tracking-wider font-semibold bg-emerald-100 text-emerald-900 px-2 py-0.5 rounded-full">
           🎯 {e.currentStage.replaceAll("-", " ")}
         </span>
       </header>
@@ -201,7 +201,7 @@ function EngagementCard({
                 className={`px-2.5 py-1 rounded-full font-semibold ${
                   reached
                     ? "grad-tealblue text-white"
-                    : "border border-ink/15 text-ink/55 hover:border-cyan-500"
+                    : "border border-ink/15 text-ink/55 hover:border-emerald-500"
                 }`}
               >
                 {s.label}
@@ -290,8 +290,8 @@ function Block({
   children: React.ReactNode;
 }) {
   return (
-    <div className="border-l-2 border-cyan-300 pl-3">
-      <h4 className="text-xs uppercase tracking-wider text-cyan-700 font-semibold mb-1">
+    <div className="border-l-2 border-emerald-300 pl-3">
+      <h4 className="text-xs uppercase tracking-wider text-emerald-700 font-semibold mb-1">
         {title}
       </h4>
       {children}
@@ -424,7 +424,7 @@ function NewEngagementModal({
             font-size: 0.9rem;
           }
           :global(.input:focus-visible) {
-            outline: 2px solid #06b6d4;
+            outline: 2px solid #0F6B54;
             outline-offset: -1px;
           }
         `}</style>

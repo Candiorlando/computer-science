@@ -152,7 +152,7 @@ function CategoryPill({
       className={`text-xs px-3 py-1.5 rounded-full font-semibold transition ${
         active
           ? "grad-tealblue text-white"
-          : "border border-ink/15 text-ink/70 hover:border-cyan-500"
+          : "border border-ink/15 text-ink/70 hover:border-emerald-500"
       }`}
     >
       {label}
@@ -205,7 +205,7 @@ function ServiceRow({
               {service.category.replaceAll("-", " ")}
             </span>
             {overridden && (
-              <span className="text-[10px] uppercase tracking-wider bg-cyan-100 text-cyan-900 px-2 py-0.5 rounded-full font-semibold">
+              <span className="text-[10px] uppercase tracking-wider bg-emerald-100 text-emerald-900 px-2 py-0.5 rounded-full font-semibold">
                 Price overridden
               </span>
             )}
@@ -217,7 +217,7 @@ function ServiceRow({
             type="checkbox"
             checked={enabled}
             onChange={toggleEnabled}
-            className="accent-cyan-500 w-4 h-4"
+            className="accent-emerald-500 w-4 h-4"
           />
           <span>{enabled ? "Enabled" : "Disabled"}</span>
         </label>
@@ -232,8 +232,8 @@ function ServiceRow({
             {formatPrice(service.defaultPriceCents, service.priceUnit)}
           </div>
         </div>
-        <div className="border border-cyan-200 rounded p-2 bg-cyan-50/50">
-          <div className="text-[10px] uppercase tracking-wider text-cyan-700 font-semibold">
+        <div className="border border-emerald-200 rounded p-2 bg-emerald-50/50">
+          <div className="text-[10px] uppercase tracking-wider text-emerald-700 font-semibold">
             Your price
           </div>
           {editing ? (
@@ -250,7 +250,7 @@ function ServiceRow({
               />
               <button
                 onClick={save}
-                className="text-xs bg-cyan-600 text-white px-2 py-1 rounded"
+                className="text-xs bg-emerald-600 text-white px-2 py-1 rounded"
               >
                 Save
               </button>
@@ -268,7 +268,7 @@ function ServiceRow({
               </div>
               <button
                 onClick={() => setEditing(true)}
-                className="text-xs text-cyan-700 hover:underline"
+                className="text-xs text-emerald-700 hover:underline"
               >
                 Edit
               </button>
@@ -277,7 +277,7 @@ function ServiceRow({
           {overridden && (
             <button
               onClick={resetToDefault}
-              className="text-[10px] text-ink/55 hover:text-cyan-700 mt-1"
+              className="text-[10px] text-ink/55 hover:text-emerald-700 mt-1"
             >
               Reset to default
             </button>
@@ -298,17 +298,17 @@ function ServiceRow({
               .map((a) => a[0].toUpperCase() + a.slice(1))
               .join(" · ")}
             {service.visibleToClient && (
-              <span className="ml-1 text-cyan-700">· Client</span>
+              <span className="ml-1 text-emerald-700">· Client</span>
             )}
           </div>
         </div>
       </div>
 
       <details className="mt-3 text-xs">
-        <summary className="cursor-pointer text-ink/65 hover:text-cyan-700">
+        <summary className="cursor-pointer text-ink/65 hover:text-emerald-700">
           AI generation template
         </summary>
-        <p className="mt-2 text-ink/75 italic border-l-2 border-cyan-300 pl-3">
+        <p className="mt-2 text-ink/75 italic border-l-2 border-emerald-300 pl-3">
           {service.aiTemplate}
         </p>
       </details>

@@ -145,7 +145,7 @@ export default function PartnerDocumentsPage() {
                     {new Date(d.uploadedAt).toLocaleString()}
                   </div>
                 </div>
-                <span className="text-[10px] uppercase tracking-wider bg-cyan-100 text-cyan-900 px-2 py-0.5 rounded-full font-semibold">
+                <span className="text-[10px] uppercase tracking-wider bg-emerald-100 text-emerald-900 px-2 py-0.5 rounded-full font-semibold">
                   Logged
                 </span>
               </li>
@@ -163,7 +163,7 @@ export default function PartnerDocumentsPage() {
           padding: 0.55rem 0.75rem;
         }
         :global(.input:focus-visible) {
-          outline: 2px solid #06b6d4;
+          outline: 2px solid #0F6B54;
           outline-offset: -1px;
         }
       `}</style>

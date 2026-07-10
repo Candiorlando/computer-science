@@ -30,7 +30,7 @@ export default function VendorAssessmentPage() {
   if (!org || !tool) {
     return (
       <div className="space-y-3">
-        <Link href={`/dashboard/vendors/${vendorId}`} className="text-xs text-cyan-700 hover:underline">
+        <Link href={`/dashboard/vendors/${vendorId}`} className="text-xs text-emerald-700 hover:underline">
           ← Back to case
         </Link>
         <h1 className="text-2xl">Not found</h1>
@@ -43,7 +43,7 @@ export default function VendorAssessmentPage() {
       <header>
         <Link
           href={`/dashboard/vendors/${vendorId}`}
-          className="text-xs text-cyan-700 hover:underline mb-1 inline-block"
+          className="text-xs text-emerald-700 hover:underline mb-1 inline-block"
         >
           ← Back to {org.legalName}
         </Link>

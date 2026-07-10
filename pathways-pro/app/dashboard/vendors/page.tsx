@@ -99,13 +99,13 @@ function Mini({
 }) {
   return (
     <div
-      className={`border rounded p-2 ${alert && value > 0 ? "border-rose-300 bg-rose-50/40" : "border-ink/10 bg-white"}`}
+      className={`border rounded p-2 ${alert && value > 0 ? "border-amber-300 bg-amber-50/40" : "border-ink/10 bg-white"}`}
     >
       <div className="text-[10px] uppercase tracking-wider text-ink/55">
         {label}
       </div>
       <div
-        className={`text-sm font-semibold ${alert && value > 0 ? "text-rose-700" : "text-ink"}`}
+        className={`text-sm font-semibold ${alert && value > 0 ? "text-amber-700" : "text-ink"}`}
       >
         {value}
       </div>

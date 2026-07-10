@@ -58,7 +58,7 @@ export default function SupportedEmploymentPage() {
             No supported employment opportunities posted yet.{" "}
             <Link
               href="/partner-portal/opportunities"
-              className="text-cyan-700 hover:underline"
+              className="text-emerald-700 hover:underline"
             >
               Post one →
             </Link>

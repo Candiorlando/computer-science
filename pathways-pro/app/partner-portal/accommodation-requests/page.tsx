@@ -134,8 +134,8 @@ export default function AccommodationRequestsPage() {
                   &ldquo;{i.question}&rdquo;
                 </p>
                 {i.responseBody && (
-                  <div className="mt-3 border-l-2 border-cyan-300 pl-3">
-                    <div className="text-xs uppercase tracking-wider text-cyan-700 font-semibold">
+                  <div className="mt-3 border-l-2 border-emerald-300 pl-3">
+                    <div className="text-xs uppercase tracking-wider text-emerald-700 font-semibold">
                       Counselor response
                     </div>
                     <p className="text-sm text-ink/85 mt-1">{i.responseBody}</p>
@@ -159,7 +159,7 @@ export default function AccommodationRequestsPage() {
           padding: 0.55rem 0.75rem;
         }
         :global(.input:focus-visible) {
-          outline: 2px solid #06b6d4;
+          outline: 2px solid #0F6B54;
           outline-offset: -1px;
         }
       `}</style>

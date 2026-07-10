@@ -9,9 +9,13 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        cream: "#F4F1EA",
-        ink: "#1f1d1a",
-        accent: "#b95c3c",
+        // Elegant mint-green + gold on a warm ivory ground.
+        cream: "#F5F2E9", // warm ivory surface
+        ink: "#1c211e", // deep green-charcoal text
+        accent: "#0F6B54", // primary — deep mint green
+        mint: "#2E9E7E", // lighter mint for soft fills
+        gold: "#B8892B", // antique gold — the jewel accent
+        "gold-soft": "#C9A24B",
       },
       fontFamily: {
         serif: ["Georgia", "Cambria", "Times New Roman", "serif"],

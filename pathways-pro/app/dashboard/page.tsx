@@ -220,9 +220,9 @@ export default function CounselorHome() {
               Tutorials &amp; support
             </h2>
             <ul className="space-y-1">
-              <li>📖 <Link href="/practitioner-hub" className="text-cyan-700 hover:underline">Practitioner Hub</Link></li>
-              <li>📚 <Link href="/resources/counselor" className="text-cyan-700 hover:underline">Resource Library</Link></li>
-              <li>⚙️ <Link href="/settings" className="text-cyan-700 hover:underline">Settings &amp; preferences</Link></li>
+              <li>📖 <Link href="/practitioner-hub" className="text-emerald-700 hover:underline">Practitioner Hub</Link></li>
+              <li>📚 <Link href="/resources/counselor" className="text-emerald-700 hover:underline">Resource Library</Link></li>
+              <li>⚙️ <Link href="/settings" className="text-emerald-700 hover:underline">Settings &amp; preferences</Link></li>
             </ul>
           </section>
         </aside>
@@ -235,20 +235,20 @@ function Alerts({ unread, recentNotes }: { unread: number; recentNotes: number }
   if (unread === 0 && recentNotes === 0) return null;
   return (
     <section
-      className="saas-card border-cyan-300 bg-cyan-50/60"
+      className="saas-card border-emerald-300 bg-emerald-50/60"
       aria-live="polite"
     >
       <div className="flex items-baseline gap-3 flex-wrap text-sm">
         <span className="text-base">🔔</span>
         <span className="font-semibold">Notifications:</span>
         {unread > 0 && (
-          <Link href="/messages" className="text-cyan-800 hover:underline">
+          <Link href="/messages" className="text-emerald-800 hover:underline">
             {unread} new message{unread === 1 ? "" : "s"}
           </Link>
         )}
         {unread > 0 && recentNotes > 0 && <span className="text-ink/30">·</span>}
         {recentNotes > 0 && (
-          <Link href="/case-notes" className="text-cyan-800 hover:underline">
+          <Link href="/case-notes" className="text-emerald-800 hover:underline">
             {recentNotes} recent case note{recentNotes === 1 ? "" : "s"}
           </Link>
         )}
@@ -293,7 +293,7 @@ function SectionHeader({
       <h2 className="text-xl font-semibold">{title}</h2>
       <Link
         href={link}
-        className="text-xs text-cyan-700 hover:underline"
+        className="text-xs text-emerald-700 hover:underline"
       >
         {linkLabel}
       </Link>
@@ -313,7 +313,7 @@ function QuickAction({
   return (
     <Link
       href={href}
-      className="border border-ink/10 rounded-lg p-3 text-xs text-center hover:border-cyan-500 hover:bg-cyan-50/50 transition"
+      className="border border-ink/10 rounded-lg p-3 text-xs text-center hover:border-emerald-500 hover:bg-emerald-50/50 transition"
     >
       <div className="text-xl mb-1">{icon}</div>
       <div className="font-semibold">{label}</div>
@@ -323,7 +323,7 @@ function QuickAction({
 
 function StatusBadge({ status }: { status: ClientUser["status"] }) {
   const styles: Record<ClientUser["status"], string> = {
-    "In Training": "bg-blue-100 text-blue-800",
+    "In Training": "bg-emerald-100 text-emerald-800",
     "Job Placement": "bg-emerald-100 text-emerald-800",
     "Assessment Phase": "bg-amber-100 text-amber-800",
     Intake: "bg-pink-100 text-pink-800",

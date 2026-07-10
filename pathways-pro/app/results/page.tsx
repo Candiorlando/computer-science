@@ -342,8 +342,8 @@ function OccupationCard({
           border-radius: 4px;
         }
         :global(.link-btn:hover) {
-          border-color: #b95c3c;
-          color: #b95c3c;
+          border-color: #0F6B54;
+          color: #0F6B54;
         }
       `}</style>
     </article>

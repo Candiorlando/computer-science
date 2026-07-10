@@ -44,7 +44,7 @@ export default function ClientHome() {
       <section className="saas-card grad-tealblue-soft">
         <div className="flex items-baseline justify-between gap-4 flex-wrap">
           <div>
-            <span className="text-[10px] uppercase tracking-wider font-semibold bg-blue-100 text-blue-900 px-2 py-0.5 rounded-full">
+            <span className="text-[10px] uppercase tracking-wider font-semibold bg-emerald-100 text-emerald-900 px-2 py-0.5 rounded-full">
               {isClient ? "Client" : "Client Portal Preview"}
             </span>
             <h1 className="text-4xl mt-2 font-semibold">
@@ -205,9 +205,9 @@ export default function ClientHome() {
               Tutorials &amp; support
             </h2>
             <ul className="space-y-1">
-              <li>📖 <Link href="/resources/client" className="text-cyan-700 hover:underline">Resource Library</Link></li>
-              <li>💰 <Link href="/funding" className="text-cyan-700 hover:underline">Funding directory</Link></li>
-              <li>⚙️ <Link href="/settings" className="text-cyan-700 hover:underline">Settings</Link></li>
+              <li>📖 <Link href="/resources/client" className="text-emerald-700 hover:underline">Resource Library</Link></li>
+              <li>💰 <Link href="/funding" className="text-emerald-700 hover:underline">Funding directory</Link></li>
+              <li>⚙️ <Link href="/settings" className="text-emerald-700 hover:underline">Settings</Link></li>
             </ul>
           </section>
         </aside>
@@ -235,7 +235,7 @@ function QuickStart({
       <div className="flex items-baseline gap-2 mb-1">
         <h3 className="font-semibold">{title}</h3>
         {badge && (
-          <span className="text-[10px] uppercase tracking-wider bg-cyan-100 text-cyan-800 px-1.5 py-0.5 rounded-full">
+          <span className="text-[10px] uppercase tracking-wider bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded-full">
             {badge}
           </span>
         )}

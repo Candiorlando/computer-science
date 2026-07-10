@@ -135,7 +135,7 @@ export default function SettingsPage() {
           font-size: 0.9rem;
         }
         :global(.input:focus-visible) {
-          outline: 2px solid #06b6d4;
+          outline: 2px solid #0F6B54;
           outline-offset: -1px;
         }
       `}</style>
@@ -194,7 +194,7 @@ function Toggle({
         type="checkbox"
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}
-        className="accent-cyan-500 w-4 h-4"
+        className="accent-emerald-500 w-4 h-4"
       />
       <span>{label}</span>
     </label>

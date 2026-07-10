@@ -147,7 +147,7 @@ function ItemRow({
   return (
     <fieldset>
       <legend className="text-sm font-medium mb-2">
-        <span className="text-cyan-700 mr-2">{n}.</span>
+        <span className="text-emerald-700 mr-2">{n}.</span>
         {item.prompt}
       </legend>
       {item.kind === "likert5" && (
@@ -206,7 +206,7 @@ function ItemRow({
       )}
       {item.kind === "text" && (
         <textarea
-          className="w-full bg-white border border-ink/15 rounded-md px-3 py-2 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 min-h-[80px]"
+          className="w-full bg-white border border-ink/15 rounded-md px-3 py-2 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 min-h-[80px]"
           value={value ?? ""}
           onChange={(e) => onChange(e.target.value)}
           placeholder="Type response…"
@@ -232,7 +232,7 @@ function Choice({
       className={`text-xs px-3 py-1.5 rounded border ${
         selected
           ? "grad-tealblue text-white border-transparent"
-          : "bg-white border-ink/15 hover:border-cyan-500"
+          : "bg-white border-ink/15 hover:border-emerald-500"
       }`}
     >
       {label}

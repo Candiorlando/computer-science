@@ -54,7 +54,7 @@ export default function CounselorVendorCaseFile() {
       <div className="space-y-3">
         <Link
           href="/dashboard/vendors"
-          className="text-xs text-cyan-700 hover:underline"
+          className="text-xs text-emerald-700 hover:underline"
         >
           ← Vendors
         </Link>
@@ -70,7 +70,7 @@ export default function CounselorVendorCaseFile() {
       <header>
         <Link
           href="/dashboard/vendors"
-          className="text-xs text-cyan-700 hover:underline mb-1 inline-block"
+          className="text-xs text-emerald-700 hover:underline mb-1 inline-block"
         >
           ← All vendors
         </Link>
@@ -127,7 +127,7 @@ export default function CounselorVendorCaseFile() {
               <li key={r.id} className="saas-card">
                 <div className="flex items-baseline justify-between gap-3 flex-wrap">
                   <h3 className="font-semibold">{r.serviceTitle}</h3>
-                  <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full font-semibold bg-blue-100 text-blue-900">
+                  <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full font-semibold bg-emerald-100 text-emerald-900">
                     {r.status.replaceAll("-", " ")}
                   </span>
                 </div>
