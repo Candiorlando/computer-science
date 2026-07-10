@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 
 export const metadata: Metadata = {
   title: "About Pathways Pro & Founder Candace Metcalf",
@@ -78,6 +79,19 @@ export default function AboutPage() {
         </div>
 
         <aside className="saas-card space-y-4">
+          <figure className="m-0 -mx-1 -mt-1">
+            <div className="overflow-hidden rounded-xl border border-ink/10">
+              <Image
+                src="/founder/candace-metcalf.jpg"
+                alt="Portrait of Candace Metcalf, CRC, LPC — founder of Pathways Pro"
+                width={864}
+                height={1184}
+                sizes="(max-width: 768px) 100vw, 300px"
+                style={{ width: "100%", height: "auto" }}
+                priority
+              />
+            </div>
+          </figure>
           <div>
             <div className="text-xs uppercase tracking-wider text-ink/50 mb-1">
               Credentials
