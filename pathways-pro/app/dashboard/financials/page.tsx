@@ -172,7 +172,7 @@ function ARTable({
                           onChange();
                         }
                       }}
-                      className="text-xs text-rose-700 hover:underline"
+                      className="text-xs text-amber-700 hover:underline"
                     >
                       Void
                     </button>
@@ -259,7 +259,7 @@ function Stat({
   alert?: boolean;
 }) {
   const cls = alert
-    ? "border-rose-300 bg-rose-50/40"
+    ? "border-amber-300 bg-amber-50/40"
     : highlight
       ? "grad-tealblue-soft"
       : "";
@@ -289,7 +289,7 @@ function TabPill({
       className={`text-xs px-3 py-1.5 rounded-full font-semibold ${
         active
           ? "grad-tealblue text-white"
-          : "border border-ink/15 text-ink/70 hover:border-cyan-500"
+          : "border border-ink/15 text-ink/70 hover:border-emerald-500"
       }`}
     >
       {children}
@@ -299,12 +299,12 @@ function TabPill({
 
 function StatusChip({ status }: { status: string }) {
   const styles: Record<string, string> = {
-    issued: "bg-blue-100 text-blue-900",
+    issued: "bg-emerald-100 text-emerald-900",
     paid: "bg-emerald-100 text-emerald-900",
-    overdue: "bg-rose-100 text-rose-900",
+    overdue: "bg-amber-100 text-amber-900",
     void: "bg-ink/10 text-ink/55",
     owed: "bg-amber-100 text-amber-900",
-    scheduled: "bg-blue-100 text-blue-900",
+    scheduled: "bg-emerald-100 text-emerald-900",
   };
   return (
     <span

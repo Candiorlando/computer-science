@@ -43,7 +43,7 @@ export default function ClientProgressPage() {
       </header>
 
       <section className="saas-card grad-tealblue-soft">
-        <h2 className="text-sm uppercase tracking-wider font-semibold text-cyan-700 mb-2">
+        <h2 className="text-sm uppercase tracking-wider font-semibold text-emerald-700 mb-2">
           Today
         </h2>
         <p className="text-xl text-ink leading-snug">{encouragement.text}</p>
@@ -158,7 +158,7 @@ function CTA({ href, label }: { href: string; label: string }) {
   return (
     <Link
       href={href}
-      className="text-xs border border-cyan-300 text-cyan-800 px-3 py-1.5 rounded-full hover:bg-cyan-50"
+      className="text-xs border border-emerald-300 text-emerald-800 px-3 py-1.5 rounded-full hover:bg-emerald-50"
     >
       {label} →
     </Link>

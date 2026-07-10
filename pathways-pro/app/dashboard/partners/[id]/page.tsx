@@ -53,7 +53,7 @@ export default function CounselorPartnerCaseFile() {
         <h1 className="text-2xl">Partner not found</h1>
         <Link
           href="/dashboard/partners"
-          className="text-cyan-700 hover:underline"
+          className="text-emerald-700 hover:underline"
         >
           ← Back to Employment Partners
         </Link>
@@ -66,7 +66,7 @@ export default function CounselorPartnerCaseFile() {
       <header>
         <Link
           href="/dashboard/partners"
-          className="text-xs text-cyan-700 hover:underline mb-1 inline-block"
+          className="text-xs text-emerald-700 hover:underline mb-1 inline-block"
         >
           ← All Employment Partners
         </Link>
@@ -77,7 +77,7 @@ export default function CounselorPartnerCaseFile() {
         </p>
         <div className="flex gap-2 mt-3 flex-wrap">
           {data.org.participatesInCustomizedEmployment && (
-            <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full font-semibold bg-cyan-100 text-cyan-900">
+            <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full font-semibold bg-emerald-100 text-emerald-900">
               🎯 Customized Employment
             </span>
           )}
@@ -145,7 +145,7 @@ export default function CounselorPartnerCaseFile() {
                         </span>
                       )}
                     </h3>
-                    <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full font-semibold bg-cyan-100 text-cyan-900">
+                    <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full font-semibold bg-emerald-100 text-emerald-900">
                       {e.currentStage.replaceAll("-", " ")}
                     </span>
                   </div>

@@ -376,7 +376,7 @@ export default function AccommodationLetterPage() {
           font-family: inherit;
         }
         :global(.input:focus-visible) {
-          outline: 2px solid #b95c3c;
+          outline: 2px solid #0F6B54;
           outline-offset: -1px;
         }
       `}</style>

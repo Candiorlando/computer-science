@@ -86,7 +86,7 @@ export default function CaseSearchPage() {
   return (
     <div className="space-y-8 max-w-4xl mx-auto pt-8 pb-12">
       <header className="text-center space-y-2">
-        <p className="text-xs uppercase tracking-widest text-cyan-700">
+        <p className="text-xs uppercase tracking-widest text-emerald-700">
           Case Search · {user.agency}
         </p>
         <h1 className="text-4xl font-semibold">
@@ -100,7 +100,7 @@ export default function CaseSearchPage() {
 
       {(totalUnread > 0 || totalPending > 0) && (
         <section
-          className="saas-card border-cyan-300 bg-cyan-50/60 text-center"
+          className="saas-card border-emerald-300 bg-emerald-50/60 text-center"
           aria-live="polite"
         >
           <p className="text-sm">
@@ -136,7 +136,7 @@ export default function CaseSearchPage() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Type a name, case ID, or organization…"
-            className="w-full text-lg bg-white border-2 border-cyan-300 focus:border-cyan-600 focus:outline-none rounded-lg px-4 py-3 mt-2"
+            className="w-full text-lg bg-white border-2 border-emerald-300 focus:border-emerald-600 focus:outline-none rounded-lg px-4 py-3 mt-2"
             autoFocus
           />
         </label>
@@ -199,11 +199,11 @@ export default function CaseSearchPage() {
 
       <footer className="text-center text-xs text-ink/55 border-t border-ink/10 pt-4">
         Need to onboard a new case? Clients sign up at the{" "}
-        <Link href="/" className="text-cyan-700 hover:underline">
+        <Link href="/" className="text-emerald-700 hover:underline">
           public landing
         </Link>
         ; business / vendor / partner accounts sign up at{" "}
-        <Link href="/business" className="text-cyan-700 hover:underline">
+        <Link href="/business" className="text-emerald-700 hover:underline">
           /business
         </Link>
         .
@@ -214,10 +214,10 @@ export default function CaseSearchPage() {
 
 function CaseRowItem({ c }: { c: CaseRow }) {
   const typeStyles: Record<CaseType, { bg: string; label: string; icon: string }> = {
-    client: { bg: "bg-blue-100 text-blue-900", label: "Client", icon: "👤" },
+    client: { bg: "bg-emerald-100 text-emerald-900", label: "Client", icon: "👤" },
     vendor: { bg: "bg-amber-100 text-amber-900", label: "Vendor", icon: "🛠️" },
-    business: { bg: "bg-purple-100 text-purple-900", label: "Business", icon: "🏢" },
-    partner: { bg: "bg-cyan-100 text-cyan-900", label: "Partner", icon: "🤝" },
+    business: { bg: "bg-emerald-100 text-emerald-900", label: "Business", icon: "🏢" },
+    partner: { bg: "bg-emerald-100 text-emerald-900", label: "Partner", icon: "🤝" },
   };
   const t = typeStyles[c.type];
   return (
@@ -242,7 +242,7 @@ function CaseRowItem({ c }: { c: CaseRow }) {
         </div>
         <div className="flex items-center gap-2">
           {c.unreadMessages > 0 && (
-            <span className="text-[10px] font-bold bg-cyan-500 text-white px-2 py-1 rounded-full">
+            <span className="text-[10px] font-bold bg-emerald-500 text-white px-2 py-1 rounded-full">
               ✉️ {c.unreadMessages}
             </span>
           )}
@@ -352,7 +352,7 @@ function Pill({
       className={`text-xs px-3 py-1.5 rounded-full font-semibold transition ${
         active
           ? "grad-tealblue text-white"
-          : "border border-ink/15 text-ink/70 hover:border-cyan-500"
+          : "border border-ink/15 text-ink/70 hover:border-emerald-500"
       }`}
     >
       {children}

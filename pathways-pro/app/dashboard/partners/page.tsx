@@ -60,7 +60,7 @@ export default function CounselorPartnersIndex() {
                   <h2 className="text-lg font-semibold">{o.legalName}</h2>
                   <div className="flex gap-1.5 flex-wrap">
                     {o.participatesInCustomizedEmployment && (
-                      <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full font-semibold bg-cyan-100 text-cyan-900">
+                      <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full font-semibold bg-emerald-100 text-emerald-900">
                         🎯 CE
                       </span>
                     )}

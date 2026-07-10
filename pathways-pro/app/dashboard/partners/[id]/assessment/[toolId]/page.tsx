@@ -32,7 +32,7 @@ export default function PartnerAssessmentPage() {
       <div className="space-y-3">
         <Link
           href={`/dashboard/partners/${partnerId}`}
-          className="text-xs text-cyan-700 hover:underline"
+          className="text-xs text-emerald-700 hover:underline"
         >
           ← Back to case
         </Link>
@@ -46,7 +46,7 @@ export default function PartnerAssessmentPage() {
       <header>
         <Link
           href={`/dashboard/partners/${partnerId}`}
-          className="text-xs text-cyan-700 hover:underline mb-1 inline-block"
+          className="text-xs text-emerald-700 hover:underline mb-1 inline-block"
         >
           ← Back to {org.legalName}
         </Link>

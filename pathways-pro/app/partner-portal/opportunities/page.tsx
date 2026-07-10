@@ -101,7 +101,7 @@ function OppCard({ o }: { o: Opportunity }) {
         <span
           className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full font-semibold ${
             o.kind === "customized-employment"
-              ? "bg-cyan-100 text-cyan-900"
+              ? "bg-emerald-100 text-emerald-900"
               : "bg-emerald-100 text-emerald-900"
           }`}
         >
@@ -143,7 +143,7 @@ function Pill({ label, value }: { label: string; value: string }) {
 
 function Tag({ label }: { label: string }) {
   return (
-    <span className="text-[11px] bg-cyan-50 text-cyan-900 border border-cyan-200 px-2 py-0.5 rounded-full">
+    <span className="text-[11px] bg-emerald-50 text-emerald-900 border border-emerald-200 px-2 py-0.5 rounded-full">
       {label}
     </span>
   );
@@ -286,7 +286,7 @@ function NewOpportunityModal({
               type="checkbox"
               checked={willingToCarveRole}
               onChange={(e) => setCarve(e.target.checked)}
-              className="accent-cyan-500"
+              className="accent-emerald-500"
             />
             Willing to carve role
           </label>
@@ -295,7 +295,7 @@ function NewOpportunityModal({
               type="checkbox"
               checked={willingToAdjustSchedule}
               onChange={(e) => setSched(e.target.checked)}
-              className="accent-cyan-500"
+              className="accent-emerald-500"
             />
             Willing to adjust schedule
           </label>
@@ -324,7 +324,7 @@ function NewOpportunityModal({
             font-size: 0.9rem;
           }
           :global(.input:focus-visible) {
-            outline: 2px solid #06b6d4;
+            outline: 2px solid #0F6B54;
             outline-offset: -1px;
           }
         `}</style>

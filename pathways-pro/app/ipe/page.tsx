@@ -1029,10 +1029,10 @@ function SignatureCard({
 
 function StatusBadge({ status, large }: { status: IPEStatus; large?: boolean }) {
   const styles: Record<IPEStatus, string> = {
-    draft: "bg-yellow-100 text-yellow-800",
-    "pending-client-signature": "bg-blue-100 text-blue-800",
+    draft: "bg-amber-100 text-amber-800",
+    "pending-client-signature": "bg-emerald-100 text-emerald-800",
     signed: "bg-green-100 text-green-800",
-    active: "bg-purple-100 text-purple-800",
+    active: "bg-emerald-100 text-emerald-800",
   };
   const labels: Record<IPEStatus, string> = {
     draft: "Draft",

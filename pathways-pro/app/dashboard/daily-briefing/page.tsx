@@ -88,7 +88,7 @@ export default function DailyBriefingPage() {
       </header>
 
       <section className="saas-card grad-tealblue-soft">
-        <h2 className="text-sm uppercase tracking-wider font-semibold text-cyan-700 mb-2">
+        <h2 className="text-sm uppercase tracking-wider font-semibold text-emerald-700 mb-2">
           🧠 Priority summary
         </h2>
         <p className="text-ink/85 leading-relaxed">{summary}</p>
@@ -139,7 +139,7 @@ export default function DailyBriefingPage() {
                   </div>
                   <Link
                     href="/dashboard/business"
-                    className="text-xs text-cyan-700 hover:underline"
+                    className="text-xs text-emerald-700 hover:underline"
                   >
                     Open →
                   </Link>
@@ -176,7 +176,7 @@ export default function DailyBriefingPage() {
                       </div>
                       <Link
                         href={`/messages?thread=${t.id}`}
-                        className="text-xs text-cyan-700 hover:underline"
+                        className="text-xs text-emerald-700 hover:underline"
                       >
                         Reply →
                       </Link>
@@ -209,7 +209,7 @@ export default function DailyBriefingPage() {
                 </div>
                 <Link
                   href={`/case/${n.clientCaseId}`}
-                  className="text-xs text-cyan-700 hover:underline"
+                  className="text-xs text-emerald-700 hover:underline"
                 >
                   Case →
                 </Link>
@@ -279,7 +279,7 @@ function Alert({
     <Link
       href={href}
       className={`saas-card block hover:no-underline ${
-        severe && count > 0 ? "border-rose-300 bg-rose-50/40" : ""
+        severe && count > 0 ? "border-amber-300 bg-amber-50/40" : ""
       }`}
     >
       <div className="text-3xl font-bold leading-none">{count}</div>

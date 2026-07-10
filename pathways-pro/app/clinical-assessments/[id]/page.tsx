@@ -265,14 +265,14 @@ function bandTone(color: SeverityBand["color"]) {
     case "green":
       return { box: "border-green-300 bg-green-50", text: "text-green-800" };
     case "yellow":
-      return { box: "border-yellow-300 bg-yellow-50", text: "text-yellow-800" };
+      return { box: "border-amber-300 bg-amber-50", text: "text-amber-800" };
     case "orange":
-      return { box: "border-orange-300 bg-orange-50", text: "text-orange-800" };
+      return { box: "border-amber-300 bg-amber-50", text: "text-amber-800" };
     case "red":
       return { box: "border-red-300 bg-red-50", text: "text-red-800" };
     case "blue":
-      return { box: "border-blue-300 bg-blue-50", text: "text-blue-800" };
+      return { box: "border-emerald-300 bg-emerald-50", text: "text-emerald-800" };
     case "purple":
-      return { box: "border-purple-300 bg-purple-50", text: "text-purple-800" };
+      return { box: "border-emerald-300 bg-emerald-50", text: "text-emerald-800" };
   }
 }

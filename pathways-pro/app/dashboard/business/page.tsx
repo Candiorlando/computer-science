@@ -177,7 +177,7 @@ export default function CounselorBusinessView() {
                 <h3 className="text-xl font-semibold">
                   <Link
                     href={`/dashboard/business/${e.orgId}`}
-                    className="hover:text-cyan-700"
+                    className="hover:text-emerald-700"
                   >
                     {e.orgName} →
                   </Link>
@@ -603,7 +603,7 @@ function ServiceRequestQueue({
           className={`border-2 rounded-lg p-4 ${
             r.status === "pending-counselor-review"
               ? "border-amber-300 bg-amber-50/40"
-              : "border-purple-300 bg-purple-50/30"
+              : "border-emerald-300 bg-emerald-50/30"
           }`}
         >
           <div className="flex items-baseline justify-between gap-3 flex-wrap mb-1">
@@ -617,7 +617,7 @@ function ServiceRequestQueue({
               className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full font-semibold ${
                 r.status === "pending-counselor-review"
                   ? "bg-amber-200 text-amber-900"
-                  : "bg-purple-200 text-purple-900"
+                  : "bg-emerald-200 text-emerald-900"
               }`}
             >
               {r.status === "pending-counselor-review"
@@ -688,7 +688,7 @@ function ServiceRequestQueue({
                     onChange();
                   }
                 }}
-                className="bg-purple-700 text-cream px-3 py-1.5 rounded font-semibold text-xs"
+                className="bg-emerald-700 text-cream px-3 py-1.5 rounded font-semibold text-xs"
               >
                 ✓ Release to business client
               </button>

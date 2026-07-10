@@ -156,7 +156,7 @@ function ThreadList({
                     {unread > 0 && (
                       <span
                         className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
-                          isActive ? "bg-white/25 text-white" : "bg-cyan-500 text-white"
+                          isActive ? "bg-white/25 text-white" : "bg-emerald-500 text-white"
                         }`}
                       >
                         {unread}
@@ -268,14 +268,14 @@ function ThreadView({
             {attachmentNames.map((n, i) => (
               <li
                 key={i}
-                className="bg-cyan-100 text-cyan-900 px-2 py-1 rounded-full"
+                className="bg-emerald-100 text-emerald-900 px-2 py-1 rounded-full"
               >
                 📎 {n}
                 <button
                   onClick={() =>
                     setAttachmentNames((p) => p.filter((_, j) => j !== i))
                   }
-                  className="ml-2 text-cyan-900/65 hover:text-cyan-900"
+                  className="ml-2 text-emerald-900/65 hover:text-emerald-900"
                   aria-label={`Remove ${n}`}
                 >
                   ×
@@ -292,7 +292,7 @@ function ThreadView({
               if (e.key === "Enter" && e.metaKey) send();
             }}
             placeholder="Write a message… (⌘+Enter to send)"
-            className="flex-1 bg-white border border-ink/15 rounded-md px-3 py-2 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 min-h-[60px]"
+            className="flex-1 bg-white border border-ink/15 rounded-md px-3 py-2 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 min-h-[60px]"
           />
           <div className="flex flex-col gap-2">
             <button
@@ -458,7 +458,7 @@ function NewThreadModal({
             font-size: 0.9rem;
           }
           :global(.input:focus-visible) {
-            outline: 2px solid #06b6d4;
+            outline: 2px solid #0F6B54;
             outline-offset: -1px;
           }
         `}</style>

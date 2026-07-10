@@ -397,7 +397,7 @@ function AssessmentCard({
   const costStyles = {
     free: "bg-green-100 text-green-800",
     proprietary: "bg-amber-100 text-amber-800",
-    varies: "bg-blue-100 text-blue-800",
+    varies: "bg-emerald-100 text-emerald-800",
   } as const;
   const adminLabels = {
     "self-administered": "Client",

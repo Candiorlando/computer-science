@@ -278,7 +278,7 @@ function Styles() {
   return (
     <style jsx>{`
       :global(.btn-primary) {
-        background: #b95c3c;
+        background: #0F6B54;
         color: white;
         padding: 0.6rem 1.2rem;
         border-radius: 6px;

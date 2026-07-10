@@ -54,7 +54,7 @@ export default function CaseFilePage() {
       <div className="space-y-3">
         <Link
           href="/caseload"
-          className="text-xs text-cyan-700 hover:underline"
+          className="text-xs text-emerald-700 hover:underline"
         >
           ← Caseload
         </Link>
@@ -68,7 +68,7 @@ export default function CaseFilePage() {
       <header>
         <Link
           href="/caseload"
-          className="text-xs text-cyan-700 hover:underline mb-1 inline-block"
+          className="text-xs text-emerald-700 hover:underline mb-1 inline-block"
         >
           ← Caseload
         </Link>
@@ -164,7 +164,7 @@ function OverviewTab({
   return (
     <div className="space-y-4">
       <section className="saas-card grad-tealblue-soft">
-        <h2 className="text-sm uppercase tracking-wider font-semibold text-cyan-700 mb-2">
+        <h2 className="text-sm uppercase tracking-wider font-semibold text-emerald-700 mb-2">
           🎯 Employment goal
         </h2>
         <p className="text-xl font-semibold">{client.goal}</p>
@@ -301,7 +301,7 @@ function MessagesTab({
     return (
       <div className="saas-card text-center text-ink/55 italic">
         No conversations with this client yet.{" "}
-        <Link href="/messages" className="text-cyan-700 hover:underline">
+        <Link href="/messages" className="text-emerald-700 hover:underline">
           Start one →
         </Link>
       </div>
@@ -346,7 +346,7 @@ function TimelineTab({ caseId }: { caseId: string }) {
         {events.map((e) => (
           <li
             key={e.id}
-            className="flex items-start gap-3 border-l-2 border-cyan-300 pl-3 py-1"
+            className="flex items-start gap-3 border-l-2 border-emerald-300 pl-3 py-1"
           >
             <time
               dateTime={e.sessionAt}
@@ -376,7 +376,7 @@ function ProgressTab({
   return (
     <div className="space-y-4">
       <section className="saas-card grad-tealblue-soft">
-        <h2 className="text-sm uppercase tracking-wider font-semibold text-cyan-700 mb-2">
+        <h2 className="text-sm uppercase tracking-wider font-semibold text-emerald-700 mb-2">
           Overall progress
         </h2>
         <div className="text-4xl font-bold">{client.progress}%</div>

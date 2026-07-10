@@ -32,7 +32,7 @@ export default function BusinessAssessmentPage() {
       <div className="space-y-3">
         <Link
           href={`/dashboard/business/${orgId}`}
-          className="text-xs text-cyan-700 hover:underline"
+          className="text-xs text-emerald-700 hover:underline"
         >
           ← Back to case
         </Link>
@@ -46,7 +46,7 @@ export default function BusinessAssessmentPage() {
       <header>
         <Link
           href={`/dashboard/business/${orgId}`}
-          className="text-xs text-cyan-700 hover:underline mb-1 inline-block"
+          className="text-xs text-emerald-700 hover:underline mb-1 inline-block"
         >
           ← Back to {org.legalName}
         </Link>

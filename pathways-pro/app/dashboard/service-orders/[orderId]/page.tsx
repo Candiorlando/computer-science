@@ -81,7 +81,7 @@ export default function ServiceOrderDetail() {
       <div className="space-y-3">
         <Link
           href="/dashboard/service-orders"
-          className="text-xs text-cyan-700 hover:underline"
+          className="text-xs text-emerald-700 hover:underline"
         >
           ← Service Orders
         </Link>
@@ -166,7 +166,7 @@ export default function ServiceOrderDetail() {
       <header>
         <Link
           href="/dashboard/service-orders"
-          className="text-xs text-cyan-700 hover:underline mb-1 inline-block"
+          className="text-xs text-emerald-700 hover:underline mb-1 inline-block"
         >
           ← Service Orders
         </Link>
@@ -176,7 +176,7 @@ export default function ServiceOrderDetail() {
         </div>
         <p className="text-ink/65 text-sm mt-1">
           Requested by{" "}
-          <Link href={caseFileHref} className="text-cyan-700 hover:underline">
+          <Link href={caseFileHref} className="text-emerald-700 hover:underline">
             {order.requesterOrgName}
           </Link>{" "}
           · {order.requesterName} · {formatPrice(price, service?.priceUnit ?? "flat")}
@@ -214,7 +214,7 @@ export default function ServiceOrderDetail() {
           )}
         </dl>
         {order.notes && (
-          <p className="text-sm text-ink/75 italic mt-3 border-l-2 border-cyan-300 pl-3">
+          <p className="text-sm text-ink/75 italic mt-3 border-l-2 border-emerald-300 pl-3">
             &ldquo;{order.notes}&rdquo;
           </p>
         )}
@@ -305,7 +305,7 @@ export default function ServiceOrderDetail() {
                 {error && (
                   <div
                     role="alert"
-                    className="mt-3 text-sm border border-rose-300 bg-rose-50 text-rose-900 p-3 rounded"
+                    className="mt-3 text-sm border border-amber-300 bg-amber-50 text-amber-900 p-3 rounded"
                   >
                     {error}
                   </div>
@@ -333,7 +333,7 @@ export default function ServiceOrderDetail() {
                           setEditText(order.deliverableFinal ?? order.deliverableDraft ?? "");
                           setEditing(true);
                         }}
-                        className="text-xs border border-cyan-500 text-cyan-700 px-3 py-1.5 rounded-md hover:bg-cyan-50"
+                        className="text-xs border border-emerald-500 text-emerald-700 px-3 py-1.5 rounded-md hover:bg-emerald-50"
                       >
                         ✏️ Edit
                       </button>
@@ -341,7 +341,7 @@ export default function ServiceOrderDetail() {
                       <>
                         <button
                           onClick={saveEdit}
-                          className="text-xs bg-cyan-600 text-white px-3 py-1.5 rounded-md font-semibold"
+                          className="text-xs bg-emerald-600 text-white px-3 py-1.5 rounded-md font-semibold"
                         >
                           Save edits
                         </button>
@@ -388,7 +388,7 @@ export default function ServiceOrderDetail() {
           </p>
           <button
             onClick={send}
-            className="bg-purple-700 text-white font-semibold px-5 py-2.5 rounded-md text-sm"
+            className="bg-emerald-700 text-white font-semibold px-5 py-2.5 rounded-md text-sm"
           >
             🚀 Send to client
           </button>
@@ -409,9 +409,9 @@ export default function ServiceOrderDetail() {
       )}
 
       {order.status === "declined" && (
-        <section className="saas-card border-rose-300 bg-rose-50/40">
-          <h2 className="text-lg font-semibold text-rose-900">Declined</h2>
-          <p className="text-sm text-rose-900/85 mt-1">
+        <section className="saas-card border-amber-300 bg-amber-50/40">
+          <h2 className="text-lg font-semibold text-amber-900">Declined</h2>
+          <p className="text-sm text-amber-900/85 mt-1">
             <strong>Reason:</strong> {order.decisionNotes ?? "No reason recorded."}
           </p>
         </section>
@@ -431,11 +431,11 @@ function DueAndUrgency({
   const dueAlert = dueDays !== null && dueDays <= 3;
   return (
     <section
-      className={`saas-card ${dueAlert || urgencyAlert ? "border-rose-300 bg-rose-50/40" : "grad-tealblue-soft"}`}
+      className={`saas-card ${dueAlert || urgencyAlert ? "border-amber-300 bg-amber-50/40" : "grad-tealblue-soft"}`}
     >
       <div className="flex items-baseline justify-between gap-3 flex-wrap">
         <div>
-          <div className="text-xs uppercase tracking-wider font-semibold text-cyan-700">
+          <div className="text-xs uppercase tracking-wider font-semibold text-emerald-700">
             Priority
           </div>
           <div className="text-2xl font-bold mt-1">
@@ -459,7 +459,7 @@ function DueAndUrgency({
           )}
         </div>
         <div className="text-right">
-          <div className="text-xs uppercase tracking-wider font-semibold text-cyan-700">
+          <div className="text-xs uppercase tracking-wider font-semibold text-emerald-700">
             Urgency
           </div>
           <div className="text-lg font-semibold capitalize mt-1">
@@ -505,10 +505,10 @@ function Row({ label, value }: { label: string; value: string }) {
 function StatusChip({ status }: { status: ServiceRequest["status"] }) {
   const styles: Record<ServiceRequest["status"], string> = {
     "pending-counselor-review": "bg-amber-100 text-amber-900",
-    "approved-in-progress": "bg-blue-100 text-blue-900",
-    "draft-awaiting-release": "bg-purple-100 text-purple-900",
+    "approved-in-progress": "bg-emerald-100 text-emerald-900",
+    "draft-awaiting-release": "bg-emerald-100 text-emerald-900",
     delivered: "bg-emerald-100 text-emerald-900",
-    declined: "bg-rose-100 text-rose-900",
+    declined: "bg-amber-100 text-amber-900",
   };
   const labels: Record<ServiceRequest["status"], string> = {
     "pending-counselor-review": "Awaiting review",

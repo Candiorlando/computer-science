@@ -176,7 +176,7 @@ function AssignmentCard({
             Take on Pathways Pro
           </span>
         ) : (
-          <span className="text-xs uppercase tracking-wider font-semibold px-2 py-1 rounded-full bg-blue-100 text-blue-800">
+          <span className="text-xs uppercase tracking-wider font-semibold px-2 py-1 rounded-full bg-emerald-100 text-emerald-800">
             External
           </span>
         )}

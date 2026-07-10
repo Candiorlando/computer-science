@@ -148,7 +148,7 @@ export default function ServiceOrdersPage() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Service title, organization, matter caption…"
-            className="w-full bg-white border border-ink/15 focus:border-cyan-500 rounded-md px-3 py-2 text-sm mt-2 focus:outline-none"
+            className="w-full bg-white border border-ink/15 focus:border-emerald-500 rounded-md px-3 py-2 text-sm mt-2 focus:outline-none"
           />
         </label>
 
@@ -267,9 +267,9 @@ function OrderRow({
   onChange: () => void;
 }) {
   const orgKindStyles: Record<OrgKind, { bg: string; label: string; icon: string }> = {
-    business: { bg: "bg-purple-100 text-purple-900", label: "Business", icon: "🏢" },
+    business: { bg: "bg-emerald-100 text-emerald-900", label: "Business", icon: "🏢" },
     vendor: { bg: "bg-amber-100 text-amber-900", label: "Vendor", icon: "🛠️" },
-    partner: { bg: "bg-cyan-100 text-cyan-900", label: "Partner", icon: "🤝" },
+    partner: { bg: "bg-emerald-100 text-emerald-900", label: "Partner", icon: "🤝" },
   };
   const ok = orgKindStyles[order.orgKind];
 
@@ -317,7 +317,7 @@ function OrderRow({
       <p className="text-sm text-ink/75 mt-1">
         <Link
           href={order.caseFileHref}
-          className="font-semibold text-cyan-700 hover:underline"
+          className="font-semibold text-emerald-700 hover:underline"
         >
           {order.requesterOrgName} →
         </Link>{" "}
@@ -352,7 +352,7 @@ function OrderRow({
       </div>
 
       {order.notes && (
-        <p className="text-xs text-ink/65 italic mt-2 border-l-2 border-cyan-300 pl-3">
+        <p className="text-xs text-ink/65 italic mt-2 border-l-2 border-emerald-300 pl-3">
           &ldquo;{order.notes}&rdquo;
         </p>
       )}
@@ -374,7 +374,7 @@ function OrderRow({
           <>
             <button
               onClick={onApprove}
-              className="border border-cyan-500 text-cyan-700 text-xs px-3 py-1.5 rounded-md font-semibold hover:bg-cyan-50"
+              className="border border-emerald-500 text-emerald-700 text-xs px-3 py-1.5 rounded-md font-semibold hover:bg-emerald-50"
             >
               ✓ Quick-approve
             </button>
@@ -389,14 +389,14 @@ function OrderRow({
         {order.status === "draft-awaiting-release" && (
           <button
             onClick={onRelease}
-            className="bg-purple-700 text-white text-xs px-3 py-1.5 rounded-md font-semibold"
+            className="bg-emerald-700 text-white text-xs px-3 py-1.5 rounded-md font-semibold"
           >
             🚀 Release to {ok.label.toLowerCase()} client
           </button>
         )}
         <Link
           href={order.caseFileHref}
-          className="text-xs text-cyan-700 hover:underline self-center"
+          className="text-xs text-emerald-700 hover:underline self-center"
         >
           Open in case →
         </Link>
@@ -408,10 +408,10 @@ function OrderRow({
 function StatusChip({ status }: { status: ServiceRequest["status"] }) {
   const styles: Record<ServiceRequest["status"], string> = {
     "pending-counselor-review": "bg-amber-100 text-amber-900",
-    "approved-in-progress": "bg-blue-100 text-blue-900",
-    "draft-awaiting-release": "bg-purple-100 text-purple-900",
+    "approved-in-progress": "bg-emerald-100 text-emerald-900",
+    "draft-awaiting-release": "bg-emerald-100 text-emerald-900",
     delivered: "bg-emerald-100 text-emerald-900",
-    declined: "bg-rose-100 text-rose-900",
+    declined: "bg-amber-100 text-amber-900",
   };
   const labels: Record<ServiceRequest["status"], string> = {
     "pending-counselor-review": "Awaiting review",
@@ -440,13 +440,13 @@ function Stat({
 }) {
   return (
     <div
-      className={`saas-card ${alert && value > 0 ? "border-rose-300 bg-rose-50/40" : ""}`}
+      className={`saas-card ${alert && value > 0 ? "border-amber-300 bg-amber-50/40" : ""}`}
     >
       <div className="text-[10px] uppercase tracking-wider text-ink/55">
         {label}
       </div>
       <div
-        className={`text-2xl font-bold mt-1 ${alert && value > 0 ? "text-rose-700" : "text-ink"}`}
+        className={`text-2xl font-bold mt-1 ${alert && value > 0 ? "text-amber-700" : "text-ink"}`}
       >
         {value}
       </div>
@@ -465,13 +465,13 @@ function Tile({
 }) {
   return (
     <div
-      className={`border rounded p-2 ${alert ? "border-rose-300 bg-rose-50/40" : "border-ink/10 bg-white"}`}
+      className={`border rounded p-2 ${alert ? "border-amber-300 bg-amber-50/40" : "border-ink/10 bg-white"}`}
     >
       <div className="text-[10px] uppercase tracking-wider text-ink/55">
         {label}
       </div>
       <div
-        className={`text-xs font-semibold mt-0.5 ${alert ? "text-rose-700" : "text-ink"}`}
+        className={`text-xs font-semibold mt-0.5 ${alert ? "text-amber-700" : "text-ink"}`}
       >
         {value}
       </div>
@@ -495,7 +495,7 @@ function Pill({
       className={`text-xs px-3 py-1.5 rounded-full font-semibold transition ${
         active
           ? "grad-tealblue text-white"
-          : "border border-ink/15 text-ink/70 hover:border-cyan-500"
+          : "border border-ink/15 text-ink/70 hover:border-emerald-500"
       }`}
     >
       {children}
