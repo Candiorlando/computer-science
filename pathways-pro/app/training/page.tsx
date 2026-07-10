@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { CareerAssessmentDemo } from "@/components/CareerAssessmentDemo";
 import { BLUEPRINT_PAGES } from "@/lib/blueprint";
 
 export const metadata: Metadata = {
@@ -215,10 +214,10 @@ export default function TrainingPage() {
           <p className="text-xs uppercase tracking-widest text-accent">
             Interactive activities
           </p>
-          <h2 className="text-3xl tracking-tight">Do it here — take the assessments</h2>
+          <h2 className="text-3xl tracking-tight">Take the assessments</h2>
           <p className="text-ink/70">
-            These activities come to life with real instruments. Take the Interest
-            Profiler and Personality Inventory below and get your results
+            These activities come to life with real instruments. Take the
+            Interest Profiler and Personality Inventory and get your results
             instantly — a free taste of the Pathways Pro experience.
           </p>
         </header>
@@ -232,7 +231,24 @@ export default function TrainingPage() {
             </li>
           ))}
         </ol>
-        <CareerAssessmentDemo />
+        <div className="saas-card flex flex-col sm:flex-row sm:items-center gap-4 !bg-accent/5 border-accent/30">
+          <div className="flex-1 space-y-1">
+            <h3 className="text-lg font-semibold text-ink">
+              Free career assessments · no sign-up
+            </h3>
+            <p className="text-sm text-ink/70">
+              The Interest Profiler (RIASEC), the Big Five Personality
+              Inventory, and a work-environment check — 44 items, about 6
+              minutes, instant best-fit career matches.
+            </p>
+          </div>
+          <Link
+            href="/training/assessments"
+            className="flex-none bg-gold text-ink font-semibold px-6 py-3 rounded-md hover:bg-gold-soft transition text-center"
+          >
+            Take the assessments →
+          </Link>
+        </div>
       </section>
 
       <section className="space-y-6">

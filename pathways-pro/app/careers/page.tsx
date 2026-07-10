@@ -565,7 +565,7 @@ export default function CareersPage() {
         </p>
         <div className="flex flex-wrap gap-3">
           <Link
-            href="/training#assessment-top"
+            href="/training/assessments"
             className="bg-accent text-cream font-semibold px-6 py-3 rounded-md hover:bg-accent/90 transition"
           >
             Take the free assessment →
