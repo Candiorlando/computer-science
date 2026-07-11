@@ -10,6 +10,7 @@ import { useParams, useRouter } from "next/navigation";
 import { loadSession } from "@/lib/session";
 import type { CounselorUser } from "@/lib/users";
 import { renderDocument, type RenderedDocument } from "@/lib/case-documents";
+import { printRenderedDocument } from "@/lib/print-document";
 
 export default function CaseDocumentViewer() {
   const router = useRouter();
@@ -59,7 +60,12 @@ export default function CaseDocumentViewer() {
           ← Documents
         </Link>
         <button
-          onClick={() => window.print()}
+          onClick={() =>
+            printRenderedDocument(
+              doc,
+              `Generated via Pathways Pro · Case ${caseId} · Printed ${new Date().toLocaleDateString()}`,
+            )
+          }
           className="grad-tealblue text-white text-sm font-semibold px-4 py-2.5 min-h-[44px] rounded-md"
         >
           🖨️ Print / Save as PDF
