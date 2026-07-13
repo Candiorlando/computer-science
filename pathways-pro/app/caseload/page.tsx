@@ -62,8 +62,16 @@ export default function CaseloadPage() {
         </div>
         <input
           type="search"
+          role="searchbox"
+          aria-label="Search caseload by name, case ID, or goal"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={(e) => {
+            // Enter opens the top match's case file directly.
+            if (e.key === "Enter" && clients.length > 0) {
+              router.push(`/case/${clients[0].caseId}`);
+            }
+          }}
           placeholder="Search by name, case ID, goal…"
           className="bg-white border border-ink/20 rounded px-3 py-2 text-sm focus:outline-none focus:border-accent w-72"
         />
@@ -116,7 +124,7 @@ export default function CaseloadPage() {
                 </td>
                 <td className="px-4 py-3">
                   <Link
-                    href={`/report?case=${c.caseId}`}
+                    href={`/case/${c.caseId}`}
                     className="font-semibold hover:text-accent"
                   >
                     {c.name}
@@ -143,8 +151,25 @@ export default function CaseloadPage() {
             ))}
             {clients.length === 0 && (
               <tr className="border-t border-ink/10 bg-cream">
-                <td colSpan={6} className="px-4 py-8 text-center text-ink/50">
-                  No clients match your search.
+                <td colSpan={6} className="px-4 py-8 text-center text-ink/60">
+                  <p>
+                    No clients on your roster match
+                    {query.trim() ? (
+                      <>
+                        {" "}
+                        &ldquo;<strong>{query.trim()}</strong>&rdquo;
+                      </>
+                    ) : (
+                      " your search"
+                    )}
+                    .
+                  </p>
+                  <Link
+                    href={`/case-search${query.trim() ? `?q=${encodeURIComponent(query.trim())}` : ""}`}
+                    className="inline-block mt-3 text-accent hover:underline font-semibold"
+                  >
+                    Search all cases — businesses, vendors &amp; partners →
+                  </Link>
                 </td>
               </tr>
             )}

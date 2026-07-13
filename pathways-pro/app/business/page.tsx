@@ -16,10 +16,11 @@ type Tab = "signin" | "signup-business" | "signup-vendor";
 
 export default function BusinessLandingPage() {
   const router = useRouter();
-  const [mounted, setMounted] = useState(false);
 
+  // Session redirect only — the marketing content below renders
+  // unconditionally so crawlers receive the full HTML (no
+  // mounted-gate empty shell).
   useEffect(() => {
-    setMounted(true);
     seedBusinessPortal();
     const u = loadSession();
     if (u) {
@@ -36,8 +37,6 @@ export default function BusinessLandingPage() {
       router.replace(dest);
     }
   }, [router]);
-
-  if (!mounted) return null;
 
   return (
     <div className="-mx-6 -mt-6 mb-[-2rem]">
@@ -66,15 +65,10 @@ function Hero() {
             <em className="italic text-accent"> rehab</em>.
           </h1>
           <p className="text-lg text-ink/85 prose-narrow font-medium">
-            Pathways Pro is an AI-powered vocational rehabilitation and
-            compliance platform that increases competitive integrated
-            employment for disabled individuals. It also provides
-            business-facing solutions — including inclusive hiring
-            assessments, job task analysis, retention risk reporting, and
-            ADA / Section 504 / EEO compliance consulting — creating a
-            unified ecosystem where clients, counselors, businesses, and
-            vendors collaborate to improve employment outcomes and
-            accessibility.
+            Compliance audits, job task analysis, accommodation planning,
+            and litigation-grade vocational opinions — delivered by
+            credentialed counselors, tracked in one auditable workspace
+            your legal team can stand behind.
           </p>
           <p className="text-base text-ink/70 prose-narrow">
             Workers&apos; comp adjusters, HR directors, defense and
@@ -975,15 +969,15 @@ function Styles() {
     <style jsx>{`
       :global(.input) {
         width: 100%;
-        background: white;
-        border: 1px solid rgba(31, 29, 26, 0.2);
+        background: #1E293B;
+        border: 1px solid rgba(230, 234, 242, 0.2);
         border-radius: 6px;
         padding: 0.5rem 0.75rem;
         font-size: 0.9rem;
       }
       :global(.input:focus) {
         outline: none;
-        border-color: #0F6B54;
+        border-color: #6366F1;
       }
     `}</style>
   );

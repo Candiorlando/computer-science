@@ -213,6 +213,31 @@ export interface ServiceRequest {
   // Send to client (business / vendor / partner)
   sentToClientAt?: string;
   sentToClientByEmail?: string;
+  // Counselor signature applied to the deliverable. Either a base64
+  // PNG data URL of a drawn signature OR a typed cursive name. The
+  // signed-at timestamp marks when the counselor authorized release.
+  counselorSignatureDataUrl?: string;
+  counselorSignatureText?: string;
+  counselorSignatureName?: string;        // printed name shown under the signature line
+  counselorSignatureCredentials?: string; // credentials line shown under printed name
+  signedAt?: string;
+
+  // ── AI work plan (information & collection tooling) ──
+  // Serialized JSON plan from /api/generate-service-workplan: what
+  // information to collect, which instruments to use, and the intake
+  // questions to answer during the engagement.
+  workplanJson?: string;
+  workplanGeneratedAt?: string;
+  workplanModel?: string;
+  // Collection progress — info-item key -> collected yes/no.
+  workplanChecklist?: Record<string, boolean>;
+  // Intake answers — question key -> counselor's recorded answer.
+  workplanAnswers?: Record<string, string>;
+  // Top scenarios this service is requested for — AI-suggested list
+  // (serialized {title, description, custom?}[]) plus the counselor's
+  // selection. The selected scenario steers work-plan generation.
+  workplanScenariosJson?: string;
+  workplanSelectedScenario?: string;
 }
 
 const KEY = "pathways-pro:service-requests-v1";
@@ -429,6 +454,57 @@ export function saveDeliverableEdit(id: string, edited: string) {
   updateServiceRequest(id, {
     deliverableFinal: edited,
     deliverableFinalEditedAt: new Date().toISOString(),
+  });
+}
+
+export function saveWorkplanScenarios(id: string, json: string) {
+  updateServiceRequest(id, { workplanScenariosJson: json });
+}
+
+export function saveSelectedScenario(id: string, title: string) {
+  updateServiceRequest(id, { workplanSelectedScenario: title });
+}
+
+export function saveWorkplan(id: string, json: string, model: string) {
+  updateServiceRequest(id, {
+    workplanJson: json,
+    workplanGeneratedAt: new Date().toISOString(),
+    workplanModel: model,
+    workplanChecklist: {},
+    workplanAnswers: {},
+  });
+}
+
+export function saveWorkplanProgress(
+  id: string,
+  patch: {
+    checklist?: Record<string, boolean>;
+    answers?: Record<string, string>;
+  },
+) {
+  const r = loadServiceRequests().find((x) => x.id === id);
+  if (!r) return;
+  updateServiceRequest(id, {
+    workplanChecklist: patch.checklist ?? r.workplanChecklist,
+    workplanAnswers: patch.answers ?? r.workplanAnswers,
+  });
+}
+
+export function saveCounselorSignature(
+  id: string,
+  sig: {
+    dataUrl?: string;
+    text?: string;
+    printedName: string;
+    credentials?: string;
+  },
+) {
+  updateServiceRequest(id, {
+    counselorSignatureDataUrl: sig.dataUrl,
+    counselorSignatureText: sig.text,
+    counselorSignatureName: sig.printedName,
+    counselorSignatureCredentials: sig.credentials,
+    signedAt: new Date().toISOString(),
   });
 }
 

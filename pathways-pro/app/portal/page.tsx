@@ -8,6 +8,24 @@ import type { AnyUser, ClientUser } from "@/lib/users";
 import { loadCaseNotes } from "@/lib/case-notes";
 import { threadsForUser, unreadCount } from "@/lib/messages";
 import { seedDemoMessages } from "@/lib/demo-messages-seed";
+import { loadAccommodationLetters } from "@/lib/accommodation-letters";
+import {
+  loadEEOCCharges,
+  loadOCRComplaints,
+  loadProblemAnalysisReports,
+} from "@/lib/self-advocacy";
+import InteractiveProgress from "./InteractiveProgress";
+import { loadServiceRequests } from "@/lib/service-requests";
+import { getService } from "@/lib/service-catalog";
+import { pendingAssignmentsForCase } from "@/lib/assessment-assignments";
+
+interface RecentDoc {
+  id: string;
+  kind: string;
+  title: string;
+  href: string;
+  createdAt: string;
+}
 
 export default function ClientHome() {
   const router = useRouter();
@@ -30,7 +48,73 @@ export default function ClientHome() {
             .filter((n) => n.clientCaseId === user.caseId)
             .slice(0, 6)
         : [];
-    return { unread, threads, recentNotes };
+    const myCaseId = "caseId" in user ? user.caseId : null;
+    const assignedAssessments = myCaseId
+      ? pendingAssignmentsForCase(myCaseId)
+      : [];
+    const activeServices = myCaseId
+      ? loadServiceRequests()
+          .filter(
+            (r) =>
+              r.subjectCaseId === myCaseId &&
+              r.status !== "declined" &&
+              r.status !== "delivered" &&
+              getService(r.serviceId)?.visibleToClient === true,
+          )
+          .sort(
+            (a, b) =>
+              new Date(b.requestedAt).getTime() -
+              new Date(a.requestedAt).getTime(),
+          )
+          .slice(0, 4)
+      : [];
+    const recentDocs: RecentDoc[] = [
+      ...loadAccommodationLetters().map((l) => ({
+        id: l.id,
+        kind: "Accommodation Letter",
+        title: l.employerName
+          ? `Accommodation Letter — ${l.employerName}`
+          : "Accommodation Letter",
+        href: `/accommodation-letter?id=${l.id}`,
+        createdAt: l.createdAt,
+      })),
+      ...loadProblemAnalysisReports().map((r) => ({
+        id: r.id,
+        kind: "Problem Analysis",
+        title: r.employerName
+          ? `Problem Analysis — ${r.employerName}`
+          : "Problem Analysis Report",
+        href: `/self-advocacy/incident-report?id=${r.id}`,
+        createdAt: r.createdAt,
+      })),
+      ...loadEEOCCharges().map((c) => ({
+        id: c.id,
+        kind: "EEOC Charge",
+        title: "EEOC Charge of Discrimination",
+        href: `/self-advocacy/eeoc?id=${c.id}`,
+        createdAt: c.createdAt,
+      })),
+      ...loadOCRComplaints().map((c) => ({
+        id: c.id,
+        kind: "OCR/DOJ Complaint",
+        title: "OCR / DOJ Civil Rights Complaint",
+        href: `/self-advocacy/ocr-doj?id=${c.id}`,
+        createdAt: c.createdAt,
+      })),
+    ]
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      )
+      .slice(0, 4);
+    return {
+      unread,
+      threads,
+      recentNotes,
+      recentDocs,
+      activeServices,
+      assignedAssessments,
+    };
   }, [user]);
 
   if (!user || !data) return null;
@@ -70,6 +154,39 @@ export default function ClientHome() {
           </Link>
         </div>
       </section>
+
+      {data.assignedAssessments.length > 0 && (
+        <section className="saas-card border-emerald-500/50" role="status">
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div>
+              <h2 className="text-lg font-semibold">
+                📤 {data.assignedAssessments.length} assessment
+                {data.assignedAssessments.length === 1 ? "" : "s"} waiting for
+                you
+              </h2>
+              <p className="text-sm text-ink/65 mt-0.5">
+                {data.assignedAssessments[0].assignedByName} assigned{" "}
+                {data.assignedAssessments.length === 1
+                  ? `"${data.assignedAssessments[0].toolTitle}"`
+                  : "assessments"}{" "}
+                for you to complete.
+              </p>
+            </div>
+            <Link
+              href="/my-assessments"
+              className="grad-tealblue text-white font-semibold px-4 py-2.5 min-h-[44px] inline-flex items-center rounded-md text-sm shrink-0"
+            >
+              Start now →
+            </Link>
+          </div>
+        </section>
+      )}
+
+      {isClient && (
+        <section className="saas-card">
+          <InteractiveProgress />
+        </section>
+      )}
 
       {c && (
         <section className="saas-card">
@@ -135,6 +252,78 @@ export default function ClientHome() {
               badge="Claude Opus 4.8"
             />
           </div>
+
+          {data.activeServices.length > 0 && (
+            <>
+              <h2 className="text-xl font-semibold pt-2">
+                Services your counselor is working on for you
+              </h2>
+              <ul role="list" className="grid sm:grid-cols-2 gap-3">
+                {data.activeServices.map((s) => (
+                  <li key={s.id}>
+                    <div className="saas-card border-emerald-200 bg-emerald-50/30">
+                      <div className="text-[10px] uppercase tracking-wider text-emerald-700 font-semibold">
+                        {s.status === "approved-in-progress"
+                          ? "In progress"
+                          : s.status === "draft-awaiting-release"
+                            ? "Final review"
+                            : "Awaiting counselor review"}
+                      </div>
+                      <div className="font-semibold text-sm mt-1">
+                        {s.serviceTitle}
+                      </div>
+                      {s.dueDate && (
+                        <div className="text-xs text-ink/55 mt-1">
+                          Target completion{" "}
+                          {new Date(s.dueDate).toLocaleDateString()}
+                        </div>
+                      )}
+                      {s.notes && (
+                        <p className="text-xs text-ink/70 mt-2 italic">
+                          &ldquo;{s.notes}&rdquo;
+                        </p>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+
+          {data.recentDocs.length > 0 && (
+            <>
+              <h2 className="text-xl font-semibold pt-2">
+                Recently delivered to you
+              </h2>
+              <ul role="list" className="grid sm:grid-cols-2 gap-3">
+                {data.recentDocs.map((d) => (
+                  <li key={d.kind + d.id}>
+                    <Link
+                      href={d.href}
+                      className="block saas-card hover:shadow-md transition border-emerald-200 bg-emerald-50/30"
+                    >
+                      <div className="text-[10px] uppercase tracking-wider text-emerald-700 font-semibold">
+                        {d.kind}
+                      </div>
+                      <div className="font-semibold text-sm mt-1">
+                        {d.title}
+                      </div>
+                      <div className="text-xs text-ink/55 mt-1">
+                        {new Date(d.createdAt).toLocaleDateString(undefined, {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                        })}
+                      </div>
+                      <div className="text-xs text-emerald-700 font-semibold mt-2">
+                        📄 Open document →
+                      </div>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
 
           <h2 className="text-xl font-semibold pt-2">Your activity</h2>
           {data.recentNotes.length === 0 ? (

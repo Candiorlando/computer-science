@@ -166,17 +166,17 @@ export default function DailyBriefingPage() {
                   return (
                     <li
                       key={t.id}
-                      className="flex items-baseline justify-between gap-2 text-sm border-b border-ink/10 pb-2 last:border-0"
+                      className="flex items-start justify-between gap-3 text-sm border-b border-ink/10 pb-2 last:border-0"
                     >
-                      <div>
+                      <div className="min-w-0 flex-1">
                         <div className="font-semibold">{counter?.name}</div>
-                        <div className="text-xs text-ink/55 truncate">
+                        <div className="text-xs text-ink/60 break-words line-clamp-2">
                           {t.lastMessagePreview}
                         </div>
                       </div>
                       <Link
                         href={`/messages?thread=${t.id}`}
-                        className="text-xs text-emerald-700 hover:underline"
+                        className="text-xs text-emerald-700 hover:underline shrink-0"
                       >
                         Reply →
                       </Link>
@@ -279,7 +279,7 @@ function Alert({
     <Link
       href={href}
       className={`saas-card block hover:no-underline ${
-        severe && count > 0 ? "border-amber-300 bg-amber-50/40" : ""
+        severe && count > 0 ? "border-rose-300 bg-rose-50/40" : ""
       }`}
     >
       <div className="text-3xl font-bold leading-none">{count}</div>

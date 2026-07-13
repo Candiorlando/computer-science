@@ -30,10 +30,12 @@ function menuFor(user: AnyUser, unread: number): NavItem[] {
       { href: "/dashboard/business", label: "Business Clients", icon: "🏢" },
       { href: "/dashboard/partners", label: "Employment Partners", icon: "🤝" },
       { href: "/dashboard/service-orders", label: "Service Orders", icon: "📦" },
+      { href: "/dashboard/forensic", label: "Forensic", icon: "⚖️" },
       { href: "/dashboard/daily-briefing", label: "Daily Briefing", icon: "📰" },
       { href: "/dashboard/financials", label: "Financials (AR/AP)", icon: "💰" },
       { href: "/dashboard/reports", label: "Reports", icon: "📊" },
       { href: "/dashboard/services-catalog", label: "Service Catalog", icon: "💼" },
+      { href: "/ce", label: "CE Tracker", icon: "🎓" },
       { href: "/settings", label: "Settings", icon: "⚙️" },
     ];
   }
@@ -41,7 +43,10 @@ function menuFor(user: AnyUser, unread: number): NavItem[] {
     return [
       { href: "/portal", label: "Home", icon: "🏠" },
       { href: "/progress", label: "My Progress", icon: "📈" },
+      { href: "/ipe", label: "My IPE Plan", icon: "📋" },
       { href: "/assessment", label: "Assessments", icon: "📝" },
+      { href: "/my-assessments", label: "My Assessments", icon: "🗂️" },
+      { href: "/transferable-skills", label: "My Skills", icon: "🧰" },
       { href: "/report", label: "Documents", icon: "📄" },
       { href: "/messages", label: "Messages", icon: "✉️", badge: unread },
       { href: "/case-notes", label: "Case Notes", icon: "🗒️" },
@@ -53,6 +58,8 @@ function menuFor(user: AnyUser, unread: number): NavItem[] {
     return [
       { href: "/business-portal", label: "Home", icon: "🏠" },
       { href: "/business-portal/services", label: "Service Catalog", icon: "💼" },
+      { href: "/business-portal/orders", label: "Service Orders", icon: "📦" },
+      { href: "/business-portal/accounts-payable", label: "Accounts Payable", icon: "💰" },
       { href: "/business-portal", label: "Documents", icon: "📄" },
       { href: "/messages", label: "Messages", icon: "✉️", badge: unread },
       { href: "/case-notes", label: "Case Notes", icon: "🗒️" },
@@ -62,8 +69,8 @@ function menuFor(user: AnyUser, unread: number): NavItem[] {
   if (user.role === "vendor") {
     return [
       { href: "/vendor-portal", label: "Home", icon: "🏠" },
-      { href: "/vendor-portal", label: "Engagements", icon: "📋" },
-      { href: "/vendor-portal/services", label: "Services", icon: "💼" },
+      { href: "/vendor-portal/orders", label: "Service Orders", icon: "📦" },
+      { href: "/vendor-portal/services", label: "Service Catalog", icon: "💼" },
       { href: "/vendor-portal", label: "Documents", icon: "📄" },
       { href: "/messages", label: "Messages", icon: "✉️", badge: unread },
       { href: "/case-notes", label: "Case Notes", icon: "🗒️" },
@@ -73,6 +80,7 @@ function menuFor(user: AnyUser, unread: number): NavItem[] {
   // partner — Employment Partner
   const items: NavItem[] = [
     { href: "/partner-portal", label: "Home", icon: "🏠" },
+    { href: "/partner-portal/orders", label: "Service Orders", icon: "📦" },
     { href: "/partner-portal/opportunities", label: "Opportunities", icon: "📋" },
     { href: "/partner-portal/supported-employment", label: "Supported Employment", icon: "🤝" },
   ];

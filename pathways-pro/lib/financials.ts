@@ -86,6 +86,83 @@ export function loadInvoicesForCounselor(counselorEmail: string): Invoice[] {
   );
 }
 
+// Business-side view: invoices addressed to the requesting org (i.e.
+// amounts the business owes Pathways Pro for delivered services).
+// Materializes any missing invoices using the counselor on the
+// service request as the issuing party, then filters by orgId.
+export function loadInvoicesForOrg(orgId: string): Invoice[] {
+  const existing = loadInvoices();
+  const byRequest = new Map(existing.map((i) => [i.serviceRequestId, i]));
+  const delivered = loadServiceRequests().filter(
+    (r) => r.status === "delivered" && r.requesterOrgId === orgId,
+  );
+  for (const r of delivered) {
+    if (byRequest.has(r.id)) continue;
+    const svc = getService(r.serviceId);
+    if (!svc) continue;
+    const counselorEmail =
+      r.sentToClientByEmail ?? r.assignedCounselorEmail ?? "";
+    const amount = effectivePrice(r.serviceId, counselorEmail);
+    const inv: Invoice = {
+      id: "inv-" + r.id.slice(3),
+      serviceRequestId: r.id,
+      serviceId: r.serviceId,
+      serviceTitle: r.serviceTitle,
+      orgId: r.requesterOrgId,
+      orgName: r.requesterOrgName,
+      counselorEmail,
+      amountCents: amount,
+      issuedAt: r.sentToClientAt ?? r.releasedAt ?? new Date().toISOString(),
+      dueAt: addDays(
+        r.sentToClientAt ?? r.releasedAt ?? new Date().toISOString(),
+        30,
+      ),
+      status: "issued",
+    };
+    byRequest.set(r.id, inv);
+  }
+  const now = Date.now();
+  for (const inv of byRequest.values()) {
+    if (inv.status === "issued" && Date.parse(inv.dueAt) < now) {
+      inv.status = "overdue";
+    }
+  }
+  const next = Array.from(byRequest.values());
+  saveInvoices(next);
+  return next
+    .filter((i) => i.orgId === orgId && i.status !== "void")
+    .sort((a, b) => Date.parse(b.issuedAt) - Date.parse(a.issuedAt));
+}
+
+export interface BusinessAPSummary {
+  totalCents: number;
+  outstandingCents: number;
+  overdueCents: number;
+  paidThisQuarterCents: number;
+  invoices: Invoice[];
+}
+
+export function apSummaryForOrg(orgId: string): BusinessAPSummary {
+  const invoices = loadInvoicesForOrg(orgId);
+  const quarterStart = startOfQuarter().getTime();
+  return {
+    totalCents: invoices.reduce((s, i) => s + i.amountCents, 0),
+    outstandingCents: invoices
+      .filter((i) => i.status !== "paid")
+      .reduce((s, i) => s + i.amountCents, 0),
+    overdueCents: invoices
+      .filter((i) => i.status === "overdue")
+      .reduce((s, i) => s + i.amountCents, 0),
+    paidThisQuarterCents: invoices
+      .filter(
+        (i) =>
+          i.status === "paid" && Date.parse(i.paidAt ?? "0") >= quarterStart,
+      )
+      .reduce((s, i) => s + i.amountCents, 0),
+    invoices,
+  };
+}
+
 export function markInvoicePaid(id: string) {
   const all = loadInvoices();
   const next = all.map((i) =>

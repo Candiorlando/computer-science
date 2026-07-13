@@ -363,12 +363,20 @@ function OrderRow({
         </p>
       )}
 
-      <div className="flex flex-wrap gap-2 mt-3">
+      <div className="flex flex-wrap gap-2 mt-3 items-center">
         <Link
           href={`/dashboard/service-orders/${order.id}`}
           className="grad-tealblue text-white text-xs px-3 py-1.5 rounded-md font-semibold"
         >
-          Open order →
+          {order.status === "pending-counselor-review"
+            ? "✨ Open & run AI assessment →"
+            : order.status === "approved-in-progress"
+              ? "✨ Run AI deliverable →"
+              : order.status === "draft-awaiting-release"
+                ? "📄 Review & send PDF →"
+                : order.status === "delivered"
+                  ? "📄 View / print PDF →"
+                  : "Open order →"}
         </Link>
         {order.status === "pending-counselor-review" && (
           <>

@@ -16,6 +16,7 @@ import { threadsForUser, unreadCount } from "@/lib/messages";
 import { notesForPartnerOrg } from "@/lib/case-notes";
 import { seedPartnerDemo } from "@/lib/partner-seed";
 import { seedDemoAccounts } from "@/lib/demo-accounts-seed";
+import { loadServiceRequests } from "@/lib/service-requests";
 
 export default function PartnerHome() {
   const router = useRouter();
@@ -50,7 +51,29 @@ export default function PartnerHome() {
     const unread = unreadCount(user.email);
     const threads = threadsForUser(user.email);
     const notes = notesForPartnerOrg(user.partnerOrgId).slice(0, 6);
-    return { org, opps, placements, inquiries, ce, unread, threads, notes };
+    const deliveredOrders = loadServiceRequests()
+      .filter(
+        (r) =>
+          r.requesterOrgId === user.partnerOrgId &&
+          r.status === "delivered",
+      )
+      .sort(
+        (a, b) =>
+          new Date(b.sentToClientAt ?? b.requestedAt).getTime() -
+          new Date(a.sentToClientAt ?? a.requestedAt).getTime(),
+      )
+      .slice(0, 4);
+    return {
+      org,
+      opps,
+      placements,
+      inquiries,
+      ce,
+      unread,
+      threads,
+      notes,
+      deliveredOrders,
+    };
   }, [user]);
 
   if (!user || !data) return null;
@@ -112,6 +135,52 @@ export default function PartnerHome() {
           icon="♿"
         />
       </section>
+
+      {data.deliveredOrders.length > 0 && (
+        <section>
+          <div className="flex items-baseline justify-between gap-3 flex-wrap mb-3">
+            <h2 className="text-xl font-semibold">
+              Recently delivered to you
+            </h2>
+            <Link
+              href="/partner-portal/orders"
+              className="text-xs text-emerald-700 hover:underline font-semibold"
+            >
+              View all orders →
+            </Link>
+          </div>
+          <ul role="list" className="grid sm:grid-cols-2 gap-3">
+            {data.deliveredOrders.map((o) => (
+              <li key={o.id}>
+                <Link
+                  href={`/partner-portal/orders/${o.id}`}
+                  className="block saas-card hover:shadow-md transition border-emerald-200 bg-emerald-50/30"
+                >
+                  <div className="text-[10px] uppercase tracking-wider text-emerald-700 font-semibold">
+                    Delivered
+                  </div>
+                  <div className="font-semibold text-sm mt-1">
+                    {o.serviceTitle}
+                  </div>
+                  <div className="text-xs text-ink/55 mt-1">
+                    {o.matterCaption ? `${o.matterCaption} · ` : ""}
+                    {new Date(
+                      o.sentToClientAt ?? o.requestedAt,
+                    ).toLocaleDateString(undefined, {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </div>
+                  <div className="text-xs text-emerald-700 font-semibold mt-2">
+                    📄 View / print →
+                  </div>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <section className="saas-card">
         <h2 className="text-sm uppercase tracking-wider text-ink/55 mb-3 font-semibold">

@@ -74,3 +74,20 @@ html, body {
   border: 1px solid rgba(28, 33, 30, 0.12);
   background: #0E5A46;
 }
+
+/* ── Print: force printable documents back to black-on-white ── */
+@media print {
+  html, body {
+    background: #ffffff !important;
+  }
+  .deliverable-page,
+  .deliverable-page *,
+  .ipe-printable,
+  .ipe-printable * {
+    color: #111111 !important;
+    background: #ffffff !important;
+    border-color: #bbbbbb !important;
+    text-shadow: none !important;
+    box-shadow: none !important;
+  }
+}

@@ -33,6 +33,7 @@ export default function CounselorBusinessCaseFile() {
   const orgId = String(params.orgId);
   const [user, setUser] = useState<CounselorUser | null>(null);
   const [tab, setTab] = useState<Tab>("overview");
+  const [bump, setBump] = useState(0);
 
   useEffect(() => {
     const s = loadSession();
@@ -82,7 +83,7 @@ export default function CounselorBusinessCaseFile() {
       threads,
       activity,
     };
-  }, [user, orgId]);
+  }, [user, orgId, bump]);
 
   if (!user) return null;
   if (!data) {
@@ -123,6 +124,20 @@ export default function CounselorBusinessCaseFile() {
             </span>
           )}
         </p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <Link
+            href={`/dashboard/business/${orgId}/request-service`}
+            className="grad-tealblue text-white text-sm font-semibold px-4 py-2 rounded-md"
+          >
+            📦 Request service for this business
+          </Link>
+          <Link
+            href={`/dashboard/service-orders?org=${orgId}`}
+            className="text-sm border border-ink/15 px-4 py-2 rounded-md hover:bg-ink/5 font-semibold"
+          >
+            View all orders ({data.requests.length})
+          </Link>
+        </div>
       </header>
 
       <div className="flex flex-wrap gap-2 border-b border-ink/10 pb-2">
@@ -160,6 +175,13 @@ export default function CounselorBusinessCaseFile() {
           notes={data.notes}
           title=""
           emptyLabel="No case notes for this business yet."
+          scope={{
+            kind: "business",
+            orgId,
+            orgName: data.org.legalName,
+          }}
+          counselorEmail={user.email}
+          onAdded={() => setBump((n) => n + 1)}
         />
       )}
       {tab === "messages" && <MessagesTab threads={data.threads} />}

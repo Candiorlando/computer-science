@@ -1,19 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { Suspense, useEffect, useMemo, useState } from "react";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { loadSession } from "@/lib/session";
 import type { CounselorUser } from "@/lib/users";
 import { CLIENTS } from "@/lib/users";
 import { loadCaseNotes, notesForClient } from "@/lib/case-notes";
 import { CaseNotesPanel } from "@/components/CaseNotesPanel";
-import { loadAccommodationLetters } from "@/lib/accommodation-letters";
 import {
-  loadProblemAnalysisReports,
-  loadEEOCCharges,
-  loadOCRComplaints,
-} from "@/lib/self-advocacy";
+  documentsForCase,
+  CASE_DOCUMENT_KIND_LABELS,
+} from "@/lib/case-documents";
+import { loadIPE } from "@/lib/ipe";
 import { threadsForUser } from "@/lib/messages";
 import { buildProgress } from "@/lib/positive-psychology";
 import { recordCaseOpen } from "@/lib/recent-cases";
@@ -25,15 +24,41 @@ type Tab =
   | "case-notes"
   | "messages"
   | "timeline"
+  | "ipe"
   | "assessments"
   | "progress";
 
+const VALID_TABS: Tab[] = [
+  "overview",
+  "documents",
+  "case-notes",
+  "messages",
+  "timeline",
+  "ipe",
+  "assessments",
+  "progress",
+];
+
 export default function CaseFilePage() {
+  return (
+    <Suspense fallback={null}>
+      <CaseFileInner />
+    </Suspense>
+  );
+}
+
+function CaseFileInner() {
   const router = useRouter();
   const params = useParams();
+  const searchParams = useSearchParams();
   const caseId = String(params.caseId);
   const [user, setUser] = useState<CounselorUser | null>(null);
-  const [tab, setTab] = useState<Tab>("overview");
+  // ?tab= deep links (e.g. a Documents-tab entry pointing back at the
+  // Assessments tab) land on the right tab directly.
+  const [tab, setTab] = useState<Tab>(() => {
+    const t = searchParams.get("tab") as Tab | null;
+    return t && VALID_TABS.includes(t) ? t : "overview";
+  });
 
   useEffect(() => {
     const s = loadSession();
@@ -82,6 +107,14 @@ export default function CaseFilePage() {
           <span className="font-mono">{client.caseId}</span> · DOB {client.dob} ·
           Goal: <strong>{client.goal}</strong>
         </p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <Link
+            href={`/case/${caseId}/assign-service`}
+            className="grad-tealblue text-white text-sm font-semibold px-4 py-2 rounded-md"
+          >
+            🤝 Assign service to client
+          </Link>
+        </div>
       </header>
 
       <div className="flex flex-wrap gap-2 border-b border-ink/10 pb-2">
@@ -100,6 +133,9 @@ export default function CaseFilePage() {
         <TabBtn active={tab === "timeline"} onClick={() => setTab("timeline")}>
           Activity Timeline
         </TabBtn>
+        <TabBtn active={tab === "ipe"} onClick={() => setTab("ipe")}>
+          IPE
+        </TabBtn>
         <TabBtn active={tab === "assessments"} onClick={() => setTab("assessments")}>
           Assessments
         </TabBtn>
@@ -110,17 +146,25 @@ export default function CaseFilePage() {
 
       {tab === "overview" && <OverviewTab caseId={caseId} client={client} />}
       {tab === "documents" && <DocumentsTab caseId={caseId} />}
-      {tab === "case-notes" && <CaseNotesTab caseId={caseId} />}
+      {tab === "case-notes" && (
+        <CaseNotesTab
+          caseId={caseId}
+          clientName={client.name}
+          counselorEmail={user.email}
+        />
+      )}
       {tab === "messages" && (
         <MessagesTab userEmail={user.email} clientEmail={client.email} />
       )}
       {tab === "timeline" && <TimelineTab caseId={caseId} />}
+      {tab === "ipe" && <IpeTab caseId={caseId} />}
       {tab === "assessments" && (
         <CaseAssessmentsPanel
           scopeKind="client-case"
           scopeId={caseId}
           audience="counselor"
           counselorEmail={user.email}
+          counselorName={user.name}
           launchRoute={(toolId) => `/case/${caseId}/assessment/${toolId}`}
         />
       )}
@@ -200,89 +244,187 @@ function OverviewTab({
 }
 
 function DocumentsTab({ caseId }: { caseId: string }) {
-  const letters = loadAccommodationLetters().filter((l) => l.caseId === caseId);
-  const reports = loadProblemAnalysisReports().filter((r) => r.caseId === caseId);
-  const eeoc = loadEEOCCharges().filter((c) => c.caseId === caseId);
-  const ocr = loadOCRComplaints().filter((c) => c.caseId === caseId);
+  const docs = documentsForCase(caseId);
 
-  const groups: { label: string; items: { id: string; title: string; date: string }[] }[] = [
-    {
-      label: "Accommodation letters",
-      items: letters.map((l) => ({
-        id: l.id,
-        title: l.workplaceProblem.slice(0, 60),
-        date: l.createdAt,
-      })),
-    },
-    {
-      label: "Problem Analysis Reports",
-      items: reports.map((r) => ({
-        id: r.id,
-        title: r.employerName,
-        date: r.createdAt,
-      })),
-    },
-    {
-      label: "EEOC charges",
-      items: eeoc.map((c) => ({
-        id: c.id,
-        title: `${c.employerName} — ${c.basesOfDiscrimination.join(", ")}`,
-        date: c.createdAt,
-      })),
-    },
-    {
-      label: "OCR / DOJ complaints",
-      items: ocr.map((c) => ({
-        id: c.id,
-        title: `${c.respondentName} — ${c.agency}`,
-        date: c.createdAt,
-      })),
-    },
-  ];
-
-  const total = groups.reduce((s, g) => s + g.items.length, 0);
-
-  if (total === 0) {
+  if (docs.length === 0) {
     return (
       <div className="saas-card text-center text-ink/55 italic">
-        No documents generated for this case yet.
+        No documents generated for this case yet. Anything produced for
+        this client — completed assessments, the signed IPE, letters,
+        reports, complaints, business plans — files here automatically.
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
-      {groups
-        .filter((g) => g.items.length > 0)
-        .map((g) => (
-          <section key={g.label} className="saas-card">
-            <h2 className="text-lg font-semibold mb-3">{g.label}</h2>
-            <ol role="list" className="space-y-1.5">
-              {g.items.map((it) => (
-                <li
-                  key={it.id}
-                  className="flex items-baseline justify-between gap-2 text-sm border-b border-ink/10 pb-1.5 last:border-0"
+    <div className="space-y-3">
+      <p className="text-xs text-ink/55">
+        {docs.length} document{docs.length === 1 ? "" : "s"} on file —
+        every deliverable generated for this client, newest first.
+      </p>
+      <ol role="list" className="space-y-2">
+        {docs.map((d) => (
+          <li key={d.id} className="saas-card">
+            <div className="flex items-baseline justify-between gap-3 flex-wrap">
+              <div className="min-w-0">
+                <span className="text-[10px] uppercase tracking-wider bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-semibold">
+                  {CASE_DOCUMENT_KIND_LABELS[d.kind]}
+                </span>
+                <h3 className="font-semibold mt-1.5">{d.title}</h3>
+                <p className="text-xs text-ink/55 mt-0.5">
+                  {new Date(d.createdAt).toLocaleDateString(undefined, {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                  })}
+                  {d.createdByName && <> · by {d.createdByName}</>}
+                  {d.status && (
+                    <>
+                      {" · "}
+                      <span
+                        className={
+                          d.status === "Approved" || d.status === "Signed"
+                            ? "text-emerald-400 font-semibold"
+                            : "text-amber-300 font-semibold"
+                        }
+                      >
+                        {d.status}
+                      </span>
+                    </>
+                  )}
+                </p>
+              </div>
+              {d.href && (
+                <Link
+                  href={d.href}
+                  className="text-xs text-emerald-700 hover:underline shrink-0 py-2"
                 >
-                  <span className="truncate">{it.title}</span>
-                  <span className="text-xs text-ink/55">
-                    {new Date(it.date).toLocaleDateString()}
-                  </span>
-                </li>
-              ))}
-            </ol>
-          </section>
+                  Open →
+                </Link>
+              )}
+            </div>
+          </li>
         ))}
+      </ol>
     </div>
   );
 }
 
-function CaseNotesTab({ caseId }: { caseId: string }) {
-  const notes = notesForClient(caseId);
+function IpeTab({ caseId }: { caseId: string }) {
+  const [bump, setBump] = useState(0);
+  const ipe = useMemo(() => loadIPE(caseId), [caseId, bump]);
+
+  const statusMeta = (() => {
+    if (!ipe)
+      return { label: "Not started", cls: "bg-ink/10 text-ink/60" };
+    if (ipe.status === "draft")
+      return { label: "Draft", cls: "bg-amber-500/15 text-amber-300" };
+    if (ipe.status === "pending-client-signature")
+      return {
+        label: "Awaiting client signature",
+        cls: "bg-amber-500/15 text-amber-300",
+      };
+    return { label: "Signed", cls: "bg-emerald-500/15 text-emerald-300" };
+  })();
+
+  return (
+    <div className="space-y-4">
+      <section className="saas-card">
+        <div className="flex items-baseline justify-between gap-3 flex-wrap">
+          <div>
+            <h2 className="text-lg font-semibold">
+              Individualized Plan for Employment
+            </h2>
+            <p className="text-xs text-ink/55 mt-0.5">
+              WIOA Title IV § 102(b){ipe && ` · updated ${new Date(ipe.updatedAt).toLocaleDateString()}`}
+            </p>
+          </div>
+          <span
+            className={`text-[10px] uppercase tracking-wider px-2 py-1 rounded-full font-semibold ${statusMeta.cls}`}
+          >
+            {statusMeta.label}
+          </span>
+        </div>
+
+        {ipe ? (
+          <div className="mt-4 space-y-3">
+            <div className="grid sm:grid-cols-2 gap-3 text-sm">
+              <KV label="Employment goal" value={ipe.employmentGoal || "—"} />
+              <KV label="SOC code" value={ipe.goalSocCode || "—"} />
+              <KV
+                label="Timeline"
+                value={`${ipe.timelineMonths} months`}
+              />
+              <KV
+                label="Counselor signature"
+                value={ipe.counselorSignature.signed ? "✓ Signed" : "Pending"}
+              />
+              <KV
+                label="Client signature"
+                value={ipe.clientSignature.signed ? "✓ Signed" : "Pending"}
+              />
+              <KV
+                label="Services listed"
+                value={String(ipe.vrServices.length)}
+              />
+            </div>
+            <div className="flex gap-2 flex-wrap pt-1">
+              <Link
+                href={`/ipe?case=${caseId}`}
+                className="grad-tealblue text-white text-sm font-semibold px-4 py-2.5 min-h-[44px] inline-flex items-center rounded-md"
+              >
+                {ipe.status === "draft"
+                  ? "✏️ Continue IPE draft →"
+                  : "Open IPE →"}
+              </Link>
+              <Link
+                href={`/case/${caseId}/document/ipe-${caseId}`}
+                className="border border-ink/20 text-sm px-4 py-2.5 min-h-[44px] inline-flex items-center rounded-md hover:bg-ink/5"
+              >
+                🖨️ View / print
+              </Link>
+            </div>
+          </div>
+        ) : (
+          <div className="mt-4">
+            <p className="text-sm text-ink/65 mb-3">
+              No IPE has been started for this client yet. Draft the plan —
+              the builder pulls in the interest profile, transferable skills,
+              screener results, and case notes, then drafts every § 102(b)
+              section for you to review and sign.
+            </p>
+            <Link
+              href={`/ipe?case=${caseId}`}
+              className="grad-tealblue text-white text-sm font-semibold px-4 py-2.5 min-h-[44px] inline-flex items-center rounded-md"
+            >
+              ✨ Start IPE draft →
+            </Link>
+          </div>
+        )}
+      </section>
+    </div>
+  );
+}
+
+function CaseNotesTab({
+  caseId,
+  clientName,
+  counselorEmail,
+}: {
+  caseId: string;
+  clientName: string;
+  counselorEmail: string;
+}) {
+  const [bump, setBump] = useState(0);
+  const notes = useMemo(() => notesForClient(caseId), [caseId, bump]);
   return (
     <CaseNotesPanel
       notes={notes}
       title=""
       emptyLabel="No case notes for this client yet."
+      scope={{ kind: "client", caseId, clientName }}
+      counselorEmail={counselorEmail}
+      onAdded={() => setBump((n) => n + 1)}
     />
   );
 }

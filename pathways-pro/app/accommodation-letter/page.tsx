@@ -369,14 +369,14 @@ export default function AccommodationLetterPage() {
       <style jsx>{`
         :global(.input) {
           width: 100%;
-          background: white;
-          border: 1px solid rgba(31, 29, 26, 0.2);
+          background: #1E293B;
+          border: 1px solid rgba(230, 234, 242, 0.2);
           border-radius: 6px;
           padding: 0.55rem 0.75rem;
           font-family: inherit;
         }
         :global(.input:focus-visible) {
-          outline: 2px solid #0F6B54;
+          outline: 2px solid #6366F1;
           outline-offset: -1px;
         }
       `}</style>

@@ -24,6 +24,11 @@ const RequestSchema = z.object({
 
   counselorName: z.string(),
   counselorCredentials: z.string().optional(),
+
+  // Findings the counselor collected via the AI work plan — intake
+  // answers plus which checklist items were obtained. When present,
+  // the draft must be grounded in this material.
+  collectedInformation: z.string().optional(),
 });
 
 const SYSTEM_PROMPT = `You are a senior Certified Rehabilitation Counselor (CRC)
@@ -37,18 +42,31 @@ NON-NEGOTIABLE RULES:
 1. Use ONLY information present in the request context. Do not invent
    facts about the client, the workforce, or the legal posture.
 
-2. Format as a complete, ready-to-send Markdown document with:
-   - A title line
+2. Format as a complete, ready-to-send plain-prose document with:
+   - A title line on the first line
    - A short executive summary (2-3 sentences)
    - Clearly labeled sections specific to the service requested
    - Concrete recommendations the recipient can act on
    - A "Counselor signature block" placeholder at the bottom
 
-3. Apply the SERVICE-SPECIFIC TEMPLATE provided in the user prompt
+3. FORMATTING — STRICT:
+   - DO NOT emit Markdown heading markers (#, ##, ###) anywhere.
+   - DO NOT emit asterisk emphasis markers (**bold** or *italic*).
+   - DO NOT emit underscore emphasis markers (_italic_) either.
+   - Write section headings in Title Case on their own line followed by
+     a blank line — for example "Executive Summary" — and let the
+     prose underneath carry the section.
+   - For lists, use simple hyphens at the start of the line: "- item".
+     For numbered steps, use "1. step".
+   - Emphasis should come from the prose itself, not from typographic
+     markers. Where you would normally bold a phrase, just write it
+     plainly — the counselor's typography stack handles styling.
+
+4. Apply the SERVICE-SPECIFIC TEMPLATE provided in the user prompt
    exactly — this template was authored for this service and defines
    the required deliverable structure.
 
-4. CRC ethics + WIOA Title IV compliance:
+5. CRC ethics + WIOA Title IV compliance:
    - Use person-first language by default.
    - Never disclose individual client PHI beyond what the requester
      already provided.
@@ -57,10 +75,30 @@ NON-NEGOTIABLE RULES:
    - Recommend specific JAN topic pages by URL when proposing
      accommodations.
 
-5. Length: 600-1200 words. Concise wins. Do not pad.
+6. Length: 600-1200 words. Concise wins. Do not pad.
 
-6. Output ONLY the Markdown document. No surrounding prose, no
-   meta-commentary, no JSON envelope.`;
+7. Output ONLY the prose document. No surrounding meta-commentary, no
+   JSON envelope, no Markdown markers.`;
+
+// Strip any stragglers — ## headings and ** bold — that the model
+// may still emit despite the strict prompt above. The counselor edits
+// this text in a plain textarea and the business viewer renders the
+// resulting prose, so raw Markdown markers look like noise.
+function stripMarkdownMarkers(text: string): string {
+  const cleaned = text
+    // Strip heading markers (#, ##, ###, ####) at the start of lines
+    .replace(/^#{1,6}\s+/gm, "")
+    // Strip leading/trailing ** around inline phrases, keeping the text
+    .replace(/\*\*([^*\n]+?)\*\*/g, "$1")
+    // Strip leading/trailing single * for italic, keeping the text
+    .replace(/(^|[^*])\*([^*\n]+?)\*(?!\*)/g, "$1$2")
+    // Strip underscore italic _phrase_ (avoid touching code identifiers
+    // by requiring whitespace or line boundary on at least one side)
+    .replace(/(^|\s)_([^_\n]+?)_(?=\s|$|[.,;:!?])/g, "$1$2")
+    // Collapse any 3+ consecutive blank lines down to 2
+    .replace(/\n{3,}/g, "\n\n");
+  return cleaned.trim();
+}
 
 export async function POST(req: Request) {
   if (!process.env.ANTHROPIC_API_KEY) {
@@ -92,6 +130,13 @@ export async function POST(req: Request) {
   if (body.urgency) ctx.push(`URGENCY: ${body.urgency}`);
   if (body.dueDate) ctx.push(`DUE BY: ${body.dueDate}`);
   if (body.requesterNotes) ctx.push(`\nREQUESTER NOTES:\n${body.requesterNotes}`);
+  if (body.collectedInformation) {
+    ctx.push("");
+    ctx.push(
+      "COLLECTED FINDINGS (from the counselor's work plan — ground the deliverable in these; do not contradict them):",
+    );
+    ctx.push(body.collectedInformation);
+  }
   ctx.push("");
   ctx.push(`COUNSELOR OF RECORD: ${body.counselorName}${body.counselorCredentials ? `, ${body.counselorCredentials}` : ""}`);
   ctx.push("");
@@ -136,7 +181,10 @@ export async function POST(req: Request) {
   }
 
   return new Response(
-    JSON.stringify({ draft: textBlock.text, model: "claude-opus-4-8" }),
+    JSON.stringify({
+      draft: stripMarkdownMarkers(textBlock.text),
+      model: "claude-opus-4-8",
+    }),
     { headers: { "Content-Type": "application/json" } },
   );
 }

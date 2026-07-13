@@ -19,6 +19,10 @@ import {
 } from "@/lib/client-report";
 import { loadProfile } from "@/lib/storage";
 import { loadTSA } from "@/lib/tsa-storage";
+import {
+  documentsForCase,
+  CASE_DOCUMENT_KIND_LABELS,
+} from "@/lib/case-documents";
 import { rankOccupations } from "@/lib/onet-data";
 import { riasecNames, traitNames } from "@/lib/assessments";
 import { analyzeHollandCode } from "@/lib/holland-analysis";
@@ -349,6 +353,7 @@ function ReportDocument({
             </button>
           )}
           <h1 className="text-2xl">Assessment Report</h1>
+          <ClientDocumentsFolder caseId={caseId} isClient={isClient} />
         </div>
         <div className="flex gap-2 flex-wrap">
           {!isClient && ipeFullySigned && (
@@ -563,7 +568,7 @@ function ReportDocument({
         .report-page .r-bar .r-bar-fill span {
           display: block;
           height: 100%;
-          background: #0F6B54;
+          background: #6366F1;
         }
         .report-page .r-bar .r-bar-val {
           text-align: right;
@@ -582,7 +587,7 @@ function ReportDocument({
           place-items: center;
           font-weight: bold;
           font-size: 14pt;
-          background: #0F6B54;
+          background: #6366F1;
           color: white;
         }
         .report-page .holland-letter.s2 {
@@ -610,7 +615,7 @@ function ReportDocument({
           font-variant-numeric: tabular-nums;
         }
         .report-page .match-row .m-fit {
-          color: #0F6B54;
+          color: #6366F1;
           font-weight: bold;
         }
         .report-page .skill-card {
@@ -646,6 +651,59 @@ function ReportDocument({
           }
         }
       `}</style>
+    </div>
+  );
+}
+
+function ClientDocumentsFolder({
+  caseId,
+  isClient,
+}: {
+  caseId: string;
+  isClient?: boolean;
+}) {
+  const docs = documentsForCase(caseId, isClient ? "client" : "counselor");
+  const [open, setOpen] = useState(false);
+  if (docs.length === 0) return null;
+  return (
+    <div className="mt-2">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        className="text-xs text-accent hover:underline font-semibold"
+      >
+        📁 Documents on file ({docs.length}){" "}
+        <span aria-hidden>{open ? "▲" : "▼"}</span>
+      </button>
+      {open && (
+        <ul role="list" className="mt-2 space-y-1.5 max-w-md">
+          {docs.map((d) => (
+            <li
+              key={d.id}
+              className="flex items-baseline justify-between gap-3 text-sm border-b border-ink/10 pb-1.5 last:border-0"
+            >
+              <span className="min-w-0">
+                <span className="text-[10px] uppercase tracking-wider text-accent mr-1.5">
+                  {CASE_DOCUMENT_KIND_LABELS[d.kind]}
+                </span>
+                <span className="truncate">{d.title}</span>
+              </span>
+              {d.href ? (
+                <Link
+                  href={d.href}
+                  className="text-xs text-accent hover:underline shrink-0"
+                >
+                  Open →
+                </Link>
+              ) : (
+                <span className="text-xs text-ink/40 shrink-0">
+                  {new Date(d.createdAt).toLocaleDateString()}
+                </span>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
@@ -949,7 +1007,7 @@ function ClientGoalsBlock({ report }: { report: ClientReport }) {
           <p
             style={{
               fontStyle: "italic",
-              borderLeft: "3pt solid #0F6B54",
+              borderLeft: "3pt solid #6366F1",
               paddingLeft: "10px",
               margin: "6px 0",
             }}
@@ -1552,7 +1610,7 @@ function AssessmentBlock({
       <h2>Personality &amp; Interest Profile</h2>
       <h3>
         Holland Code:{" "}
-        <span style={{ color: "#0F6B54", fontWeight: "bold" }}>{hollandCode}</span>
+        <span style={{ color: "#6366F1", fontWeight: "bold" }}>{hollandCode}</span>
       </h3>
       <div className="holland-row">
         {hollandCode.split("").map((l, i) => (

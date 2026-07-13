@@ -620,18 +620,26 @@ function ClientView({ user }: { user: ClientUser }) {
 
   return (
     <div className="space-y-6">
-      <header>
+      <header className="print:hidden">
         <p className="text-xs uppercase tracking-widest text-ink/50 mb-1">
           Individualized Plan for Employment · {ipe.caseId}
         </p>
-        <h1 className="text-3xl">Your IPE Plan</h1>
+        <div className="flex items-baseline justify-between gap-3 flex-wrap">
+          <h1 className="text-3xl">Your IPE Plan</h1>
+          <button
+            onClick={() => window.print()}
+            className="grad-tealblue text-white text-sm font-semibold px-4 py-2 rounded-md"
+          >
+            🖨️ Print / Save as PDF
+          </button>
+        </div>
         <p className="text-ink/60 mt-1 text-sm">
           Prepared by {ipe.counselorName} · WIOA Title IV § 102(b)
         </p>
       </header>
 
       {ipe.status === "signed" ? (
-        <div className="border border-green-300 bg-green-50 rounded-lg p-6">
+        <div className="border border-green-300 bg-green-50 rounded-lg p-6 print:hidden">
           <h2 className="text-lg font-semibold text-green-900 mb-2">
             ✓ Plan signed
           </h2>
@@ -643,7 +651,7 @@ function ClientView({ user }: { user: ClientUser }) {
           </p>
         </div>
       ) : (
-        <div className="border border-accent/40 bg-accent/5 rounded-lg p-6">
+        <div className="border border-accent/40 bg-accent/5 rounded-lg p-6 print:hidden">
           <h2 className="text-lg font-semibold text-accent mb-2">
             Ready for your signature
           </h2>
@@ -654,6 +662,24 @@ function ClientView({ user }: { user: ClientUser }) {
           </p>
         </div>
       )}
+
+      <article
+        className="ipe-printable space-y-6"
+        aria-label="Individualized Plan for Employment"
+      >
+        <header className="hidden print:block border-b border-ink/20 pb-3 mb-4">
+          <h1 className="text-2xl font-semibold">
+            Individualized Plan for Employment
+          </h1>
+          <p className="text-sm text-ink/65 mt-1">
+            Case {ipe.caseId} · Prepared for {ipe.clientName} ·{" "}
+            Counselor of record: {ipe.counselorName}
+          </p>
+          <p className="text-xs text-ink/55 mt-0.5">
+            Authority: WIOA Title IV § 102(b) · Printed{" "}
+            {new Date().toLocaleDateString()}
+          </p>
+        </header>
 
       <ReadOnlySection title="Your employment goal">
         <p className="text-lg">
@@ -694,8 +720,63 @@ function ClientView({ user }: { user: ClientUser }) {
         </p>
       </ReadOnlySection>
 
+      <section className="hidden print:block border-t border-ink/20 pt-4">
+        <h2 className="text-sm uppercase tracking-wider text-ink/55 mb-3">
+          Signatures
+        </h2>
+        <div className="grid grid-cols-2 gap-6 text-sm">
+          <div>
+            <div className="font-semibold mb-1">
+              Client: {ipe.clientName}
+            </div>
+            {ipe.clientSignature.signed ? (
+              <>
+                <div className="border-b border-ink/40 h-6 italic text-ink/70">
+                  {ipe.clientSignature.signedBy}
+                </div>
+                <div className="text-xs text-ink/55 mt-0.5">
+                  Signed{" "}
+                  {new Date(
+                    ipe.clientSignature.signedAt!,
+                  ).toLocaleDateString()}
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="border-b border-ink/60 h-8" aria-hidden />
+                <div className="text-xs text-ink/55 mt-0.5">Date: ____________</div>
+              </>
+            )}
+          </div>
+          <div>
+            <div className="font-semibold mb-1">
+              Counselor: {ipe.counselorName}
+            </div>
+            {ipe.counselorSignature.signed ? (
+              <>
+                <div className="border-b border-ink/40 h-6 italic text-ink/70">
+                  {ipe.counselorSignature.signedBy}
+                </div>
+                <div className="text-xs text-ink/55 mt-0.5">
+                  Signed{" "}
+                  {new Date(
+                    ipe.counselorSignature.signedAt!,
+                  ).toLocaleDateString()}
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="border-b border-ink/60 h-8" aria-hidden />
+                <div className="text-xs text-ink/55 mt-0.5">Date: ____________</div>
+              </>
+            )}
+          </div>
+        </div>
+      </section>
+      </article>
+
       {ipe.status !== "signed" && (
-        <div className="border border-ink/15 rounded-lg p-6 bg-cream sticky bottom-4">
+        <div className="border border-ink/15 rounded-lg p-6 bg-cream sticky bottom-4 print:hidden">
           <h2 className="text-xl mb-2">Sign your IPE</h2>
           <p className="text-sm text-ink/70 mb-4">
             By clicking the button below, you, <strong>{user.name}</strong>,
@@ -714,6 +795,25 @@ function ClientView({ user }: { user: ClientUser }) {
           </p>
         </div>
       )}
+
+      <style jsx global>{`
+        @media print {
+          body * {
+            visibility: hidden;
+          }
+          .ipe-printable,
+          .ipe-printable * {
+            visibility: visible;
+          }
+          .ipe-printable {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            font-family: Georgia, "Times New Roman", Times, serif;
+          }
+        }
+      `}</style>
     </div>
   );
 }

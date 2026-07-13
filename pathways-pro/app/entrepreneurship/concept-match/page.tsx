@@ -244,14 +244,14 @@ export default function ConceptMatchPage() {
       <style jsx>{`
         :global(.input) {
           width: 100%;
-          background: white;
-          border: 1px solid rgba(31, 29, 26, 0.2);
+          background: #1E293B;
+          border: 1px solid rgba(230, 234, 242, 0.2);
           border-radius: 6px;
           padding: 0.55rem 0.75rem;
           font-family: inherit;
         }
         :global(.input:focus-visible) {
-          outline: 2px solid #0F6B54;
+          outline: 2px solid #6366F1;
           outline-offset: -1px;
         }
       `}</style>
@@ -348,7 +348,7 @@ function ConceptCard({ c, idx }: { c: BusinessConcept; idx: number }) {
       ? "border-emerald-300 bg-emerald-50/40"
       : c.riskLevel === "moderate"
         ? "border-amber-300 bg-amber-50/30"
-        : "border-amber-300 bg-amber-50/30";
+        : "border-rose-300 bg-rose-50/30";
   const atTotal = c.assistiveTechNeeded.reduce((s, a) => s + a.estimatedCost, 0);
   return (
     <article className={`border-2 rounded-lg p-5 ${riskColor}`}>
@@ -438,7 +438,7 @@ function ConceptCard({ c, idx }: { c: BusinessConcept; idx: number }) {
           </ul>
         </div>
         <div>
-          <h4 className="text-xs uppercase tracking-wider text-amber-700 font-semibold">
+          <h4 className="text-xs uppercase tracking-wider text-rose-700 font-semibold">
             Red flags (abandon if…)
           </h4>
           <ul className="text-xs text-ink/75 list-disc pl-4 space-y-1 mt-1">
