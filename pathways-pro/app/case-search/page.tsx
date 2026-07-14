@@ -19,6 +19,7 @@ import { loadPartnerOrgs } from "@/lib/employment-partners";
 import { loadCaseNotes } from "@/lib/case-notes";
 import { threadsForUser, unreadCount } from "@/lib/messages";
 import { seedDemoAccounts } from "@/lib/demo-accounts-seed";
+import { AddEntityModal } from "@/components/AddEntityModal";
 
 type CaseType = "client" | "vendor" | "business" | "partner";
 
@@ -61,6 +62,8 @@ function CaseSearchInner() {
   // that found no roster match) so the query carries over.
   const [query, setQuery] = useState(searchParams.get("q") ?? "");
   const [filter, setFilter] = useState<"all" | CaseType>("all");
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     const s = loadSession();
@@ -70,7 +73,7 @@ function CaseSearchInner() {
     setUser(s);
   }, [router]);
 
-  const cases = useMemo(() => buildCaseList(user), [user]);
+  const cases = useMemo(() => buildCaseList(user), [user, refreshKey]);
   const recents = useMemo(() => (user ? loadRecents(user.email) : []), [user]);
 
   if (!user) return null;
@@ -104,9 +107,14 @@ function CaseSearchInner() {
           Welcome back, {user.name.split(" ")[0]}.
         </h1>
         <p className="text-ink/65">
-          Pick a case to open. Case notes, messages, and documents live
-          inside each case — never on this page.
+          Pick a case to open, or add a new entity to your network.
         </p>
+        <button
+          onClick={() => setShowAddModal(true)}
+          className="mt-3 inline-flex items-center gap-2 bg-accent text-cream font-semibold text-sm px-5 py-2.5 rounded-md hover:bg-accent/90 transition"
+        >
+          <span className="text-lg leading-none">+</span> Add Client, Business, Vendor, or Partner
+        </button>
       </header>
 
       {(totalUnread > 0 || totalPending > 0) && (
@@ -217,8 +225,23 @@ function CaseSearchInner() {
         <Link href="/business" className="text-emerald-700 hover:underline">
           /business
         </Link>
-        .
+        , or use the{" "}
+        <button
+          onClick={() => setShowAddModal(true)}
+          className="text-emerald-700 hover:underline"
+        >
+          Add Entity
+        </button>{" "}
+        button above.
       </footer>
+
+      {showAddModal && (
+        <AddEntityModal
+          counselor={user}
+          onClose={() => setShowAddModal(false)}
+          onSuccess={() => setRefreshKey((k) => k + 1)}
+        />
+      )}
     </div>
   );
 }
