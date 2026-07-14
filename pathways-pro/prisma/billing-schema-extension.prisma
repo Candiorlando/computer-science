@@ -1,0 +1,173 @@
+// ─── Billing schema extension ────────────────────────────────────────
+// Merge into schema.prisma after the base schema is migrated.
+// Adds: Subscription tracking, ClientCase/BusinessClient models with
+// usage-limit enforcement, and PlatformInvoice for Stripe Connect charges.
+
+// ─── Subscription (links Organization to Stripe Billing) ────────────
+
+enum SubscriptionStatus {
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  UNPAID
+}
+
+model Subscription {
+  id     String             @id @default(cuid())
+  status SubscriptionStatus @default(ACTIVE)
+
+  stripeSubscriptionId String @unique
+  stripeCustomerId     String
+  stripePriceId        String
+
+  // Tier limits (set from price metadata on creation/change)
+  maxActiveCases           Int @default(100)   // Solo: 100, Agency: unlimited (-1)
+  maxActiveBusinessClients Int @default(200)   // Solo: 200, Agency: unlimited (-1)
+
+  currentPeriodStart DateTime
+  currentPeriodEnd   DateTime
+  cancelAtPeriodEnd  Boolean @default(false)
+
+  orgId String       @unique
+  org   Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ─── ClientCase (counselor's active rehabilitation cases) ────────────
+
+enum CaseStatus {
+  INTAKE
+  ASSESSMENT
+  PLAN_DEVELOPMENT
+  ACTIVE_SERVICES
+  JOB_PLACEMENT
+  FOLLOW_UP
+  CLOSED
+  TRANSFERRED
+}
+
+model ClientCase {
+  id         String     @id @default(cuid())
+  caseNumber String     @unique       // "VR-2026-0041"
+  status     CaseStatus @default(INTAKE)
+
+  clientName  String
+  clientEmail String?
+
+  // Which org/counselor owns this case
+  orgId       String
+  org         Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  counselorId String
+  counselor   User         @relation("CounselorCases", fields: [counselorId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  invoices PlatformInvoice[]
+
+  @@index([orgId, status])
+}
+
+// ─── BusinessClient (organizations that purchase services) ───────────
+
+enum BusinessClientStatus {
+  ACTIVE
+  INACTIVE
+  PROSPECT
+}
+
+model BusinessClient {
+  id     String               @id @default(cuid())
+  status BusinessClientStatus @default(ACTIVE)
+
+  companyName    String
+  contactName    String?
+  contactEmail   String?
+  industry       String?
+
+  // Which org owns this relationship
+  orgId       String
+  org         Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  counselorId String
+  counselor   User         @relation("CounselorBusinessClients", fields: [counselorId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  invoices PlatformInvoice[]
+
+  @@index([orgId, status])
+}
+
+// ─── PlatformInvoice (B2B charges via Stripe Connect) ────────────────
+
+enum PlatformInvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  OVERDUE
+  VOID
+  REFUNDED
+}
+
+model PlatformInvoice {
+  id     String                @id @default(cuid())
+  status PlatformInvoiceStatus @default(DRAFT)
+
+  // What's being billed
+  description  String
+  amountCents  Int
+  currency     String @default("usd")
+  issuedAt     DateTime?
+  dueAt        DateTime?
+  paidAt       DateTime?
+
+  // Stripe Connect linkage
+  stripePaymentIntentId String? @unique
+  stripeChargeId        String?
+
+  // Platform fee (application_fee_amount)
+  platformFeeCents Int @default(0)
+
+  // Relationships
+  businessClientId String?
+  businessClient   BusinessClient? @relation(fields: [businessClientId], references: [id])
+
+  clientCaseId String?
+  clientCase   ClientCase? @relation(fields: [clientCaseId], references: [id])
+
+  // The counselor's connected account that receives funds
+  counselorId            String
+  counselor              User   @relation("CounselorInvoices", fields: [counselorId], references: [id])
+  destinationAccountId   String // Stripe connected account ID (acct_...)
+
+  orgId String
+  org   Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([orgId, status])
+  @@index([counselorId, status])
+}
+
+// ─── Relations to add to existing models ─────────────────────────────
+//
+// model Organization {
+//   ...
+//   subscription    Subscription?
+//   clientCases     ClientCase[]
+//   businessClients BusinessClient[]
+//   platformInvoices PlatformInvoice[]
+// }
+//
+// model User {
+//   ...
+//   counselorCases          ClientCase[]       @relation("CounselorCases")
+//   counselorBusinessClients BusinessClient[]  @relation("CounselorBusinessClients")
+//   counselorInvoices       PlatformInvoice[]  @relation("CounselorInvoices")
+//   stripeConnectedAccountId String?           // acct_... for receiving funds
+// }
