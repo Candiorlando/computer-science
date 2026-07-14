@@ -1,0 +1,111 @@
+// ─── Network schema extension ────────────────────────────────────────
+// Merge these models into schema.prisma after the base schema is migrated.
+// They link Employment Partners, Vendors, and Business Clients into an
+// Organization's network workspace so counselors can browse, assign, and
+// track partners from their dashboard.
+
+enum NetworkMemberType {
+  EMPLOYMENT_PARTNER
+  VENDOR
+  BUSINESS_CLIENT
+}
+
+enum NetworkMemberStatus {
+  PENDING
+  VERIFIED
+  SUSPENDED
+}
+
+// An employment partner's extended profile — stores the fields specific
+// to their partnership with the platform (beyond the base User model).
+model EmploymentPartnerProfile {
+  id String @id @default(cuid())
+
+  legalName     String
+  partnerType   String          // "small-employer", "corporate-hr", "nonprofit", etc.
+  industry      String?
+  hqCity        String?
+  hqState       String?
+  hqZip         String?
+  primaryContactName  String?
+  primaryContactEmail String?
+  primaryContactPhone String?
+
+  // Capability flags
+  participatesInCustomizedEmployment Boolean @default(false)
+  participatesInSupportedEmployment  Boolean @default(false)
+  offersInternships                  Boolean @default(false)
+  offersApprenticeships              Boolean @default(false)
+
+  // Compliance
+  isFederalContractor  Boolean @default(false)
+  section503Tracking   Boolean @default(false)
+  wotcParticipant      Boolean @default(false)
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Network memberships (which Organizations this partner belongs to)
+  networkMemberships NetworkMembership[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Links any external entity (partner, vendor, business client) to an
+// Organization (agency/counselor workspace). This is the "network
+// directory" join table — it answers "which partners are in my workspace?"
+model NetworkMembership {
+  id     String              @id @default(cuid())
+  type   NetworkMemberType
+  status NetworkMemberStatus @default(PENDING)
+
+  // The workspace this member belongs to
+  orgId String
+  org   Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  // Polymorphic: one of these will be set based on `type`
+  employmentPartnerId String?
+  employmentPartner   EmploymentPartnerProfile? @relation(fields: [employmentPartnerId], references: [id], onDelete: Cascade)
+
+  vendorProfileId String?
+  vendorProfile   VendorProfile? @relation(fields: [vendorProfileId], references: [id], onDelete: Cascade)
+
+  businessProfileId String?
+  businessProfile   BusinessProfile? @relation(fields: [businessProfileId], references: [id], onDelete: Cascade)
+
+  // Metadata
+  joinedAt   DateTime @default(now())
+  verifiedAt DateTime?
+  verifiedBy String?    // userId of the counselor/admin who verified
+  notes      String?
+
+  @@unique([orgId, employmentPartnerId])
+  @@unique([orgId, vendorProfileId])
+  @@unique([orgId, businessProfileId])
+  @@index([orgId, type, status])
+}
+
+// ─── Relations to add to existing models ─────────────────────────────
+//
+// In schema.prisma, add these fields:
+//
+// model User {
+//   ...
+//   employmentPartnerProfile EmploymentPartnerProfile?
+// }
+//
+// model Organization {
+//   ...
+//   networkMembers NetworkMembership[]
+// }
+//
+// model VendorProfile {
+//   ...
+//   networkMemberships NetworkMembership[]
+// }
+//
+// model BusinessProfile {
+//   ...
+//   networkMemberships NetworkMembership[]
+// }
