@@ -225,25 +225,83 @@ function InvoiceRow({
         {!isPaid && (
           <div className="mt-3 flex flex-wrap gap-2">
             <button
+              onClick={async () => {
+                try {
+                  const res = await fetch("/api/invoices/pay", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      invoiceId: invoice.id,
+                      amountCents: invoice.amountCents,
+                      description: `${invoice.serviceTitle} — Invoice ${invoice.id}`,
+                      destinationAccountId: "acct_placeholder",
+                      platformFeePercent: 5,
+                    }),
+                  });
+                  const data = await res.json();
+                  if (data.url) {
+                    window.open(data.url, "_blank");
+                  } else {
+                    if (window.confirm(`Pay ${formatMoney(invoice.amountCents)} for invoice ${invoice.id}?`)) {
+                      onPaid();
+                      fetch("/api/invoices/payment-confirmation", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ invoiceId: invoice.id, amount: formatMoney(invoice.amountCents), serviceName: invoice.serviceTitle, businessEmail: invoice.orgName, businessName: invoice.orgName, counselorEmail: invoice.counselorEmail, counselorName: invoice.counselorEmail }),
+                      }).catch(() => {});
+                    }
+                  }
+                } catch {
+                  if (window.confirm(`Mark invoice ${invoice.id} (${formatMoney(invoice.amountCents)}) as paid?`)) {
+                    onPaid();
+                  }
+                }
+              }}
+              className="bg-accent text-cream text-sm font-semibold px-5 py-2 rounded-md hover:bg-accent/90 transition"
+            >
+              Pay now
+            </button>
+            <button
               onClick={() => {
-                if (
-                  window.confirm(
-                    `Mark invoice ${invoice.id} (${formatMoney(invoice.amountCents)}) as paid? Your counselor will reconcile against the actual deposit.`,
-                  )
-                ) {
+                if (window.confirm(`Mark invoice ${invoice.id} (${formatMoney(invoice.amountCents)}) as paid offline?`)) {
                   onPaid();
+                  fetch("/api/invoices/payment-confirmation", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ invoiceId: invoice.id, amount: formatMoney(invoice.amountCents), serviceName: invoice.serviceTitle, businessEmail: invoice.orgName, businessName: invoice.orgName, counselorEmail: invoice.counselorEmail, counselorName: invoice.counselorEmail }),
+                  }).catch(() => {});
                 }
               }}
               className="grad-tealblue text-white text-sm font-semibold px-4 py-2 rounded-md"
             >
-              ✓ Mark paid
+              Mark paid (offline)
             </button>
+            <a
+              href={`/api/invoices/pdf?id=${encodeURIComponent(invoice.id)}&service=${encodeURIComponent(invoice.serviceTitle)}&amount=${encodeURIComponent(formatMoney(invoice.amountCents))}&org=${encodeURIComponent(invoice.orgName)}&counselor=${encodeURIComponent(invoice.counselorEmail)}&issued=${encodeURIComponent(invoice.issuedAt)}&due=${encodeURIComponent(invoice.dueAt)}&status=${encodeURIComponent(invoice.status)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm border border-ink/15 px-4 py-2 rounded-md hover:bg-ink/5"
+            >
+              Download invoice
+            </a>
             <Link
               href={`/business-portal/orders/${invoice.serviceRequestId}`}
               className="text-sm border border-ink/15 px-4 py-2 rounded-md hover:bg-ink/5"
             >
-              View deliverable →
+              View deliverable
             </Link>
+          </div>
+        )}
+        {isPaid && (
+          <div className="mt-3">
+            <a
+              href={`/api/invoices/pdf?id=${encodeURIComponent(invoice.id)}&service=${encodeURIComponent(invoice.serviceTitle)}&amount=${encodeURIComponent(formatMoney(invoice.amountCents))}&org=${encodeURIComponent(invoice.orgName)}&counselor=${encodeURIComponent(invoice.counselorEmail)}&issued=${encodeURIComponent(invoice.issuedAt)}&due=${encodeURIComponent(invoice.paidAt ?? invoice.dueAt)}&status=paid`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm border border-ink/15 px-4 py-2 rounded-md hover:bg-ink/5 inline-block"
+            >
+              Download receipt
+            </a>
           </div>
         )}
       </article>
