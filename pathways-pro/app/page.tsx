@@ -25,6 +25,7 @@ export default function HomePage() {
     <div className="-mx-6 -mt-6 mb-[-2rem]">
       <Hero />
       <TrustBar />
+      <StakeholderPillars />
       <HowItWorks />
       <RoiMetrics />
       <Testimonial />
@@ -38,32 +39,28 @@ export default function HomePage() {
 function Hero() {
   return (
     <section className="border-b border-ink/10">
-      <div className="max-w-6xl mx-auto px-6 py-20 grid md:grid-cols-2 gap-12 items-center">
+      <div className="max-w-6xl mx-auto px-6 py-24 grid md:grid-cols-2 gap-14 items-center">
         <div className="space-y-6">
           <p className="inline-block text-xs uppercase tracking-widest text-accent bg-accent/10 px-3 py-1 rounded-full">
-            For state VR agencies & community rehab providers
+            A digital ecosystem for the rehabilitation community
           </p>
           <h1 className="text-5xl md:text-6xl tracking-tight leading-[1.05]">
-            Vocational Rehabilitation,{" "}
+            Rehabilitation,{" "}
             <em className="italic text-accent">unified</em>.
           </h1>
           <p className="text-lg text-ink/85 prose-narrow font-medium">
-            Pathways Pro is an AI-powered vocational rehabilitation and
-            compliance platform that increases competitive integrated
-            employment for disabled individuals. It also provides
-            business-facing solutions — including inclusive hiring
-            assessments, job task analysis, retention risk reporting, and
-            ADA / Section 504 / EEO compliance consulting — creating a
-            unified ecosystem where clients, counselors, businesses, and
-            vendors collaborate to improve employment outcomes and
-            accessibility.
+            For too long, the work of human restoration has been fractured
+            by the very systems built to support it — counselors drafting
+            compliance documents in silos, clients navigating a maze alone,
+            businesses seeking ADA compliance without a connection to
+            community, and vendors operating at the margins.
           </p>
           <p className="text-base text-ink/70 prose-narrow">
-            One WIOA-compliant platform replaces the patchwork of
-            spreadsheets, PDFs, and third-party portals. Generate
-            signature-ready IPEs in minutes, give every client a real
-            assessment, and surface live BLS labor-market data without
-            leaving the case.
+            Pathways Pro is a digital ecosystem that honors the mutual
+            responsibility at the heart of our industry. We bring together
+            counselors, clients, businesses, and partners into a single,
+            cohesive framework — because true rehabilitation is the active
+            rebuilding of a shared life.
           </p>
 
           <div className="flex flex-wrap gap-3 pt-2">
@@ -95,7 +92,7 @@ function Hero() {
                 Live IPE preview
               </span>
               <span className="text-xs text-emerald-700 font-semibold">
-                ✓ WIOA § 102(b) compliant
+                WIOA § 102(b) compliant
               </span>
             </div>
             <div className="border-l-4 border-accent pl-3 py-1">
@@ -168,6 +165,83 @@ function TrustBar() {
   );
 }
 
+// ──────────────────── Stakeholder pillars ───────────────────────────────
+
+function StakeholderPillars() {
+  const pillars = [
+    {
+      for: "For the Counselor",
+      headline: "We restore the calling of the profession.",
+      body: "By lifting the burden of administrative fragmentation and redundant data entry, we return your time to where it belongs — in deep, meaningful engagement with the individuals you guide.",
+      icon: "01",
+    },
+    {
+      for: "For the Client",
+      headline: "A transparent, dignified path forward.",
+      body: "You are no longer a fragmented case file moving through a disjointed system, but an active, empowered participant in your own journey toward integrated, meaningful work.",
+      icon: "02",
+    },
+    {
+      for: "For the Business Client",
+      headline: "Compliance becomes civic virtue.",
+      body: "Through inclusive hiring assessments, job task analysis, and ADA / Section 504 consulting, we help you build workplaces that reflect the true diversity and capability of our society.",
+      icon: "03",
+    },
+    {
+      for: "For Employment Partners & Vendors",
+      headline: "A seamless web of collaboration.",
+      body: "You are vital threads in the social fabric of rehabilitation. Our platform ensures your services are woven directly into the shared pursuit of client success.",
+      icon: "04",
+    },
+  ];
+
+  return (
+    <section className="border-b border-ink/10">
+      <div className="max-w-6xl mx-auto px-6 py-20 space-y-12">
+        <header className="text-center max-w-3xl mx-auto space-y-4">
+          <p className="text-xs uppercase tracking-widest text-accent">
+            An ecology of interconnected people and institutions
+          </p>
+          <h2 className="text-4xl tracking-tight">
+            When we unify counselors, clients, businesses, and partners,
+            we do more than streamline case management.
+          </h2>
+          <p className="text-ink/70 text-lg">
+            We rebuild the habits of connection that sustain our
+            communities. Employment is not just a metric of economic
+            success — it is a cornerstone of human dignity, identity,
+            and belonging.
+          </p>
+        </header>
+
+        <div className="grid md:grid-cols-2 gap-6">
+          {pillars.map((p) => (
+            <div
+              key={p.icon}
+              className="border border-ink/15 bg-cream rounded-lg p-7 space-y-3"
+            >
+              <div className="flex items-center gap-3">
+                <span className="flex-none w-9 h-9 grid place-items-center rounded-md bg-accent text-cream text-sm font-bold">
+                  {p.icon}
+                </span>
+                <span className="text-xs uppercase tracking-widest text-accent font-semibold">
+                  {p.for}
+                </span>
+              </div>
+              <h3 className="text-xl font-semibold tracking-tight">
+                {p.headline}
+              </h3>
+              <p className="text-ink/75 text-[15px] leading-relaxed">
+                {p.body}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 // ────────────────────────── How it works ────────────────────────────────
 
 function HowItWorks() {
@@ -176,15 +250,16 @@ function HowItWorks() {
       <div className="max-w-6xl mx-auto px-6 py-20 space-y-20">
         <header className="text-center max-w-2xl mx-auto space-y-3">
           <p className="text-xs uppercase tracking-widest text-accent">
-            How Pathways Pro changes your workflow
+            The shared framework in practice
           </p>
           <h2 className="text-4xl tracking-tight">
-            From three apps and a binder to one record per client.
+            One record per client. Every stakeholder connected.
           </h2>
           <p className="text-ink/70">
-            Every part of the VR workflow — intake, assessment, IPE drafting,
-            services, signatures, reporting — happens against a single case
-            file. No re-keying, no copy-paste, no missing audit trail.
+            Every part of the rehabilitation workflow — intake, assessment,
+            IPE drafting, services, signatures, reporting — happens against
+            a single case file. No re-keying, no silos, no missing audit
+            trail.
           </p>
         </header>
 
@@ -381,13 +456,12 @@ function RoiMetrics() {
             Quantifiable impact
           </p>
           <h2 className="text-4xl tracking-tight">
-            The math state agencies and CRP directors actually care about.
+            When we lift the administrative burden, the human work thrives.
           </h2>
           <p className="text-ink/70">
             Every metric below is designed in — measured against the
-            tools-of-record state VR programs use today (Microsoft Word,
-            spreadsheets, agency-specific CMS, and third-party assessment
-            vendors).
+            fragmented tools-of-record that currently divide counselors
+            from their clients and communities from their purpose.
           </p>
         </header>
 
@@ -465,14 +539,15 @@ function Testimonial() {
     <section className="border-b border-ink/10">
       <div className="max-w-3xl mx-auto px-6 py-20 text-center space-y-6">
         <p className="text-xs uppercase tracking-widest text-accent">
-          From the field
+          From the founder
         </p>
         <blockquote className="text-2xl md:text-3xl tracking-tight leading-snug text-ink/90 italic">
-          &ldquo;After eight years on the caseload I was spending more time
-          formatting IPE Word docs than I was with my clients. Pathways Pro is
-          the tool I wished I had on day one — every WIOA element is already
-          there, the labor-market data is live, and my clients can finally see
-          what I see.&rdquo;
+          &ldquo;We have treated rehabilitation not as a shared civic
+          covenant, but as a series of isolated transactions. After eight
+          years on the caseload, I was spending more time formatting Word
+          docs than I was with my clients. I built Pathways Pro to return
+          counselors to the calling — and to give every person in this
+          ecosystem a seat at the same table.&rdquo;
         </blockquote>
         <div className="flex items-center justify-center gap-3 pt-2">
           <div className="w-12 h-12 bg-accent text-cream rounded-full grid place-items-center font-bold">
@@ -481,7 +556,8 @@ function Testimonial() {
           <div className="text-left">
             <div className="font-semibold">Candace Metcalf, CRC · LPC</div>
             <div className="text-sm text-ink/60">
-              Founder, Pathways Pro · Chicago
+              Founder, Pathways Pro · Applied Sociology &
+              Rehabilitation Counseling · Chicago
             </div>
           </div>
         </div>
@@ -499,27 +575,28 @@ function FinalCta() {
       <div id="demo" className="max-w-5xl mx-auto px-6 py-20 grid md:grid-cols-2 gap-12 items-start">
         <div id="start" className="space-y-5 pt-2">
           <p className="text-xs uppercase tracking-widest text-accent">
-            Get started
+            Join the ecosystem
           </p>
           <h2 className="text-4xl tracking-tight">
-            See your caseload running on Pathways Pro this week.
+            Rehabilitation, unified — starting this week.
           </h2>
           <p className="text-ink/75">
-            State VR agencies and community rehab providers can book a 30-minute
-            walkthrough with the founder, or stand up a 90-day pilot for up to
-            25 active cases — no procurement paperwork required.
+            Whether you are a state VR agency, a community rehab provider,
+            an employment partner, or a business seeking inclusive hiring
+            solutions — book a 30-minute walkthrough with the founder, or
+            stand up a 90-day pilot. No procurement paperwork required.
           </p>
           <ul className="space-y-2 text-sm text-ink/80 pt-1">
             <li className="flex gap-2">
-              <span className="text-accent font-bold">✓</span>
+              <span className="text-accent font-bold">&#10003;</span>
               <span>Live demo against your real workflow questions</span>
             </li>
             <li className="flex gap-2">
-              <span className="text-accent font-bold">✓</span>
+              <span className="text-accent font-bold">&#10003;</span>
               <span>HIPAA &amp; § 508 compliance documentation on request</span>
             </li>
             <li className="flex gap-2">
-              <span className="text-accent font-bold">✓</span>
+              <span className="text-accent font-bold">&#10003;</span>
               <span>White-glove import of your existing caseload</span>
             </li>
           </ul>
