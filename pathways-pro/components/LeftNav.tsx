@@ -33,6 +33,7 @@ function menuFor(user: AnyUser, unread: number): NavItem[] {
       { href: "/dashboard/forensic", label: "Forensic", icon: "⚖️" },
       { href: "/dashboard/daily-briefing", label: "Daily Briefing", icon: "📰" },
       { href: "/dashboard/financials", label: "Financials (AR/AP)", icon: "💰" },
+      { href: "/dashboard/payments", label: "Payments & Subscriptions", icon: "💳" },
       { href: "/dashboard/reports", label: "Reports", icon: "📊" },
       { href: "/dashboard/services-catalog", label: "Service Catalog", icon: "💼" },
       { href: "/ce", label: "CE Tracker", icon: "🎓" },
