@@ -291,7 +291,7 @@ export default function TrainingPage() {
           </p>
           <h2 className="text-3xl tracking-tight">Go deeper</h2>
           <p className="text-ink/70">
-            The Rehabilitation Systems Blueprint — a 13-part visual reference
+            The Rehabilitation Systems Blueprint — an 11-part visual reference
             on how rehabilitation systems are structured, from the legislation
             and the VR lifecycle to credentials, life care planning, and where
             technology is taking the field. Browse it here or download the
