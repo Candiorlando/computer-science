@@ -30,6 +30,10 @@ const PUBLIC_PREFIXES = [
   "/contact",
   "/demo",
   "/terms",
+  "/employment-partners",
+  "/onboarding",
+  "/request-demo",
+  "/signin",
 ];
 
 function isPublicPath(pathname: string): boolean {
