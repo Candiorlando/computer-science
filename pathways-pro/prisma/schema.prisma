@@ -1,0 +1,203 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ─── Enums ──────────────────────────────────────────────────
+
+enum UserRole {
+  COUNSELOR
+  CLIENT
+  BUSINESS
+  VENDOR
+  PARTNER
+}
+
+enum IndustrySector {
+  STATE_VR_AGENCY
+  CRP
+  PRIVATE_FORENSIC
+  K12_TRANSITION
+  HIGHER_ED_DISABILITY
+  CORPORATE_ACCOMMODATION
+  VETERANS_MILITARY
+  NONPROFIT_ADVOCACY
+  INDEPENDENT_CONSULTANT
+}
+
+enum TierType {
+  SOLO
+  AGENCY
+}
+
+enum OrgRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+  REVOKED
+}
+
+// ─── Core user ──────────────────────────────────────────────
+
+model User {
+  id             String    @id @default(cuid())
+  email          String    @unique
+  name           String
+  hashedPassword String?
+  emailVerified  DateTime?
+  activeRole     UserRole  @default(COUNSELOR)
+
+  // Role-specific profiles (at most one each)
+  counselorProfile CounselorProfile?
+  businessProfile  BusinessProfile?
+  vendorProfile    VendorProfile?
+
+  // Multi-tenant billing
+  memberships Membership[]
+  invitations Invitation[] @relation("InvitationAcceptedBy")
+
+  // Auth.js
+  accounts Account[]
+  sessions Session[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ─── Role profiles ──────────────────────────────────────────
+
+model CounselorProfile {
+  id       String         @id @default(cuid())
+  sector   IndustrySector
+  jobTitle String
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model BusinessProfile {
+  id         String         @id @default(cuid())
+  sector     IndustrySector
+  jobTitle   String
+  department String?
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VendorProfile {
+  id       String         @id @default(cuid())
+  sector   IndustrySector
+  jobTitle String
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  services VendorService[]
+}
+
+model VendorService {
+  id   String @id @default(cuid())
+  name String
+
+  vendorId String
+  vendor   VendorProfile @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+
+  @@unique([vendorId, name])
+}
+
+// ─── Multi-tenant billing ───────────────────────────────────
+
+model Organization {
+  id   String   @id @default(cuid())
+  name String
+  tier TierType
+  slug String   @unique
+
+  stripeCustomerId     String? @unique
+  stripeSubscriptionId String? @unique
+  stripePriceId        String?
+
+  seatCount   Int @default(1)
+  seatMinimum Int @default(1)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  members     Membership[]
+  invitations Invitation[]
+}
+
+model Membership {
+  id   String  @id @default(cuid())
+  role OrgRole @default(MEMBER)
+
+  userId String
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  orgId String
+  org   Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, orgId])
+}
+
+model Invitation {
+  id     String       @id @default(cuid())
+  email  String
+  role   OrgRole      @default(MEMBER)
+  status InviteStatus @default(PENDING)
+  token  String       @unique @default(cuid())
+
+  orgId String
+  org   Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  invitedById  String?
+  acceptedById String?
+  acceptedBy   User?   @relation("InvitationAcceptedBy", fields: [acceptedById], references: [id])
+
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([email, status])
+}
+
+// ─── Auth.js tables ─────────────────────────────────────────
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
