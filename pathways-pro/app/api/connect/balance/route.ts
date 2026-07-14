@@ -22,9 +22,10 @@ export async function GET(req: Request) {
     const stripe = getStripe();
 
     // Fetch balance from the connected account
-    const balance = await stripe.balance.retrieve({
-      stripeAccount: connectedAccountId,
-    });
+    const balance = await stripe.balance.retrieve(
+      {},
+      { stripeAccount: connectedAccountId },
+    );
 
     // Fetch recent payouts
     const payouts = await stripe.payouts.list(
