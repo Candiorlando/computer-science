@@ -162,9 +162,6 @@ export default function TrainingPage() {
   return (
     <div className="space-y-16 pb-8">
       <header className="space-y-5 max-w-3xl">
-        <p className="inline-block text-xs uppercase tracking-widest text-accent bg-accent/10 px-3 py-1 rounded-full">
-          Course 1 · Full outline
-        </p>
         <h1 className="text-4xl md:text-5xl tracking-tight leading-[1.08]">
           Rehabilitation Counselor{" "}
           <em className="italic text-accent">Services &amp; Careers</em>.
