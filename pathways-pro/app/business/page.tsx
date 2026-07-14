@@ -80,16 +80,16 @@ function Hero() {
 
           <div className="flex flex-wrap gap-3 pt-2">
             <a
-              href="#cta"
+              href="/dashboard/payments"
               className="bg-accent text-cream font-semibold px-6 py-3 rounded-md hover:bg-accent/90 transition"
             >
-              Book a forensic consult →
+              Get started →
             </a>
             <a
-              href="#vendor"
+              href="mailto:candace@pathwayspro.app?subject=Request%20for%20Quote%20-%20Vendor%20Partnership&body=I%20am%20interested%20in%20becoming%20an%20authorized%20vendor%20on%20the%20Pathways%20Pro%20network.%20Please%20send%20a%20quote%20for%20the%20following%20services%3A%0A%0A"
               className="border border-accent text-accent font-semibold px-6 py-3 rounded-md hover:bg-accent/5 transition"
             >
-              Become an authorized vendor
+              Contact us for a quote
             </a>
             <a
               href="#signin"
