@@ -150,7 +150,7 @@ export function SiteFooter() {
                     </li>
                   </ul>
                   <a
-                    href="mailto:candace@pathwayspro.app?subject=Solo%20Practitioner%20subscription"
+                    href="/dashboard/payments"
                     className="block text-center bg-accent text-cream font-semibold text-sm px-5 py-2.5 rounded-md hover:bg-accent/90 transition"
                   >
                     Get started
@@ -198,10 +198,10 @@ export function SiteFooter() {
                     </li>
                   </ul>
                   <a
-                    href="mailto:candace@pathwayspro.app?subject=Agency%20subscription"
+                    href="/dashboard/payments"
                     className="block text-center bg-accent text-cream font-semibold text-sm px-5 py-2.5 rounded-md hover:bg-accent/90 transition"
                   >
-                    Contact us
+                    Get started
                   </a>
                 </div>
               </div>
