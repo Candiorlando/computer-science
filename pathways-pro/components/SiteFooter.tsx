@@ -149,12 +149,12 @@ export function SiteFooter() {
                       <span>Live BLS &amp; O*NET data</span>
                     </li>
                   </ul>
-                  <a
+                  <Link
                     href="/dashboard/payments"
                     className="block text-center bg-accent text-cream font-semibold text-sm px-5 py-2.5 rounded-md hover:bg-accent/90 transition"
                   >
                     Get started
-                  </a>
+                  </Link>
                 </div>
 
                 {/* Agency tier */}
@@ -197,12 +197,12 @@ export function SiteFooter() {
                       <span>Automatic proration when seats change</span>
                     </li>
                   </ul>
-                  <a
+                  <Link
                     href="/dashboard/payments"
                     className="block text-center bg-accent text-cream font-semibold text-sm px-5 py-2.5 rounded-md hover:bg-accent/90 transition"
                   >
                     Get started
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>

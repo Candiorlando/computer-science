@@ -1,27 +1,40 @@
 import "./globals.css";
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import { AppShell } from "@/components/AppShell";
 
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-inter",
+});
+
 export const metadata: Metadata = {
-  title: "Pathways Pro — AI-Powered Vocational Rehabilitation & Compliance Platform",
+  title: "Pathways Pro — Rehabilitation, Unified",
   description:
-    "Pathways Pro is an AI-powered vocational rehabilitation and compliance platform that increases competitive integrated employment for disabled individuals. It also provides business-facing solutions — including inclusive hiring assessments, job task analysis, retention risk reporting, and ADA / Section 504 / EEO compliance consulting — creating a unified ecosystem where clients, counselors, businesses, and vendors collaborate to improve employment outcomes and accessibility.",
+    "Pathways Pro is a digital ecosystem that brings together counselors, clients, businesses, and partners into a single rehabilitation platform — driving competitive integrated employment, inclusive hiring, and ADA compliance.",
+  openGraph: {
+    title: "Pathways Pro — Rehabilitation, Unified",
+    description:
+      "A digital ecosystem unifying counselors, clients, businesses, and partners for competitive integrated employment.",
+    url: "https://www.pathwayspro.app",
+    siteName: "Pathways Pro",
+    type: "website",
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Pathways Pro — Rehabilitation, Unified",
+    description:
+      "A digital ecosystem unifying counselors, clients, businesses, and partners for competitive integrated employment.",
+  },
+  metadataBase: new URL("https://www.pathwayspro.app"),
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className={inter.variable}>
       <body className="min-h-screen font-sans">
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
-        />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
-          rel="stylesheet"
-        />
         <AppShell>{children}</AppShell>
       </body>
     </html>
