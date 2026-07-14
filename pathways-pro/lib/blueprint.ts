@@ -72,20 +72,8 @@ export const BLUEPRINT_PAGES: BlueprintPage[] = [
   },
   {
     n: 11,
-    src: "/blueprint/page-11.jpg",
-    caption: "AI dramatically compresses compliance and drafting workflows.",
-    alt: "Legacy workflow of manual cross-referencing versus the AI-powered workflow: signature-ready IPEs in minutes with live BLS and O*NET data integration.",
-  },
-  {
-    n: 12,
     src: "/blueprint/page-12.jpg",
     caption: "Expanding rehabilitation from functional impairment to purpose in life.",
     alt: "Life-satisfaction curve over time post-injury: the standard impairment-focused plateau versus the rising curve of purpose-oriented rehabilitation.",
-  },
-  {
-    n: 13,
-    src: "/blueprint/page-13.jpg",
-    caption: "The transdisciplinary blueprint weaves policy, practice, and technology.",
-    alt: "Closing schematic: legislative framework, clinical interventions, professional experts, and tech & data all converging on optimal independence and employment.",
   },
 ];
