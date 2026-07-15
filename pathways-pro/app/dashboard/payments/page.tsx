@@ -9,6 +9,7 @@
 //   4. charge the platform subscription from the account's balance.
 
 import { useEffect, useState } from "react";
+import { EmbeddedOnboarding } from "@/components/EmbeddedOnboarding";
 
 const STORAGE_KEY = "pathways-pro:stripe-demo-v1";
 
@@ -37,6 +38,7 @@ export default function PaymentsPage() {
   const [state, setState] = useState<DemoState>({});
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [showEmbeddedOnboarding, setShowEmbeddedOnboarding] = useState(false);
 
   useEffect(() => {
     setState(loadState());
@@ -129,11 +131,11 @@ export default function PaymentsPage() {
       n: 2,
       title: "Onboard the account",
       blurb:
-        "Opens Stripe-hosted onboarding (KYC) for the merchant and customer configurations. In test mode you can skip through it.",
-      action: onboard,
-      cta: "Open onboarding →",
-      done: !!state.onboardingUrl,
-      doneDetail: state.onboardingUrl && "Onboarding link created",
+        "Complete KYC without leaving Pathways Pro (embedded onboarding, recommended), or open the Stripe-hosted flow in a new tab. In test mode you can skip through it.",
+      action: () => setShowEmbeddedOnboarding((v) => !v),
+      cta: showEmbeddedOnboarding ? "Hide onboarding" : "Onboard in-app",
+      done: !!state.onboardingUrl || showEmbeddedOnboarding,
+      doneDetail: state.onboardingUrl && "Hosted onboarding link created",
       disabled: !state.accountId,
     },
     {
@@ -187,28 +189,47 @@ export default function PaymentsPage() {
 
       <div className="space-y-4">
         {steps.map((s) => (
-          <div key={s.key} className="saas-card flex flex-col sm:flex-row sm:items-center gap-4">
-            <span
-              className={`flex-none w-8 h-8 grid place-items-center rounded-md text-sm font-bold tabular-nums ${
-                s.done ? "bg-accent text-cream" : "bg-ink/10 text-ink"
-              }`}
-            >
-              {s.done ? "✓" : s.n}
-            </span>
-            <div className="flex-1 space-y-1">
-              <h2 className="text-lg font-semibold text-ink">{s.title}</h2>
-              <p className="text-sm text-ink/70">{s.blurb}</p>
-              {s.done && s.doneDetail && (
-                <p className="text-xs text-ink/50 break-all">{s.doneDetail}</p>
+          <div key={s.key}>
+            <div className="saas-card flex flex-col sm:flex-row sm:items-center gap-4">
+              <span
+                className={`flex-none w-8 h-8 grid place-items-center rounded-md text-sm font-bold tabular-nums ${
+                  s.done ? "bg-accent text-cream" : "bg-ink/10 text-ink"
+                }`}
+              >
+                {s.done ? "✓" : s.n}
+              </span>
+              <div className="flex-1 space-y-1">
+                <h2 className="text-lg font-semibold text-ink">{s.title}</h2>
+                <p className="text-sm text-ink/70">{s.blurb}</p>
+                {s.done && s.doneDetail && (
+                  <p className="text-xs text-ink/50 break-all">{s.doneDetail}</p>
+                )}
+              </div>
+              {s.key === "onboard" && (
+                <button
+                  onClick={onboard}
+                  disabled={s.disabled || busy !== null}
+                  className="flex-none border border-accent text-accent font-semibold px-5 py-2.5 rounded-md hover:bg-accent/5 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {busy === "onboard" ? "Working…" : "Hosted onboarding ↗"}
+                </button>
               )}
+              <button
+                onClick={s.action}
+                disabled={s.disabled || busy !== null}
+                className="flex-none bg-gold text-ink font-semibold px-5 py-2.5 rounded-md hover:bg-gold-soft transition disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {busy === s.key ? "Working…" : s.cta}
+              </button>
             </div>
-            <button
-              onClick={s.action}
-              disabled={s.disabled || busy !== null}
-              className="flex-none bg-gold text-ink font-semibold px-5 py-2.5 rounded-md hover:bg-gold-soft transition disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              {busy === s.key ? "Working…" : s.cta}
-            </button>
+            {s.key === "onboard" && showEmbeddedOnboarding && state.accountId && (
+              <div className="mt-3">
+                <EmbeddedOnboarding
+                  accountId={state.accountId}
+                  onExit={() => setShowEmbeddedOnboarding(false)}
+                />
+              </div>
+            )}
           </div>
         ))}
       </div>

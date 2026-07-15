@@ -417,7 +417,3 @@ export function seedDemoInvoicesIfEmpty() {
     saveInvoices([...existing, ...toAdd]);
   }
 }
-
-function daysAhead(n: number): string {
-  return new Date(Date.now() + n * 24 * 60 * 60 * 1000).toISOString();
-}

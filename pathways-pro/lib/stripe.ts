@@ -1,7 +1,12 @@
 import Stripe from "stripe";
 
-// Singleton Stripe client. The API version is deliberately left unset so the
-// account's default version applies.
+// Accounts v2 and balance-funded subscriptions are preview features; requests
+// that use them must send this Stripe-Version header (pass as a per-request
+// option so plain v1 calls keep the account's default version).
+export const STRIPE_PREVIEW_API_VERSION = "2026-06-24.preview";
+
+// Singleton Stripe client. The client-level API version is deliberately left
+// unset so the account's default version applies to standard calls.
 let client: Stripe | null = null;
 
 export function getStripe(): Stripe {
