@@ -239,6 +239,8 @@ export default function MyBenefitsPage() {
         />
       </section>
 
+      <SSAFinancialWellnessTree />
+
       <section id="resources" className="saas-card space-y-5">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
@@ -707,6 +709,286 @@ function ChecklistCard({ title, items }: { title: string; items: string[] }) {
         ))}
       </ul>
     </article>
+  );
+}
+
+/* ── SSA Financial Wellness & Benefits Planning ── */
+
+interface WellnessBranch {
+  id: string;
+  title: string;
+  color: string;
+  icon: string;
+  intro: string;
+  items: { heading: string; body: string }[];
+}
+
+const SSA_BRANCHES: WellnessBranch[] = [
+  {
+    id: "core",
+    title: "Core Benefit Programs",
+    color: "accent",
+    icon: "shield",
+    intro:
+      "Understand the foundation: which programs you receive, how they work, and what determines your payment.",
+    items: [
+      {
+        heading: "SSI (Supplemental Security Income)",
+        body: "A needs-based program for people with limited income and resources. SSA does not count all of your wages — earned-income exclusions let many people keep part of SSI while working.",
+      },
+      {
+        heading: "SSDI (Social Security Disability Insurance)",
+        body: "Based on your work record or a family member's. Includes the Trial Work Period and Extended Period of Eligibility so you can test employment without immediately losing benefits.",
+      },
+      {
+        heading: "Concurrent benefits (SSI + SSDI)",
+        body: "Some people receive both. Each program has its own work rules — a benefits counselor can model how wages affect each payment separately.",
+      },
+      {
+        heading: "Medicaid & Medicare",
+        body: "SSI typically connects to Medicaid; SSDI connects to Medicare after a waiting period. Coverage rules differ, especially 1619(b) Medicaid protection and Medicare continuation timelines.",
+      },
+      {
+        heading: "SNAP, housing, & other means-tested programs",
+        body: "Earnings can also affect SNAP, Section 8 housing, and state programs. Ask your benefits counselor to model ALL programs together, not just SSA.",
+      },
+    ],
+  },
+  {
+    id: "incentives",
+    title: "Work Incentives & Protections",
+    color: "emerald",
+    icon: "sparkles",
+    intro:
+      "SSA provides specific work incentives designed to help you try employment without risking everything.",
+    items: [
+      {
+        heading: "Trial Work Period (SSDI)",
+        body: "You can work for up to 9 months (not necessarily consecutive) and still receive full SSDI, regardless of how much you earn.",
+      },
+      {
+        heading: "Extended Period of Eligibility (SSDI)",
+        body: "After the Trial Work Period, you have 36 months during which your SSDI can restart in any month your earnings fall below the SGA level.",
+      },
+      {
+        heading: "Earned-income exclusions (SSI)",
+        body: "SSA excludes the first $65 of earnings plus half of the remainder. Additional exclusions (SEIE for students, BWE for blind individuals) can further reduce countable income.",
+      },
+      {
+        heading: "IRWE & PASS",
+        body: "Impairment-Related Work Expenses (IRWE) and Plans to Achieve Self-Support (PASS) let you deduct disability-related costs from countable earnings or set aside income for a work goal.",
+      },
+      {
+        heading: "1619(b) Medicaid protection",
+        body: "If your earnings cause SSI cash to stop, you may keep Medicaid coverage under Section 1619(b) as long as you still meet disability and resource criteria.",
+      },
+      {
+        heading: "Expedited Reinstatement",
+        body: "If your benefits stop because of work and you can't continue working, you can request reinstatement within 5 years without filing a new application.",
+      },
+    ],
+  },
+  {
+    id: "vr",
+    title: "Vocational Rehabilitation Integration",
+    color: "blue",
+    icon: "compass",
+    intro:
+      "Your VR counselor, Employment Network, and benefits counselor each play a role. Here's how they connect.",
+    items: [
+      {
+        heading: "Ticket to Work",
+        body: "A free, voluntary SSA program. You assign your Ticket to your state VR agency or an Employment Network. Timely progress toward employment can protect you from some medical CDRs.",
+      },
+      {
+        heading: "WIPA / CWIC benefits counseling",
+        body: "Work Incentives Planning and Assistance projects provide free, individualized counseling. A certified CWIC models how wages affect every benefit you receive.",
+      },
+      {
+        heading: "IPE and employment goals",
+        body: "Your Individualized Plan for Employment sets the training, services, and employment target. Benefits counseling should inform the IPE — especially when the wage goal intersects SGA thresholds.",
+      },
+      {
+        heading: "Coordinating accommodations",
+        body: "VR can fund job coaching, assistive technology, transportation, and workplace modifications. Benefits counselors help document IRWE so those costs reduce countable income.",
+      },
+    ],
+  },
+  {
+    id: "transition",
+    title: "Managing the Workplace Transition",
+    color: "amber",
+    icon: "route",
+    intro:
+      "Moving from benefits to employment is a process, not a switch. These steps help protect you along the way.",
+    items: [
+      {
+        heading: "Wage reporting",
+        body: "Report earnings to SSA monthly (or as required). Keep every pay stub. Late or missed reports lead to overpayments that SSA will recover.",
+      },
+      {
+        heading: "Health coverage planning",
+        body: "Before increasing hours, confirm whether you'll keep Medicaid (1619(b), state buy-in) or need employer/marketplace coverage. A gap in coverage can be dangerous.",
+      },
+      {
+        heading: "Gradual hour increases",
+        body: "Start small — test stamina, transportation, accommodations, and benefit impact before committing to full-time. Ask your counselor to adjust the IPE as you go.",
+      },
+      {
+        heading: "Financial literacy & budgeting",
+        body: "As wages replace part or all of your benefit, budget for taxes, work expenses, and reduced subsidies. An ABLE savings account can protect assets without affecting means-tested programs.",
+      },
+      {
+        heading: "Emergency planning",
+        body: "Know your Expedited Reinstatement rights. Keep SSA notices and documentation organized so you can reactivate benefits quickly if needed.",
+      },
+    ],
+  },
+  {
+    id: "legal",
+    title: "Legal & Systemic Frameworks",
+    color: "purple",
+    icon: "scale",
+    intro:
+      "Federal laws and regulations that shape your rights when you work with a disability.",
+    items: [
+      {
+        heading: "ADA & reasonable accommodations",
+        body: "The Americans with Disabilities Act requires employers with 15+ employees to provide reasonable accommodations. You have the right to request changes to the work environment or schedule.",
+      },
+      {
+        heading: "Rehabilitation Act (Section 503 & 504)",
+        body: "Applies to federal contractors and programs receiving federal funds. Section 504 prohibits disability discrimination; Section 503 requires affirmative action in hiring.",
+      },
+      {
+        heading: "WIOA Title IV (VR program authority)",
+        body: "The Workforce Innovation and Opportunity Act governs state VR programs, including eligibility, confidentiality (34 CFR §361.38), and the order of selection for services.",
+      },
+      {
+        heading: "SSA appeals & due process",
+        body: "If SSA changes your benefits, you have the right to written notice and the opportunity to appeal at four levels: reconsideration, ALJ hearing, Appeals Council, and federal court.",
+      },
+      {
+        heading: "State-specific protections",
+        body: "Many states have additional employment protections, Medicaid buy-in programs, and VR policies. Your CWIC or VR counselor can explain what applies in your state.",
+      },
+    ],
+  },
+];
+
+function SSAFinancialWellnessTree() {
+  const [openId, setOpenId] = useState<string | null>(null);
+
+  function toggle(id: string) {
+    setOpenId((prev) => (prev === id ? null : id));
+  }
+
+  const colorMap: Record<string, { ring: string; bg: string; text: string; dot: string; border: string }> = {
+    accent:  { ring: "ring-accent/20",  bg: "bg-accent/5",  text: "text-accent",  dot: "bg-accent",  border: "border-accent/20" },
+    emerald: { ring: "ring-emerald-500/20", bg: "bg-emerald-50", text: "text-emerald-700", dot: "bg-emerald-600", border: "border-emerald-200" },
+    blue:    { ring: "ring-blue-500/20", bg: "bg-blue-50",   text: "text-blue-700", dot: "bg-blue-600", border: "border-blue-200" },
+    amber:   { ring: "ring-amber-500/20", bg: "bg-amber-50",  text: "text-amber-700", dot: "bg-amber-500", border: "border-amber-200" },
+    purple:  { ring: "ring-purple-500/20", bg: "bg-purple-50", text: "text-purple-700", dot: "bg-purple-600", border: "border-purple-200" },
+  };
+
+  const icons: Record<string, string> = {
+    shield: "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z",
+    sparkles: "M12 2l2.09 6.26L20 10l-5.91 1.74L12 18l-2.09-6.26L4 10l5.91-1.74L12 2z",
+    compass: "M12 2a10 10 0 100 20 10 10 0 000-20zm3.5 6.5L14 14l-5.5 1.5L10 10l5.5-1.5z",
+    route: "M3 17h4V3H3v14zm5 0h4V8H8v9zm5 0h4v-6h-4v6z",
+    scale: "M12 3v18m-9-9h18M5 7l7-4 7 4M5 7v6l7 4 7-4V7",
+  };
+
+  return (
+    <section className="space-y-6">
+      {/* Hub label */}
+      <div className="flex flex-col items-center gap-3 text-center">
+        <div className="inline-flex items-center gap-2 rounded-full border border-accent/20 bg-accent/10 px-4 py-1.5">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-accent"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+          <span className="text-xs font-bold uppercase tracking-[0.22em] text-accent">Knowledge hub</span>
+        </div>
+        <h2 className="text-3xl font-bold tracking-tight text-ink md:text-4xl">
+          SSA Financial Wellness &amp; Benefits Planning
+        </h2>
+        <p className="max-w-2xl text-base leading-7 text-ink/65">
+          Tap any topic below to expand a plain-language guide. Each section is
+          designed to help you prepare for conversations with your VR counselor
+          and benefits counselor.
+        </p>
+      </div>
+
+      {/* Connecting line + branches */}
+      <div className="relative mx-auto max-w-4xl">
+        {/* vertical spine (hidden on small screens, visible md+) */}
+        <div className="absolute left-6 top-0 bottom-0 hidden w-px bg-ink/10 md:block" aria-hidden />
+
+        <div className="space-y-4">
+          {SSA_BRANCHES.map((branch) => {
+            const isOpen = openId === branch.id;
+            const c = colorMap[branch.color] ?? colorMap.accent;
+
+            return (
+              <div key={branch.id} className="relative md:pl-14">
+                {/* dot on the spine */}
+                <span
+                  aria-hidden
+                  className={`absolute left-[19px] top-5 hidden h-3 w-3 rounded-full md:block ${c.dot} ring-4 ring-white`}
+                />
+
+                <button
+                  onClick={() => toggle(branch.id)}
+                  aria-expanded={isOpen}
+                  className={`group flex w-full items-center gap-4 rounded-2xl border bg-white p-4 text-left shadow-sm transition hover:shadow-md md:p-5 ${isOpen ? `${c.border} ${c.ring} ring-2` : "border-ink/10"}`}
+                >
+                  <span className={`grid h-10 w-10 flex-none place-items-center rounded-xl ${c.bg}`}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={c.text}>
+                      <path d={icons[branch.icon] ?? icons.shield} />
+                    </svg>
+                  </span>
+                  <span className="flex-1">
+                    <span className={`text-xs font-bold uppercase tracking-[0.18em] ${c.text}`}>
+                      {branch.id === "core" ? "Foundation" : branch.id === "incentives" ? "Work safely" : branch.id === "vr" ? "Your team" : branch.id === "transition" ? "Next steps" : "Know your rights"}
+                    </span>
+                    <span className="mt-0.5 block text-lg font-bold text-ink">
+                      {branch.title}
+                    </span>
+                  </span>
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className={`flex-none text-ink/40 transition-transform ${isOpen ? "rotate-90" : ""}`}
+                  >
+                    <path d="M7 4l6 6-6 6" />
+                  </svg>
+                </button>
+
+                {isOpen && (
+                  <div className={`mt-2 overflow-hidden rounded-2xl border ${c.border} bg-white shadow-sm`}>
+                    <div className={`${c.bg} px-5 py-3`}>
+                      <p className="text-sm leading-6 text-ink/75">{branch.intro}</p>
+                    </div>
+                    <ul className="divide-y divide-ink/5 px-5">
+                      {branch.items.map((item) => (
+                        <li key={item.heading} className="py-4">
+                          <h4 className="font-bold text-ink">{item.heading}</h4>
+                          <p className="mt-1.5 text-sm leading-6 text-ink/70">{item.body}</p>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
   );
 }
 
