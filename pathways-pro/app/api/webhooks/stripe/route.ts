@@ -46,7 +46,12 @@ export async function POST(req: Request) {
   try {
     switch (event.type) {
       case "invoice.payment_succeeded": {
-        const invoice = event.data.object as Stripe.Invoice;
+        // Cast for fields the v22 SDK types no longer surface directly on
+        // Invoice (subscription moved under invoice parent details).
+        const invoice = event.data.object as Stripe.Invoice & {
+          subscription?: string | { id: string };
+          subscription_details?: { metadata?: Record<string, string> };
+        };
         const subscriptionId =
           typeof invoice.subscription === "string"
             ? invoice.subscription
@@ -76,7 +81,9 @@ export async function POST(req: Request) {
       }
 
       case "invoice.payment_failed": {
-        const invoice = event.data.object as Stripe.Invoice;
+        const invoice = event.data.object as Stripe.Invoice & {
+          subscription?: string | { id: string };
+        };
         console.log("Payment failed:", {
           subscriptionId: invoice.subscription,
           customerId: invoice.customer,

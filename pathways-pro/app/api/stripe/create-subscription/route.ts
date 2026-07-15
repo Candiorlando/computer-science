@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { getStripe, currency, stripeErrorBody } from "@/lib/stripe";
+import { getStripe, currency, stripeErrorBody, STRIPE_PREVIEW_API_VERSION } from "@/lib/stripe";
 import { getPartner, upsertPartner } from "@/lib/stripe-store";
 
 export const runtime = "nodejs";
@@ -54,7 +54,8 @@ export async function POST(req: Request) {
       customer_account: accountId,
       usage: "off_session",
       payment_method_data: { type: "stripe_balance" },
-    } as never);
+    } as never,
+    { apiVersion: STRIPE_PREVIEW_API_VERSION });
     const paymentMethodId =
       typeof setupIntent.payment_method === "string"
         ? setupIntent.payment_method
@@ -69,7 +70,8 @@ export async function POST(req: Request) {
       default_payment_method: paymentMethodId,
       items: [{ price: priceId, quantity: 1 }],
       payment_settings: { payment_method_types: ["stripe_balance"] },
-    } as never);
+    } as never,
+    { apiVersion: STRIPE_PREVIEW_API_VERSION });
 
     const record = await upsertPartner(accountId, {
       subscriptionProductId: productId,

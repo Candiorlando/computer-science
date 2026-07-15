@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { getStripe, stripeErrorBody } from "@/lib/stripe";
+import { getStripe, stripeErrorBody, STRIPE_PREVIEW_API_VERSION } from "@/lib/stripe";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -33,7 +33,8 @@ export async function POST(req: Request) {
           return_url: `${paymentsUrl}?onboarding=return`,
         },
       },
-    } as never);
+    } as never,
+    { apiVersion: STRIPE_PREVIEW_API_VERSION });
 
     return NextResponse.json({ accountLink });
   } catch (err) {
