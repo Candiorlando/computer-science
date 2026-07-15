@@ -436,27 +436,6 @@ function BenefitsPlanBuilder() {
           />
         </div>
 
-        <div>
-          <h3 className="text-lg font-bold text-ink">Ways to make more from work</h3>
-          <div className="mt-3 grid gap-3 md:grid-cols-3">
-            {plan.options.map((option) => (
-              <div key={option.label} className="rounded-2xl border border-ink/10 p-4">
-                <div className="flex items-baseline justify-between gap-2">
-                  <span className="text-sm font-bold text-ink">{option.label}</span>
-                  <span className="text-sm font-bold text-accent">${option.value.toLocaleString()}/mo</span>
-                </div>
-                <div className="mt-3 h-2 overflow-hidden rounded-full bg-ink/10">
-                  <div
-                    className="h-full rounded-full grad-tealblue"
-                    style={{ width: `${Math.min((option.value / 4500) * 100, 100)}%` }}
-                  />
-                </div>
-                <p className="mt-3 text-xs leading-5 text-ink/60">{option.note}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
         <div className="grid gap-3 md:grid-cols-2">
           <PlanList title="Ask about these work incentives" items={recommendedIncentives.incentives} />
           <PlanList title="Your next steps" items={recommendedIncentives.steps} />
