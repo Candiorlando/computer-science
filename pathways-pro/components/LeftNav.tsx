@@ -48,6 +48,7 @@ function menuFor(user: AnyUser, unread: number): NavItem[] {
       { href: "/assessment", label: "Assessments", icon: "📝" },
       { href: "/my-assessments", label: "My Assessments", icon: "🗂️" },
       { href: "/transferable-skills", label: "My Skills", icon: "🧰" },
+      { href: "/courses", label: "Courses", icon: "🎓" },
       { href: "/report", label: "Documents", icon: "📄" },
       { href: "/messages", label: "Messages", icon: "✉️", badge: unread },
       { href: "/case-notes", label: "Case Notes", icon: "🗒️" },
