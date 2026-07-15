@@ -9,6 +9,7 @@ import {
   apSummaryForOrg,
   formatMoney,
   markInvoicePaid,
+  seedDemoInvoicesIfEmpty,
   type Invoice,
   type InvoiceStatus,
 } from "@/lib/financials";
@@ -25,6 +26,7 @@ export default function BusinessAccountsPayablePage() {
     const s = loadSession();
     if (!s) return router.replace("/business");
     if (s.role !== "business") return router.replace("/portal");
+    seedDemoInvoicesIfEmpty();
     setUser(s);
   }, [router]);
 

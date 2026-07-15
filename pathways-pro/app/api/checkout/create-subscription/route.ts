@@ -93,18 +93,20 @@ export async function POST(req: Request) {
     });
 
     // 3. Extract client_secret from the PaymentIntent
-    const invoice = subscription.latest_invoice;
+    // The expanded invoice contains payment_intent but the Stripe SDK type
+    // doesn't surface it directly — use a safe cast.
+    const invoice = subscription.latest_invoice as Record<string, unknown> | string | null;
     if (!invoice || typeof invoice === "string") {
       throw new Error("Subscription created without an expanded invoice.");
     }
-    const paymentIntent = invoice.payment_intent;
+    const paymentIntent = invoice.payment_intent as Record<string, unknown> | string | null;
     if (!paymentIntent || typeof paymentIntent === "string") {
       throw new Error("Invoice does not contain an expanded PaymentIntent.");
     }
 
     return NextResponse.json({
       subscriptionId: subscription.id,
-      clientSecret: paymentIntent.client_secret,
+      clientSecret: paymentIntent.client_secret as string,
       customerId: customer.id,
       plan,
       quantity,

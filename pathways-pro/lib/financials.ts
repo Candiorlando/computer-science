@@ -333,3 +333,91 @@ export function formatMoney(cents: number): string {
 export function reIndex(_req: ServiceRequest) {
   // No-op hook reserved for the future webhook path.
 }
+
+// ── Demo invoice seed for the business AP view ─────────────────────────
+// Ensures every demo business org has sample invoices so the AP page
+// is never empty on first visit. Idempotent — checks by invoice ID.
+
+export function seedDemoInvoicesIfEmpty() {
+  const existing = loadInvoices();
+  const ids = new Set(existing.map((i) => i.id));
+
+  const demoInvoices: Invoice[] = [
+    {
+      id: "inv-demo-wec-001",
+      serviceRequestId: "sr-wec-001",
+      serviceId: "wec",
+      serviceTitle: "Wage-Earning Capacity Evaluation",
+      orgId: "org-acme",
+      orgName: "Acme Logistics",
+      counselorEmail: "candace.metcalf@pathwayspro.app",
+      amountCents: 285_000,
+      issuedAt: daysAgo(12),
+      dueAt: daysAhead(18),
+      status: "issued",
+    },
+    {
+      id: "inv-demo-lma-002",
+      serviceRequestId: "sr-lma-002",
+      serviceId: "lma",
+      serviceTitle: "Labor Market Assessment (Litigation)",
+      orgId: "org-acme",
+      orgName: "Acme Logistics",
+      counselorEmail: "candace.metcalf@pathwayspro.app",
+      amountCents: 175_000,
+      issuedAt: daysAgo(45),
+      dueAt: daysAgo(15),
+      status: "overdue",
+    },
+    {
+      id: "inv-demo-jta-003",
+      serviceRequestId: "sr-jta-003",
+      serviceId: "jd-analysis",
+      serviceTitle: "Job Task Analysis — Warehouse Associate",
+      orgId: "org-acme",
+      orgName: "Acme Logistics",
+      counselorEmail: "candace.metcalf@pathwayspro.app",
+      amountCents: 95_000,
+      issuedAt: daysAgo(60),
+      dueAt: daysAgo(30),
+      paidAt: daysAgo(25),
+      status: "paid",
+    },
+    {
+      id: "inv-demo-fce-004",
+      serviceRequestId: "sr-fce-004",
+      serviceId: "fce",
+      serviceTitle: "Functional Capacity Evaluation",
+      orgId: "org-meridian",
+      orgName: "Meridian Claims",
+      counselorEmail: "candace.metcalf@pathwayspro.app",
+      amountCents: 225_000,
+      issuedAt: daysAgo(5),
+      dueAt: daysAhead(25),
+      status: "issued",
+    },
+    {
+      id: "inv-demo-tsa-005",
+      serviceRequestId: "sr-tsa-005",
+      serviceId: "tsa",
+      serviceTitle: "Transferable Skills Analysis",
+      orgId: "org-meridian",
+      orgName: "Meridian Claims",
+      counselorEmail: "candace.metcalf@pathwayspro.app",
+      amountCents: 145_000,
+      issuedAt: daysAgo(90),
+      dueAt: daysAgo(60),
+      paidAt: daysAgo(55),
+      status: "paid",
+    },
+  ];
+
+  const toAdd = demoInvoices.filter((inv) => !ids.has(inv.id));
+  if (toAdd.length > 0) {
+    saveInvoices([...existing, ...toAdd]);
+  }
+}
+
+function daysAhead(n: number): string {
+  return new Date(Date.now() + n * 24 * 60 * 60 * 1000).toISOString();
+}
