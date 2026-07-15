@@ -83,7 +83,7 @@ export default function AboutPage() {
           <figure className="m-0 -mx-1 -mt-1">
             <div className="overflow-hidden rounded-xl border border-ink/10">
               <Image
-                src="/founder/candace-metcalf.jpg"
+                src="/founder/candace-metcalf-2025.jpg"
                 alt="Portrait of Candace Metcalf, CRC, LPC — founder of Pathways Pro"
                 width={864}
                 height={1184}
