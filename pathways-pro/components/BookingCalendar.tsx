@@ -4,7 +4,7 @@
 // aria-live announcements, 44px targets, mint theme. Timezone-aware: slots
 // come back in UTC and render in the viewer's timezone.
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   getFreeSlots,
   bookAppointment,
