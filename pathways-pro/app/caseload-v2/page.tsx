@@ -11,7 +11,7 @@ import {
 } from "@/lib/users";
 import { useDebounce } from "@/lib/use-debounce";
 import { notesForClient, loadCaseNotes } from "@/lib/case-notes";
-import { loadIPE, type IPEData } from "@/lib/ipe";
+import { loadIPE, type IPE } from "@/lib/ipe";
 
 /* ═══════════════════════════════════════════════════════════════════════
    Master-Detail Caseload Dashboard
@@ -353,7 +353,7 @@ function OverviewTab({
   notesCount,
 }: {
   client: ClientUser;
-  ipe: IPEData | null;
+  ipe: IPE | null;
   notesCount: number;
 }) {
   return (
