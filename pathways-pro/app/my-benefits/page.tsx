@@ -15,6 +15,11 @@ const earningsExamples = [
 ];
 
 const maxMonthly = Math.max(...earningsExamples.map((e) => e.monthly));
+const weeksPerMonth = 52 / 12;
+
+type BenefitType = "ssi" | "ssdi" | "both" | "not-sure";
+type HealthCoverage = "medicaid" | "medicare" | "both" | "private" | "not-sure";
+type WorkGoal = "try-work" | "increase-hours" | "full-time" | "career-growth";
 
 export default function MyBenefitsPage() {
   const router = useRouter();
@@ -84,19 +89,7 @@ export default function MyBenefitsPage() {
               ))}
             </div>
           </div>
-          <div className="rounded-2xl bg-white border border-ink/10 p-5 shadow-sm">
-            <p className="text-xs uppercase tracking-widest text-emerald-700 font-semibold mb-2">
-              Key idea
-            </p>
-            <p className="text-4xl font-bold text-grad-tealblue mb-2">
-              Plan before you earn
-            </p>
-            <p className="text-sm text-ink/70">
-              Benefits counseling helps you estimate what happens at different
-              wage levels, when to report wages, which work incentives apply,
-              and how to keep health coverage whenever possible.
-            </p>
-          </div>
+          <BenefitsPlanBuilder />
         </div>
       </section>
 
@@ -224,6 +217,357 @@ export default function MyBenefitsPage() {
   );
 }
 
+function BenefitsPlanBuilder() {
+  const [benefitType, setBenefitType] = useState<BenefitType>("not-sure");
+  const [healthCoverage, setHealthCoverage] = useState<HealthCoverage>("not-sure");
+  const [workGoal, setWorkGoal] = useState<WorkGoal>("increase-hours");
+  const [hourlyWage, setHourlyWage] = useState(18);
+  const [hoursPerWeek, setHoursPerWeek] = useState(20);
+  const [benefitAmount, setBenefitAmount] = useState(900);
+  const [monthlyExpenses, setMonthlyExpenses] = useState(1200);
+
+  const plan = useMemo(() => {
+    const grossMonthly = Math.round(hourlyWage * hoursPerWeek * weeksPerMonth);
+    const grossAnnual = Math.round(grossMonthly * 12);
+    const totalBeforeTaxes = grossMonthly + benefitAmount;
+    const cushion = totalBeforeTaxes - monthlyExpenses;
+    const moreHoursMonthly = Math.round(hourlyWage * Math.min(hoursPerWeek + 5, 40) * weeksPerMonth);
+    const higherWageMonthly = Math.round((hourlyWage + 3) * hoursPerWeek * weeksPerMonth);
+    const fullTimeMonthly = Math.round(Math.max(hourlyWage, 20) * 40 * weeksPerMonth);
+
+    return {
+      grossMonthly,
+      grossAnnual,
+      totalBeforeTaxes,
+      cushion,
+      options: [
+        {
+          label: "+5 hours/week",
+          value: moreHoursMonthly,
+          note: "Good next step if stamina, transportation, and schedule are stable.",
+        },
+        {
+          label: "+$3/hour",
+          value: higherWageMonthly,
+          note: "Ask about training, certifications, accommodations, or job carving.",
+        },
+        {
+          label: "Full-time pathway",
+          value: fullTimeMonthly,
+          note: "Plan health coverage and SSA reporting before making this jump.",
+        },
+      ],
+    };
+  }, [benefitAmount, hourlyWage, hoursPerWeek, monthlyExpenses]);
+
+  const recommendedIncentives = useMemo(
+    () => benefitGuidance(benefitType, healthCoverage, workGoal, plan.grossMonthly),
+    [benefitType, healthCoverage, workGoal, plan.grossMonthly],
+  );
+
+  return (
+    <div className="rounded-2xl bg-white border border-ink/10 p-5 shadow-sm space-y-5">
+      <div>
+        <p className="text-xs uppercase tracking-widest text-emerald-700 font-semibold mb-2">
+          Key idea · interactive
+        </p>
+        <h2 className="text-3xl font-bold text-grad-tealblue mb-2">
+          Build your work plan
+        </h2>
+        <p className="text-sm text-ink/70">
+          Try your own wage, hours, benefits, and health coverage situation to
+          see what to ask a benefits counselor before you earn more.
+        </p>
+      </div>
+
+      <div className="grid sm:grid-cols-2 gap-3">
+        <SelectField
+          label="Benefits I receive"
+          value={benefitType}
+          onChange={(value) => setBenefitType(value as BenefitType)}
+          options={[
+            ["ssi", "SSI"],
+            ["ssdi", "SSDI"],
+            ["both", "SSI + SSDI"],
+            ["not-sure", "Not sure yet"],
+          ]}
+        />
+        <SelectField
+          label="Health coverage"
+          value={healthCoverage}
+          onChange={(value) => setHealthCoverage(value as HealthCoverage)}
+          options={[
+            ["medicaid", "Medicaid"],
+            ["medicare", "Medicare"],
+            ["both", "Medicaid + Medicare"],
+            ["private", "Employer/private plan"],
+            ["not-sure", "Not sure yet"],
+          ]}
+        />
+        <SelectField
+          label="My work goal"
+          value={workGoal}
+          onChange={(value) => setWorkGoal(value as WorkGoal)}
+          options={[
+            ["try-work", "Try work safely"],
+            ["increase-hours", "Increase hours"],
+            ["full-time", "Move toward full-time"],
+            ["career-growth", "Earn more through advancement"],
+          ]}
+        />
+        <NumberField
+          label="Monthly benefit amount"
+          value={benefitAmount}
+          min={0}
+          max={4000}
+          prefix="$"
+          onChange={setBenefitAmount}
+        />
+      </div>
+
+      <div className="grid sm:grid-cols-2 gap-3">
+        <RangeField
+          label="Hourly wage"
+          value={hourlyWage}
+          min={10}
+          max={45}
+          prefix="$"
+          onChange={setHourlyWage}
+        />
+        <RangeField
+          label="Hours per week"
+          value={hoursPerWeek}
+          min={1}
+          max={40}
+          suffix=" hrs"
+          onChange={setHoursPerWeek}
+        />
+      </div>
+
+      <NumberField
+        label="Estimated monthly living expenses"
+        value={monthlyExpenses}
+        min={0}
+        max={8000}
+        prefix="$"
+        onChange={setMonthlyExpenses}
+      />
+
+      <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4" aria-live="polite">
+        <p className="text-xs uppercase tracking-widest text-emerald-800 font-semibold mb-1">
+          Your draft earning picture
+        </p>
+        <div className="grid grid-cols-2 gap-3 text-sm">
+          <Metric label="Gross wages/month" value={`$${plan.grossMonthly.toLocaleString()}`} />
+          <Metric label="Gross wages/year" value={`$${plan.grossAnnual.toLocaleString()}`} />
+          <Metric label="Benefits + wages/month" value={`$${plan.totalBeforeTaxes.toLocaleString()}`} />
+          <Metric
+            label="After expenses estimate"
+            value={`${plan.cushion < 0 ? "-" : ""}$${Math.abs(plan.cushion).toLocaleString()}`}
+          />
+        </div>
+      </div>
+
+      <div>
+        <h3 className="font-semibold mb-2">Ways to make more from work</h3>
+        <div className="space-y-2">
+          {plan.options.map((option) => (
+            <div key={option.label} className="rounded-lg border border-ink/10 p-3">
+              <div className="flex justify-between gap-2 text-sm font-semibold">
+                <span>{option.label}</span>
+                <span>${option.value.toLocaleString()}/mo gross</span>
+              </div>
+              <div className="h-2 bg-ink/10 rounded-full mt-2 overflow-hidden">
+                <div
+                  className="h-full grad-tealblue"
+                  style={{ width: `${Math.min((option.value / 4500) * 100, 100)}%` }}
+                />
+              </div>
+              <p className="text-xs text-ink/60 mt-2">{option.note}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-3">
+        <PlanList title="Ask about these work incentives" items={recommendedIncentives.incentives} />
+        <PlanList title="Your next 3 steps" items={recommendedIncentives.steps} />
+      </div>
+    </div>
+  );
+}
+
+function benefitGuidance(
+  benefitType: BenefitType,
+  healthCoverage: HealthCoverage,
+  workGoal: WorkGoal,
+  grossMonthly: number,
+) {
+  const incentives = new Set<string>();
+  const steps = new Set<string>();
+
+  if (benefitType === "ssi" || benefitType === "both" || benefitType === "not-sure") {
+    incentives.add("SSI earned-income exclusions and how your countable income is estimated");
+    incentives.add("1619(b) Medicaid continuation if cash SSI reduces or stops from earnings");
+    incentives.add("IRWE or PASS if work expenses or a work goal plan applies");
+  }
+
+  if (benefitType === "ssdi" || benefitType === "both" || benefitType === "not-sure") {
+    incentives.add("Trial Work Period months and Extended Period of Eligibility");
+    incentives.add("Substantial Gainful Activity rules, subsidies, and special conditions");
+    incentives.add("Expedited Reinstatement if benefits stop after sustained work");
+  }
+
+  if (healthCoverage === "medicaid" || healthCoverage === "both" || healthCoverage === "not-sure") {
+    incentives.add("How to keep Medicaid while working, including state buy-in or 1619(b) options");
+  }
+
+  if (healthCoverage === "medicare" || healthCoverage === "both") {
+    incentives.add("Medicare continuation timelines and premium help options");
+  }
+
+  steps.add("Bring this estimate, your latest SSA notice, and recent pay stubs to a benefits counselor.");
+  steps.add("Set a wage-reporting reminder before your first paycheck or schedule change.");
+  steps.add("Ask your VR counselor whether accommodations, transportation, or training can support more earnings.");
+
+  if (workGoal === "increase-hours") {
+    steps.add("Try one small hour increase first, then compare stamina, transportation, and benefit impact.");
+  }
+  if (workGoal === "full-time") {
+    steps.add("Map the full-time offer against health coverage, SGA, and backup supports before accepting.");
+  }
+  if (workGoal === "career-growth") {
+    steps.add("Choose one skill, certificate, or employer conversation that can raise your hourly wage.");
+  }
+  if (grossMonthly > 1500) {
+    steps.add("Ask for a written benefits analysis before increasing wages further.");
+  }
+
+  return { incentives: Array.from(incentives), steps: Array.from(steps).slice(0, 5) };
+}
+
+function SelectField({
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  options: Array<[string, string]>;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <label className="block text-sm">
+      <span className="font-semibold text-ink">{label}</span>
+      <select
+        className="input mt-1 w-full"
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+      >
+        {options.map(([optionValue, optionLabel]) => (
+          <option key={optionValue} value={optionValue}>
+            {optionLabel}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
+function NumberField({
+  label,
+  value,
+  min,
+  max,
+  prefix = "",
+  onChange,
+}: {
+  label: string;
+  value: number;
+  min: number;
+  max: number;
+  prefix?: string;
+  onChange: (value: number) => void;
+}) {
+  return (
+    <label className="block text-sm">
+      <span className="font-semibold text-ink">{label}</span>
+      <div className="mt-1 flex items-center gap-2">
+        {prefix && <span className="text-ink/55">{prefix}</span>}
+        <input
+          className="input w-full"
+          type="number"
+          min={min}
+          max={max}
+          value={value}
+          onChange={(event) => onChange(clampNumber(event.target.value, min, max))}
+        />
+      </div>
+    </label>
+  );
+}
+
+function RangeField({
+  label,
+  value,
+  min,
+  max,
+  prefix = "",
+  suffix = "",
+  onChange,
+}: {
+  label: string;
+  value: number;
+  min: number;
+  max: number;
+  prefix?: string;
+  suffix?: string;
+  onChange: (value: number) => void;
+}) {
+  return (
+    <label className="block text-sm">
+      <span className="font-semibold text-ink">{label}</span>
+      <span className="ml-2 text-ink/60">
+        {prefix}{value}{suffix}
+      </span>
+      <input
+        className="mt-2 w-full accent-emerald-700"
+        type="range"
+        min={min}
+        max={max}
+        value={value}
+        onChange={(event) => onChange(clampNumber(event.target.value, min, max))}
+      />
+    </label>
+  );
+}
+
+function Metric({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="text-[11px] uppercase tracking-wider text-ink/55">{label}</p>
+      <p className="text-lg font-bold text-ink">{value}</p>
+    </div>
+  );
+}
+
+function PlanList({ title, items }: { title: string; items: string[] }) {
+  return (
+    <div className="rounded-xl border border-ink/10 p-4 bg-cream/40">
+      <h3 className="font-semibold mb-2">{title}</h3>
+      <ul className="space-y-2">
+        {items.map((item) => (
+          <li key={item} className="flex gap-2 text-xs text-ink/70">
+            <span aria-hidden className="text-emerald-700 font-bold">•</span>
+            <span>{item}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 function InfoCard({
   title,
   eyebrow,
@@ -265,4 +609,10 @@ function ChecklistCard({ title, items }: { title: string; items: string[] }) {
       </ul>
     </article>
   );
+}
+
+function clampNumber(value: string, min: number, max: number) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return min;
+  return Math.min(Math.max(Math.round(parsed), min), max);
 }
