@@ -15,6 +15,7 @@ import {
   loadProblemAnalysisReports,
 } from "@/lib/self-advocacy";
 import InteractiveProgress from "./InteractiveProgress";
+import VocationalJourney from "./VocationalJourney";
 import { loadServiceRequests } from "@/lib/service-requests";
 import { getService } from "@/lib/service-catalog";
 import { pendingAssignmentsForCase } from "@/lib/assessment-assignments";
@@ -206,6 +207,10 @@ export default function ClientHome() {
             Stage: <strong>{c.status}</strong>. Goal: <strong>{c.goal}</strong>.
           </p>
         </section>
+      )}
+
+      {c && (
+        <VocationalJourney client={c} />
       )}
 
       <section className="grid lg:grid-cols-[1fr_320px] gap-6">
