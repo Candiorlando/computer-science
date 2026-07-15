@@ -26,6 +26,7 @@ function menuFor(user: AnyUser, unread: number): NavItem[] {
     return [
       { href: "/case-search", label: "Case Search", icon: "🔍", badge: unread },
       { href: "/caseload", label: "Caseload", icon: "📋" },
+      { href: "/schedule", label: "Scheduling", icon: "📅" },
       { href: "/dashboard/vendors", label: "Vendors", icon: "🛠️" },
       { href: "/dashboard/business", label: "Business Clients", icon: "🏢" },
       { href: "/dashboard/partners", label: "Employment Partners", icon: "🤝" },
@@ -43,11 +44,13 @@ function menuFor(user: AnyUser, unread: number): NavItem[] {
   if (user.role === "client") {
     return [
       { href: "/portal", label: "Home", icon: "🏠" },
+      { href: "/appointments", label: "Appointments", icon: "📅" },
       { href: "/progress", label: "My Progress", icon: "📈" },
       { href: "/ipe", label: "My IPE Plan", icon: "📋" },
       { href: "/assessment", label: "Assessments", icon: "📝" },
       { href: "/my-assessments", label: "My Assessments", icon: "🗂️" },
       { href: "/transferable-skills", label: "My Skills", icon: "🧰" },
+      { href: "/courses", label: "Courses", icon: "🎓" },
       { href: "/report", label: "Documents", icon: "📄" },
       { href: "/messages", label: "Messages", icon: "✉️", badge: unread },
       { href: "/case-notes", label: "Case Notes", icon: "🗒️" },
