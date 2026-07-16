@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import {
   Building2,
   CheckCircle2,
-  City,
+  MapPinned,
   FileText,
   Landmark,
   LockKeyhole,
@@ -78,7 +78,7 @@ const tenantTypes: TenantType[] = [
 
 function iconFor(type: TenantType) {
   if (type === "State Client") return Landmark;
-  if (type === "City Client") return City;
+  if (type === "City Client") return MapPinned;
   if (type === "Individual Counselor") return UserCog;
   return Building2;
 }
