@@ -10,6 +10,7 @@ import {
   CalendarDays,
   MessageSquare,
   CreditCard,
+  BookOpen,
   LogOut,
   Menu,
   X,
@@ -30,6 +31,11 @@ function tabsForRole(role: AnyUser["role"]): NavTab[] {
       href: "/appointments",
       label: "Appointments",
       icon: <CalendarDays className="w-4 h-4" />,
+    },
+    {
+      href: "/my-courses",
+      label: "My Courses",
+      icon: <BookOpen className="w-4 h-4" />,
     },
     {
       href: "/messages",
