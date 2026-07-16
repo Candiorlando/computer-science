@@ -9,7 +9,6 @@ import {
   Database,
   Download,
   FileDown,
-  FileImage,
   FileText,
   LockKeyhole,
   Mail,
@@ -256,51 +255,133 @@ function ContentEngine({
   coreMessage: string;
   setCoreMessage: (value: string) => void;
 }) {
+  const [interviewStarted, setInterviewStarted] = useState(false);
+  const [answers, setAnswers] = useState("");
+  const [assetGenerated, setAssetGenerated] = useState(false);
+
+  const questions = [
+    `Which specific ${targetSegment.toLowerCase()} audience are we targeting, and who is the decision-maker?`,
+    `Which value proposition should lead: WOTC/tax incentives, Pre-ETS pipeline development, WIOA compliance, or clinical retention?`,
+    `Should the tone feel authoritative, community-focused, data-driven, or warm and civic-minded?`,
+    `What concrete next step should the recipient take after reading this ${deliverable.toLowerCase()}?`,
+  ];
+
   return (
     <WorkspaceCard
-      eyebrow="Document Control Center"
-      title="Advanced AI Content Engine"
+      eyebrow="Reverse-Prompting Strategy Console"
+      title="GEM AI Strategy Console"
       icon={<Bot className="w-5 h-5" />}
     >
-      <div className="space-y-5">
-        <div className="grid md:grid-cols-3 gap-4">
-          <Field label="Target Segment">
+      <div className="grid lg:grid-cols-[0.95fr_1.35fr] gap-5 items-start">
+        <div className="border border-ink/10 rounded-2xl bg-cream/50 p-5 space-y-4">
+          <div className="flex items-center gap-2 text-accent font-bold text-sm">
+            <ShieldCheck className="w-4 h-4" />
+            Strategy Configuration
+          </div>
+          <Field label="Target Entity">
             <select value={targetSegment} onChange={(e) => setTargetSegment(e.target.value)} className="form-field">
+              <option>Corporate Partner</option>
+              <option>Government Agency</option>
+              <option>Educational Institution</option>
               <option>Corporate HR / Workforce Development</option>
-              <option>Government Workforce Agency</option>
-              <option>Higher Education Disability Services</option>
               <option>Community Non-Profit Partner</option>
             </select>
           </Field>
-          <Field label="Desired Deliverable Type">
+          <Field label="Campaign Objective">
             <select value={deliverable} onChange={(e) => setDeliverable(e.target.value)} className="form-field">
+              <option>Direct Pitch</option>
+              <option>Event Invitation</option>
+              <option>Informational Handout</option>
               <option>B2B Pitch Letter</option>
               <option>Community Handout</option>
               <option>Event Guide</option>
             </select>
           </Field>
-          <Field label="Core Message">
-            <input value={coreMessage} onChange={(e) => setCoreMessage(e.target.value)} className="form-field" />
+          <Field label="Brief Description">
+            <textarea value={coreMessage} onChange={(e) => setCoreMessage(e.target.value)} className="form-field min-h-[142px]" />
           </Field>
+          <button
+            onClick={() => {
+              setInterviewStarted(true);
+              setAssetGenerated(false);
+            }}
+            className="w-full inline-flex items-center justify-center gap-2 bg-accent text-white text-sm font-semibold px-5 py-3 rounded-lg hover:bg-accent-light transition"
+          >
+            <Sparkles className="w-4 h-4" />
+            Consult AI Strategy Team
+          </button>
         </div>
 
-        <div className="border border-ink/10 rounded-2xl bg-cream/60 p-5 space-y-4">
-          <div className="flex items-center gap-2 text-accent font-bold text-sm">
-            <Sparkles className="w-4 h-4" />
-            Generated Draft Preview
+        <div className="border border-ink/10 rounded-2xl bg-white overflow-hidden">
+          <div className="px-5 py-4 border-b border-ink/10 bg-ink/[0.015] flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-accent/10 text-accent grid place-items-center">
+              <Bot className="w-4 h-4" />
+            </div>
+            <div>
+              <p className="text-[11px] uppercase tracking-[0.16em] text-ink/45 font-bold">Interactive Interview Canvas</p>
+              <p className="text-sm font-bold text-ink">Strategic interview before asset generation</p>
+            </div>
           </div>
-          <div className="bg-white border border-ink/10 rounded-xl p-5 text-sm text-ink/75 leading-relaxed space-y-3">
-            <p className="font-semibold text-ink">Subject: Building inclusive workforce pathways with Pathways Pro</p>
-            <p>
-              Dear workforce leader, Pathways Pro helps {targetSegment.toLowerCase()} convert civic intention into measurable workforce infrastructure. Through structured partner engagement, rehabilitation professionals, and secure coordination, your organization can strengthen retention, expand inclusive hiring, and document meaningful social impact.
-            </p>
-            <p className="text-ink/55">Deliverable format: {deliverable}</p>
-          </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-2">
-            <ActionButton icon={<Database className="w-4 h-4" />} label="Save to Repository" />
-            <ActionButton icon={<FileDown className="w-4 h-4" />} label="Download PDF" />
-            <ActionButton icon={<FileText className="w-4 h-4" />} label="Export Word Doc" />
-            <ActionButton icon={<FileImage className="w-4 h-4" />} label="Generate Flyer Asset" />
+
+          <div className="p-5 space-y-5">
+            {!interviewStarted && (
+              <div className="rounded-2xl border border-dashed border-ink/15 bg-cream/50 p-6 text-center space-y-2">
+                <Bot className="w-8 h-8 text-accent mx-auto" />
+                <p className="font-semibold text-ink">Ready for consultation</p>
+                <p className="text-sm text-ink/55">Configure the campaign, then consult the AI strategy team.</p>
+              </div>
+            )}
+
+            {interviewStarted && (
+              <div className="space-y-4">
+                <div className="rounded-2xl bg-accent/5 border border-accent/15 p-4 space-y-3">
+                  <p className="text-sm font-semibold text-accent">To optimize this {deliverable.toLowerCase()}, please clarify the following:</p>
+                  <ol className="space-y-2 text-sm text-ink/70 list-decimal list-inside">
+                    {questions.map((q) => <li key={q}>{q}</li>)}
+                  </ol>
+                </div>
+
+                <Field label="Your Answers">
+                  <textarea
+                    value={answers}
+                    onChange={(e) => setAnswers(e.target.value)}
+                    placeholder="Answer the questions here. Include audience, lead value proposition, tone, and desired next step..."
+                    className="form-field min-h-[130px]"
+                  />
+                </Field>
+
+                <button
+                  onClick={() => setAssetGenerated(true)}
+                  className="inline-flex items-center gap-2 bg-fresh text-white text-sm font-semibold px-5 py-3 rounded-lg hover:bg-fresh-dark transition"
+                >
+                  <FileText className="w-4 h-4" />
+                  Generate Asset
+                </button>
+              </div>
+            )}
+
+            {assetGenerated && (
+              <div className="rounded-2xl border border-ink/10 bg-cream/40 p-5 space-y-4">
+                <div className="flex items-center gap-2 text-accent font-bold text-sm">
+                  <FileText className="w-4 h-4" />
+                  Generated Marketing Asset
+                </div>
+                <div className="bg-white border border-ink/10 rounded-xl p-5 text-sm text-ink/75 leading-relaxed space-y-3">
+                  <p className="font-semibold text-ink">Subject: A purpose-driven partnership opportunity with Pathways Pro</p>
+                  <p>
+                    Thank you for considering a partnership designed around dignity, workforce belonging, and measurable civic impact. Based on your strategic priorities, Pathways Pro can help {targetSegment.toLowerCase()} align rehabilitation expertise with concrete workforce outcomes.
+                  </p>
+                  <p>
+                    This {deliverable.toLowerCase()} emphasizes {coreMessage.toLowerCase()} and frames the next step as a focused partnership conversation grounded in equity, retention, and sustainable systems reform.
+                  </p>
+                  {answers && <p className="text-ink/55">Interview context: {answers}</p>}
+                </div>
+                <div className="grid sm:grid-cols-2 gap-2">
+                  <ActionButton icon={<FileDown className="w-4 h-4" />} label="Download PDF" />
+                  <ActionButton icon={<FileText className="w-4 h-4" />} label="Export Word Doc" />
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
