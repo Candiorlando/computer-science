@@ -13,6 +13,7 @@ import {
   ShieldCheck,
   Users,
 } from "lucide-react";
+import MasterAdminGuard from "@/components/MasterAdminGuard";
 
 type EntityType = "Individual" | "Private Agency" | "Government/Enterprise";
 
@@ -76,6 +77,7 @@ export default function PricingEnginePage() {
   }, [entityType, seats, cases]);
 
   return (
+    <MasterAdminGuard>
     <div className="space-y-6">
       <header className="space-y-3">
         <p className="text-xs uppercase tracking-[0.18em] text-accent font-bold flex items-center gap-2">
@@ -217,6 +219,7 @@ export default function PricingEnginePage() {
         </div>
       </section>
     </div>
+    </MasterAdminGuard>
   );
 }
 

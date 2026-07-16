@@ -6,6 +6,7 @@ import { useEffect, useState, type ComponentType } from "react";
 import { clearSession, loadSession } from "@/lib/session";
 import type { AnyUser } from "@/lib/users";
 import { unreadCount } from "@/lib/messages";
+import { isMasterAdmin } from "@/lib/rbac";
 import {
   Search,
   ClipboardList,
@@ -61,7 +62,7 @@ interface NavSection {
 
 // ── Counselor / Admin sidebar menu ─────────────────────────────────
 
-function counselorMenu(unread: number): NavSection[] {
+function counselorMenu(unread: number, masterAdmin: boolean): NavSection[] {
   return [
     {
       items: [
@@ -97,12 +98,19 @@ function counselorMenu(unread: number): NavSection[] {
     {
       title: "Admin",
       items: [
-        { href: "/admin/master-admin", label: "Master Admin", icon: LockKeyhole },
+        // Master Admin and Pricing Engine are platform-level tools —
+        // visible only to the Master Administrator, never to ordinary
+        // (including tenant-admin) counselor accounts.
+        ...(masterAdmin
+          ? [
+              { href: "/admin/master-admin", label: "Master Admin", icon: LockKeyhole },
+              { href: "/admin/pricing-engine", label: "Pricing Engine", icon: DollarSign },
+            ]
+          : []),
         { href: "/admin/client-roster", label: "Client Roster", icon: Users },
         { href: "/admin/vendor-directory", label: "Vendor Directory", icon: ListChecks },
         { href: "/admin/approval-queue", label: "Approval Queue", icon: ShieldCheck },
         { href: "/admin/user-management", label: "User Management", icon: UserPlus },
-        { href: "/admin/pricing-engine", label: "Pricing Engine", icon: DollarSign },
       ],
     },
     {
@@ -192,7 +200,7 @@ function partnerMenu(unread: number): NavSection[] {
 function sectionsFor(user: AnyUser, unread: number): NavSection[] {
   switch (user.role) {
     case "counselor":
-      return counselorMenu(unread);
+      return counselorMenu(unread, isMasterAdmin(user));
     case "client":
       return clientMenu(unread);
     case "business":

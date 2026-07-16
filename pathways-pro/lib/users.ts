@@ -14,6 +14,18 @@ export interface CounselorUser {
   employeeId: string;
   role: "counselor";
   clientKeys: string[];
+  // Platform-level administrator flag — grants access to master-admin-only
+  // tools (tenant provisioning, pricing engine). Distinct from ordinary
+  // counselor/agency-admin duties: a platform Super Admin manages the
+  // business/contract layer and must NOT read client or provider PHI
+  // (case notes, assessments, IPEs) unless separately granted a normal
+  // counselor account for that purpose. See lib/rbac.ts isMasterAdmin().
+  platformAccess?: "SUPER_ADMIN";
+  // Multi-tenant scoping — which agency/tenant this counselor belongs to,
+  // and their role within it. Absent tenantId = legacy/ungrouped demo
+  // counselor (pre-dates the multi-tenant model). See lib/tenants.ts.
+  tenantId?: string;
+  tenantRole?: "TENANT_ADMIN" | "TENANT_USER";
 }
 
 export interface ClientUser {
@@ -95,6 +107,18 @@ export type AnyUser =
   | EmploymentPartnerUser;
 
 export const COUNSELORS: Record<string, CounselorUser> = {
+  "master.admin@pathwayspro.app": {
+    email: "master.admin@pathwayspro.app",
+    password: "MasterAdmin1!",
+    name: "Platform Master Admin",
+    credentials: "Platform Administrator",
+    office: "Corporate HQ",
+    agency: "Pathways Pro (Platform)",
+    employeeId: "#001",
+    role: "counselor",
+    clientKeys: [],
+    platformAccess: "SUPER_ADMIN",
+  },
   "candace.metcalf@pathwayspro.app": {
     email: "candace.metcalf@pathwayspro.app",
     password: "CRC2026!",

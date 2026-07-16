@@ -2,7 +2,7 @@
 // Centralizes role definitions, route guards, and mock data for the
 // approval-queue and user-management admin workflows.
 
-import type { Role } from "./users";
+import type { AnyUser, Role } from "./users";
 
 /* ── Pending access request (Approval Queue) ────────────────────────── */
 
@@ -99,6 +99,13 @@ export interface DemoPersona {
 
 export const DEMO_PERSONAS: DemoPersona[] = [
   {
+    label: "Master Administrator",
+    description: "Platform-level: tenant provisioning and pricing engine only — no client/case PHI access",
+    email: "master.admin@pathwayspro.app",
+    password: "MasterAdmin1!",
+    authRole: "counselor",
+  },
+  {
     label: "Counselor",
     description: "Full caseload, IPE drafting, assessments, and case management",
     email: "demo.counselor@pathwayspro.app",
@@ -147,6 +154,17 @@ export const DEMO_PERSONAS: DemoPersona[] = [
 /** Roles that see the admin/counselor sidebar layout. */
 export function isAdminRole(role: Role): boolean {
   return role === "counselor";
+}
+
+/**
+ * True only for the platform-level Master Administrator — gates
+ * master-admin-only tools (tenant provisioning, corporate pricing engine).
+ * A master admin is NOT automatically a tenant admin and must not read
+ * client/provider PHI (case notes, assessments, IPEs); that separation is
+ * enforced at each PHI-bearing page/route, not here.
+ */
+export function isMasterAdmin(user: AnyUser | null | undefined): boolean {
+  return !!user && user.role === "counselor" && user.platformAccess === "SUPER_ADMIN";
 }
 
 /** Default landing route after login for each role. */
