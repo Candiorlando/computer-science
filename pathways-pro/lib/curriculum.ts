@@ -1,17 +1,18 @@
 // ══════════════════════════════════════════════════════════════════════
-// Pathways Pro — Vocational Curriculum Engine
+// Pathways Pro — Curriculum Engine
 //
-// Master course catalog, client typology auto-assignment, and per-client
+// Master course catalog, client typology auto-assignment, and per-profile
 // assignment state. In production the assignment table lives in the DB;
 // here we persist to localStorage so the demo round-trips.
 // ══════════════════════════════════════════════════════════════════════
 
 /* ── Types ───────────────────────────────────────────────────────────── */
 
-export type ModuleId = "A" | "B" | "C" | "D";
+export type ModuleId = "A" | "B" | "C" | "D" | "E" | "F";
+export type CourseAudience = "vocational_client" | "business_client" | "employment_partner" | "agency_partner";
 
 export interface CurriculumCourse {
-  /** Stable ID like "A1", "D3" */
+  /** Stable ID like "A1", "F5" */
   id: string;
   module: ModuleId;
   title: string;
@@ -20,11 +21,13 @@ export interface CurriculumCourse {
   /** Estimated duration in minutes */
   durationMin: number;
   lessonCount: number;
+  audiences: CourseAudience[];
 }
 
 export interface CurriculumModule {
   id: ModuleId;
   title: string;
+  audienceLabel: string;
   courses: CurriculumCourse[];
 }
 
@@ -52,12 +55,18 @@ export interface AssignedCourse {
   assignedAt: string; // ISO
 }
 
+const VC: CourseAudience[] = ["vocational_client"];
+const BUSINESS: CourseAudience[] = ["business_client"];
+const PARTNER: CourseAudience[] = ["employment_partner", "agency_partner"];
+const BUSINESS_AND_PARTNER: CourseAudience[] = ["business_client", "employment_partner", "agency_partner"];
+
 /* ── Master Course Catalog ──────────────────────────────────────────── */
 
 export const MASTER_CATALOG: CurriculumModule[] = [
   {
     id: "A",
     title: "Foundations & Adjustment",
+    audienceLabel: "Vocational Clients",
     courses: [
       {
         id: "A1",
@@ -68,6 +77,7 @@ export const MASTER_CATALOG: CurriculumModule[] = [
           "Explores the psychosocial landscape of acquired disability — grief cycles, identity reconstruction, and the development of a strengths-based self-concept that supports vocational engagement.",
         durationMin: 45,
         lessonCount: 5,
+        audiences: VC,
       },
       {
         id: "A2",
@@ -78,144 +88,328 @@ export const MASTER_CATALOG: CurriculumModule[] = [
           "Orients clients to the modern workplace: organizational culture, professional expectations, communication norms, and the unwritten rules that influence success in any industry.",
         durationMin: 38,
         lessonCount: 4,
+        audiences: VC,
       },
       {
         id: "A3",
         module: "A",
         title: "Self-Advocacy & Disability Disclosure",
-        focus: "Knowing your rights under the ADA",
+        focus: "Knowing your rights under the ADA and managing accommodations",
         description:
           "Empowers clients to make informed decisions about disclosure — when, how, and whether to share disability information — while understanding their legal protections under the ADA and Section 504.",
         durationMin: 32,
         lessonCount: 4,
+        audiences: VC,
+      },
+      {
+        id: "A4",
+        module: "A",
+        title: "Overcoming Burnout & Emotional Resilience",
+        focus: "Staying motivated through long-term career placement journeys",
+        description:
+          "Practical resilience strategies for navigating slow placement timelines, rejection fatigue, fluctuating symptoms, and the emotional labor of rebuilding vocational identity.",
+        durationMin: 40,
+        lessonCount: 4,
+        audiences: VC,
+      },
+      {
+        id: "A5",
+        module: "A",
+        title: "Financial Literacy & Benefit Management",
+        focus: "Understanding asset limits, Ticket to Work, and earnings impact",
+        description:
+          "Plain-language benefits education covering asset limits, wage reporting, Ticket to Work, work incentives, and how earned income can be planned without destabilizing essential supports.",
+        durationMin: 45,
+        lessonCount: 5,
+        audiences: VC,
       },
     ],
   },
   {
     id: "B",
     title: "Vocational Exploration & Planning",
+    audienceLabel: "Vocational Clients",
     courses: [
       {
         id: "B1",
         module: "B",
         title: "Assessing Your Transferable Skills",
-        focus: "Identifying existing strengths",
+        focus: "Identifying existing strengths and applying them to new roles",
         description:
-          "Guides clients through a structured inventory of their transferable skills — competencies gained from any life role (work, education, caregiving, volunteering) that translate across industries.",
+          "Guides clients through a structured inventory of transferable skills — competencies gained from work, education, caregiving, volunteering, or lived experience that translate across industries.",
         durationMin: 40,
         lessonCount: 4,
+        audiences: VC,
       },
       {
         id: "B2",
         module: "B",
         title: "Labor Market Navigation",
-        focus: "Understanding high-demand industries and entry requirements",
+        focus: "Understanding high-demand industries, growth sectors, and entry requirements",
         description:
           "Teaches clients to read the labor market: identifying growth industries, evaluating job postings, understanding credential requirements, and localizing opportunity data to their region.",
         durationMin: 35,
         lessonCount: 4,
+        audiences: VC,
       },
       {
         id: "B3",
         module: "B",
-        title: "Goal Setting for Competitive Integrated Employment",
-        focus: "Charting a realistic path to work",
+        title: "Goal Setting for Competitive Integrated Employment (CIE)",
+        focus: "Charting a realistic, actionable path to community work",
         description:
-          "Structured framework for setting SMART vocational goals aligned with Competitive Integrated Employment (CIE) principles — community-based, minimum-wage-or-above, alongside non-disabled peers.",
+          "Structured framework for setting SMART vocational goals aligned with Competitive Integrated Employment principles — community-based, minimum-wage-or-above, alongside non-disabled peers.",
         durationMin: 30,
         lessonCount: 3,
+        audiences: VC,
+      },
+      {
+        id: "B4",
+        module: "B",
+        title: "Navigating Digital Job Portals",
+        focus: "Master modern ATS systems, job boards, and online profiles",
+        description:
+          "Builds confidence with modern job-search infrastructure: applicant tracking systems, online profiles, job alerts, accessible applications, and follow-up workflows.",
+        durationMin: 45,
+        lessonCount: 5,
+        audiences: VC,
+      },
+      {
+        id: "B5",
+        module: "B",
+        title: "Micro-Internships & Gig Work Tracking",
+        focus: "Using project-based work to build a diverse modern resume",
+        description:
+          "Shows clients how to document short-term projects, micro-internships, volunteer work, and gig assignments as credible experience that demonstrates capacity and momentum.",
+        durationMin: 35,
+        lessonCount: 4,
+        audiences: VC,
       },
     ],
   },
   {
     id: "C",
     title: "Work Adjustment & Readiness",
+    audienceLabel: "Vocational Clients",
     courses: [
       {
         id: "C1",
         module: "C",
         title: "Modern Resume & Cover Letter Development",
-        focus: "Tailoring applications to overcome employment gaps",
+        focus: "Tailoring applications to effectively bridge employment gaps",
         description:
           "Builds functional, ATS-optimized resumes that reframe employment gaps as growth narratives, center transferable skills, and align with modern hiring practices.",
         durationMin: 50,
         lessonCount: 5,
+        audiences: VC,
       },
       {
         id: "C2",
         module: "C",
         title: "Interviewing Strategies",
-        focus: "Addressing limitations positively",
+        focus: "Addressing physical or mental limitations positively and confidently",
         description:
           "Practical preparation for behavioral interviews, virtual screenings, and panel formats — including strategies for discussing disability-related gaps with confidence and control.",
         durationMin: 45,
         lessonCount: 5,
+        audiences: VC,
       },
       {
         id: "C3",
         module: "C",
         title: "Soft Skills & Workplace Etiquette",
-        focus: "Communication, conflict resolution, and time management",
+        focus: "Professional communication, conflict resolution, and collaborative teamwork",
         description:
-          "Develops the interpersonal foundation every employer values: active listening, professional communication, constructive conflict resolution, and reliable time management.",
+          "Develops the interpersonal foundation every employer values: active listening, professional communication, constructive conflict resolution, teamwork, and reliable time management.",
         durationMin: 42,
         lessonCount: 4,
+        audiences: VC,
       },
       {
         id: "C4",
         module: "C",
         title: "Digital Literacy Fundamentals",
-        focus: "Using modern workplace software and remote work tools",
+        focus: "Mastery of remote collaboration, communication stacks, and cloud suites",
         description:
-          "Covers the digital competencies expected in today's workplace — email etiquette, video conferencing, shared documents, cloud storage, and cybersecurity basics.",
+          "Covers the digital competencies expected in today's workplace — email etiquette, video conferencing, shared documents, cloud storage, cybersecurity basics, and remote collaboration.",
         durationMin: 55,
         lessonCount: 5,
+        audiences: VC,
+      },
+      {
+        id: "C5",
+        module: "C",
+        title: "Managing Sensory & Focus Challenges at Work",
+        focus: "Environmental hacks, pacing, and ergonomic self-advocacy",
+        description:
+          "Practical strategies for managing sensory load, attention fatigue, executive-function demands, pacing, workspace adaptations, and respectful self-advocacy in varied work environments.",
+        durationMin: 40,
+        lessonCount: 4,
+        audiences: VC,
       },
     ],
   },
   {
     id: "D",
     title: "Specialized Demographic Tracks",
+    audienceLabel: "Vocational Clients",
     courses: [
       {
         id: "D1",
         module: "D",
         title: "The Workers' Compensation Transition",
-        focus: "Navigating return-to-work and role shifting",
+        focus: "Navigating return-to-work protocols, physical limitations, and role shifting",
         description:
-          "Guides individuals through the vocational dimension of workers' compensation: understanding medical clearance, transitioning from physical to sedentary roles, and managing employer relationships during recovery.",
+          "Guides individuals through the vocational dimension of workers' compensation: medical clearance, physical limitations, role transition, and employer relationships during recovery.",
         durationMin: 48,
         lessonCount: 5,
+        audiences: VC,
       },
       {
         id: "D2",
         module: "D",
         title: "Youth Transition to Adulthood",
-        focus: "Moving from school support to independent employment",
+        focus: "Moving from school-based IEP/504 supports to competitive independent employment",
         description:
-          "Supports young adults transitioning from IEP-based school systems to independent employment — building self-determination, understanding adult service systems, and developing workplace identity.",
+          "Supports young adults transitioning from school systems to independent employment — building self-determination, understanding adult services, and developing workplace identity.",
         durationMin: 42,
         lessonCount: 4,
+        audiences: VC,
       },
       {
         id: "D3",
         module: "D",
         title: "Re-entering the Workforce",
-        focus: "Strategies for caregivers or long-term unemployed",
+        focus: "Strategic positioning for returning caregivers, justice-involved individuals, or long-term unemployed",
         description:
-          "Helps individuals who have been out of the labor market — whether from caregiving, health, or circumstance — market their life experience, rebuild professional confidence, and navigate re-entry logistics.",
+          "Helps individuals who have been out of the labor market market their life experience, rebuild professional confidence, and navigate re-entry logistics.",
         durationMin: 38,
         lessonCount: 4,
+        audiences: VC,
       },
       {
         id: "D4",
         module: "D",
         title: "The Mature Worker Advantage",
-        focus: "Combating ageism and updating skills",
+        focus: "Combating ageism, updating digital skillsets, and pivoting fields",
         description:
-          "Reframes age as an asset: strategies for combating ageism, modernizing a decades-long resume, exploring consulting or part-time models, and leveraging deep institutional knowledge.",
+          "Reframes age as an asset: strategies for combating ageism, modernizing a decades-long resume, exploring consulting or part-time models, and leveraging institutional knowledge.",
         durationMin: 35,
         lessonCount: 4,
+        audiences: VC,
+      },
+    ],
+  },
+  {
+    id: "E",
+    title: "Corporate Leadership & Retention",
+    audienceLabel: "Business & Corporate Clients",
+    courses: [
+      {
+        id: "E1",
+        module: "E",
+        title: "Workplace Neurodiversity & Mental Health Inclusion",
+        focus: "Structuring environments for neurodivergent employees and mental health integration",
+        description:
+          "Helps corporate leaders design management practices, communication norms, and environmental supports that sustain neurodivergent employees and normalize behavioral health needs at work.",
+        durationMin: 45,
+        lessonCount: 4,
+        audiences: BUSINESS,
+      },
+      {
+        id: "E2",
+        module: "E",
+        title: "Navigating Reasonable Accommodations Under the ADA",
+        focus: "Practical frameworks for HR to manage accommodation requests seamlessly",
+        description:
+          "A structured HR playbook for intake, documentation, interactive-process meetings, confidentiality boundaries, undue hardship analysis, and respectful implementation of accommodations.",
+        durationMin: 50,
+        lessonCount: 5,
+        audiences: BUSINESS,
+      },
+      {
+        id: "E3",
+        module: "E",
+        title: "Ergonomics & Environmental Universal Design",
+        focus: "Minor structural adjustments that maximize retention and reduce Workers' Comp claims",
+        description:
+          "Shows employers how ergonomic reviews, universal design, task redesign, and early intervention reduce injury risk, improve retention, and support productive return-to-work transitions.",
+        durationMin: 40,
+        lessonCount: 4,
+        audiences: BUSINESS,
+      },
+      {
+        id: "E4",
+        module: "E",
+        title: "De-escalation & Crisis Management for Managers",
+        focus: "Equipping leaders to handle behavioral health crises or acute stress in the workplace",
+        description:
+          "Equips managers with trauma-informed de-escalation scripts, safety planning boundaries, referral pathways, and documentation practices that protect both employees and organizations.",
+        durationMin: 45,
+        lessonCount: 4,
+        audiences: BUSINESS,
+      },
+    ],
+  },
+  {
+    id: "F",
+    title: "Strategic Alliances & Civic Engagement",
+    audienceLabel: "Employment Partners & Agencies",
+    courses: [
+      {
+        id: "F1",
+        module: "F",
+        title: "The Economics of Inclusion: WOTC & Financial Incentives",
+        focus: "Maximizing WOTC and state-subsidized training funds",
+        description:
+          "Explains the Work Opportunity Tax Credit, state-supported training programs, documentation timing, and how inclusive hiring can generate measurable financial and civic value.",
+        durationMin: 40,
+        lessonCount: 4,
+        audiences: BUSINESS_AND_PARTNER,
+      },
+      {
+        id: "F2",
+        module: "F",
+        title: "Social Enterprise & Subcontracting Architecture",
+        focus: "Designing paid work experiences, apprenticeships, and social vendor partnerships",
+        description:
+          "Guides partners through creating scoped, paid work experiences and subcontracting pathways that build resumes, strengthen CSR outcomes, and create sustainable community partnerships.",
+        durationMin: 45,
+        lessonCount: 5,
+        audiences: BUSINESS_AND_PARTNER,
+      },
+      {
+        id: "F3",
+        module: "F",
+        title: "Civic Engagement & Inclusive Workforce Branding",
+        focus: "Positioning your entity as an ethical, civic leader",
+        description:
+          "Shows employers and agencies how community-based workforce development can strengthen brand trust, stakeholder reporting, and public commitments to equity and belonging.",
+        durationMin: 35,
+        lessonCount: 3,
+        audiences: BUSINESS_AND_PARTNER,
+      },
+      {
+        id: "F4",
+        module: "F",
+        title: "Pre-ETS Collaboration for Community Employers",
+        focus: "Building early-stage youth talent pipelines at no raw wage cost",
+        description:
+          "Explains how local employers can partner with agencies to host work-based learning, job exploration, informational interviews, and scaffolded Pre-ETS experiences for young adults.",
+        durationMin: 45,
+        lessonCount: 4,
+        audiences: PARTNER,
+      },
+      {
+        id: "F5",
+        module: "F",
+        title: "The Olmstead Framework & CIE Alignment",
+        focus: "Aligning community-agency and business metrics with federal integration standards",
+        description:
+          "Introduces Olmstead, Competitive Integrated Employment, community integration, and the metrics partners need to ensure programs advance dignity, autonomy, and federal compliance.",
+        durationMin: 50,
+        lessonCount: 5,
+        audiences: PARTNER,
       },
     ],
   },
@@ -239,35 +433,35 @@ export const CLIENT_TYPOLOGIES: ClientTypologyDef[] = [
     label: "Adjustment to a New Disability",
     description:
       "Individuals navigating a recently acquired disability, focusing on psychosocial adjustment and vocational re-orientation.",
-    courseIds: ["A1", "A3", "B1", "C2"],
+    courseIds: ["A1", "A3", "A4", "B1", "C2", "C5", "A5"],
   },
   {
     key: "youth_transition",
     label: "Transitional Youth (School-to-Work)",
     description:
       "Young adults moving from IEP-based school support to independent employment and adult service systems.",
-    courseIds: ["A2", "A3", "B3", "C3", "D2"],
+    courseIds: ["A2", "A3", "B3", "B4", "C3", "C4", "D2"],
   },
   {
     key: "mature_worker",
     label: "Older / Mature Workers",
     description:
       "Experienced workers updating their skills, combating ageism, and exploring alternative employment models.",
-    courseIds: ["B1", "C1", "C4", "D4"],
+    courseIds: ["B1", "B4", "C1", "C4", "D4"],
   },
   {
     key: "caregiver_reentry",
     label: "Caregivers Re-entering the Workforce",
     description:
       "Individuals re-entering the labor market after extended absence for caregiving, health, or other life circumstances.",
-    courseIds: ["B2", "C1", "C3", "D3"],
+    courseIds: ["B2", "B5", "C1", "C3", "D3", "A5"],
   },
   {
     key: "workers_comp",
     label: "Workers' Compensation (Vocational Rehabilitation)",
     description:
       "Individuals in the workers' compensation system navigating return-to-work, role transition, and employer compliance.",
-    courseIds: ["A1", "B1", "B2", "C1", "D1"],
+    courseIds: ["A1", "A4", "B1", "B2", "C1", "C5", "D1"],
   },
 ];
 

@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { loadSession } from "@/lib/session";
 import type { AnyUser, CounselorUser, ClientUser } from "@/lib/users";
-import { CLIENTS, COUNSELORS } from "@/lib/users";
+import { CLIENTS } from "@/lib/users";
 import {
   MASTER_CATALOG,
   COURSE_MAP,
@@ -34,10 +34,35 @@ import {
   type CurriculumCourse,
 } from "@/lib/curriculum";
 
+type ClientWithPhone = ClientUser & { phone: string };
+
+const CLIENT_PHONE_BY_EMAIL: Record<string, string> = {
+  "jordan.hayes@vr.client": "(312) 555-0141",
+  "priya.sharma@vr.client": "(312) 555-0178",
+  "marcus.thomas@vr.client": "(773) 555-0192",
+  "diana.reyes@vr.client": "(708) 555-0114",
+  "leon.washington@vr.client": "(312) 555-0186",
+  "demo.client@pathwayspro.app": "(312) 555-0100",
+  "demo.student@pathwayspro.app": "(773) 555-0125",
+  "demo.entrepreneur@pathwayspro.app": "(708) 555-0138",
+  "client.jobseeker@pathwayspro.app": "(312) 555-0164",
+  "client.student@pathwayspro.app": "(773) 555-0189",
+  "client.entrepreneur@pathwayspro.app": "(708) 555-0156",
+};
+
+function phoneForClient(email: string): string {
+  return CLIENT_PHONE_BY_EMAIL[email] ?? "(312) 555-0101";
+}
+
+function digitsOnly(value: string): string {
+  return value.replace(/\D/g, "");
+}
+
 export default function ClientCurriculumPage() {
   const router = useRouter();
   const [user, setUser] = useState<AnyUser | null>(null);
-  const [clients, setClients] = useState<ClientUser[]>([]);
+  const [clients, setClients] = useState<ClientWithPhone[]>([]);
+  const [clientSearch, setClientSearch] = useState("");
   const [selectedEmail, setSelectedEmail] = useState<string>("");
   const [assignments, setAssignments] = useState<AssignedCourse[]>([]);
   const [typology, setTypology] = useState<ClientTypology | null>(null);
@@ -54,7 +79,11 @@ export default function ClientCurriculumPage() {
     const counselor = s as CounselorUser;
     const clientList = counselor.clientKeys
       .map((key) => CLIENTS[key])
-      .filter(Boolean);
+      .filter(Boolean)
+      .map((client) => ({
+        ...client,
+        phone: phoneForClient(client.email),
+      }));
     setClients(clientList);
     if (clientList.length > 0) {
       setSelectedEmail(clientList[0].email);
@@ -100,6 +129,19 @@ export default function ClientCurriculumPage() {
 
   const assignedIds = new Set(assignments.map((a) => a.courseId));
   const selectedClient = clients.find((c) => c.email === selectedEmail);
+  const normalizedSearch = clientSearch.trim().toLowerCase();
+  const searchDigits = digitsOnly(clientSearch);
+  const filteredClients = clients.filter((client) => {
+    if (!normalizedSearch) return true;
+    const nameMatch = client.name.toLowerCase().includes(normalizedSearch);
+    const phoneMatch =
+      searchDigits.length >= 3 &&
+      digitsOnly(client.phone).includes(searchDigits);
+    return nameMatch || phoneMatch;
+  });
+  const selectedVisible = filteredClients.some(
+    (client) => client.email === selectedEmail,
+  );
 
   if (!user) return null;
 
@@ -128,7 +170,30 @@ export default function ClientCurriculumPage() {
           <h2 className="font-bold text-sm text-ink">Select Client</h2>
         </div>
 
-        <div className="grid sm:grid-cols-2 gap-4">
+        <div className="grid sm:grid-cols-3 gap-4">
+          <div className="space-y-1.5">
+            <label
+              htmlFor="client-search"
+              className="text-xs font-semibold text-ink/60 uppercase tracking-wider"
+            >
+              Search by Name or Phone
+            </label>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink/40" />
+              <input
+                id="client-search"
+                type="search"
+                value={clientSearch}
+                onChange={(e) => setClientSearch(e.target.value)}
+                placeholder="Name or phone..."
+                className="w-full pl-10 pr-4 py-2.5 border border-ink/15 rounded-md text-sm bg-cream/50 focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent"
+              />
+            </div>
+            <p className="text-[11px] text-ink/45">
+              {filteredClients.length} of {clients.length} clients shown
+            </p>
+          </div>
+
           <div className="space-y-1.5">
             <label
               htmlFor="client-select"
@@ -140,13 +205,18 @@ export default function ClientCurriculumPage() {
               <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink/40 pointer-events-none" />
               <select
                 id="client-select"
-                value={selectedEmail}
+                value={selectedVisible ? selectedEmail : ""}
                 onChange={(e) => setSelectedEmail(e.target.value)}
                 className="w-full px-4 py-2.5 border border-ink/15 rounded-md text-sm bg-cream/50 focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent appearance-none"
               >
-                {clients.map((c) => (
+                {!selectedVisible && (
+                  <option value="" disabled>
+                    Select a matching client...
+                  </option>
+                )}
+                {filteredClients.map((c) => (
                   <option key={c.email} value={c.email}>
-                    {c.name} — {c.caseId}
+                    {c.name} — {c.phone} — {c.caseId}
                   </option>
                 ))}
               </select>
@@ -213,9 +283,9 @@ export default function ClientCurriculumPage() {
             <span className="font-semibold text-ink/70">
               {selectedClient.name}
             </span>{" "}
-            — Goal: {selectedClient.goal} — Status: {selectedClient.status} —{" "}
-            {assignments.length} course{assignments.length !== 1 ? "s" : ""}{" "}
-            assigned
+            — Phone: {selectedClient.phone} — Goal: {selectedClient.goal} — Status:{" "}
+            {selectedClient.status} — {assignments.length} course
+            {assignments.length !== 1 ? "s" : ""} assigned
           </div>
         )}
       </div>
