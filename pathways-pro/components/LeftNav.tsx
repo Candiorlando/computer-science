@@ -37,6 +37,7 @@ import {
   UserPlus,
   ShieldCheck,
   ListChecks,
+  Megaphone,
   LogOut,
 } from "lucide-react";
 
@@ -84,6 +85,7 @@ function counselorMenu(unread: number): NavSection[] {
         { href: "/dashboard/financials", label: "Financials (AR/AP)", icon: DollarSign },
         { href: "/dashboard/payments", label: "Payments & Subscriptions", icon: CreditCard },
         { href: "/dashboard/reports", label: "Reports", icon: BarChart3 },
+        { href: "/dashboard/gem-suite", label: "GEM Suite", icon: Megaphone },
         { href: "/dashboard/services-catalog", label: "Service Catalog", icon: Briefcase },
         { href: "/dashboard/client-curriculum", label: "Client Curriculum", icon: BookOpen },
         { href: "/ce", label: "CE Tracker", icon: GraduationCap },
@@ -207,7 +209,7 @@ function roleBadge(role: AnyUser["role"]): { label: string; bg: string } {
   }[role];
 }
 
-/* ── Component ──────────────────────────────────────────────────── */
+/* ── Component ───���──────────────────────────────────────────────── */
 
 export function LeftNav() {
   const router = useRouter();
