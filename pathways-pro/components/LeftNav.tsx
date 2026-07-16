@@ -39,6 +39,7 @@ import {
   ListChecks,
   Megaphone,
   Landmark,
+  LockKeyhole,
   LogOut,
 } from "lucide-react";
 
@@ -96,6 +97,7 @@ function counselorMenu(unread: number): NavSection[] {
     {
       title: "Admin",
       items: [
+        { href: "/admin/master-admin", label: "Master Admin", icon: LockKeyhole },
         { href: "/admin/client-roster", label: "Client Roster", icon: Users },
         { href: "/admin/vendor-directory", label: "Vendor Directory", icon: ListChecks },
         { href: "/admin/approval-queue", label: "Approval Queue", icon: ShieldCheck },

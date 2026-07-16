@@ -189,3 +189,84 @@ export function tenantScope<T extends Record<string, unknown>>(
     tenantId: ctx.tenantId,
   };
 }
+
+export interface TenantCapacitySnapshot {
+  tenantId: string;
+  contractMaxCounselors: number;
+  contractMaxActiveCases: number;
+  activeCounselorCount: number;
+  activeCaseCount: number;
+  remainingCounselorSeats: number;
+  remainingActiveCases: number;
+}
+
+/**
+ * Corporate Master Admin provisioning helper.
+ * Use before adding counselors or active cases to enforce the contract
+ * configured when the state/city/agency/individual tenant was created.
+ */
+export async function getTenantCapacitySnapshot(
+  tenantId: string,
+): Promise<TenantCapacitySnapshot> {
+  const tenant = await prisma.tenant.findUnique({
+    where: { id: tenantId },
+    select: {
+      id: true,
+      contractMaxCounselors: true,
+      contractMaxActiveCases: true,
+    },
+  });
+
+  if (!tenant) throw new TenantAccessError("Tenant not found");
+
+  const [activeCounselorCount, activeCaseCount] = await Promise.all([
+    prisma.tenantMembership.count({
+      where: {
+        tenantId,
+        roleId: SYSTEM_ROLES.TENANT_USER,
+      },
+    }),
+    prisma.tenantClient.count({
+      where: {
+        tenantId,
+        status: { in: ["INTAKE", "ACTIVE"] },
+      },
+    }),
+  ]);
+
+  return {
+    tenantId: tenant.id,
+    contractMaxCounselors: tenant.contractMaxCounselors,
+    contractMaxActiveCases: tenant.contractMaxActiveCases,
+    activeCounselorCount,
+    activeCaseCount,
+    remainingCounselorSeats: Math.max(
+      tenant.contractMaxCounselors - activeCounselorCount,
+      0,
+    ),
+    remainingActiveCases: Math.max(
+      tenant.contractMaxActiveCases - activeCaseCount,
+      0,
+    ),
+  };
+}
+
+export async function assertCanInviteCounselor(tenantId: string) {
+  const capacity = await getTenantCapacitySnapshot(tenantId);
+  if (capacity.remainingCounselorSeats <= 0) {
+    throw new TenantAccessError(
+      "Contracted counselor seat capacity has been reached",
+    );
+  }
+  return capacity;
+}
+
+export async function assertCanCreateActiveCase(tenantId: string) {
+  const capacity = await getTenantCapacitySnapshot(tenantId);
+  if (capacity.remainingActiveCases <= 0) {
+    throw new TenantAccessError(
+      "Contracted active case capacity has been reached",
+    );
+  }
+  return capacity;
+}

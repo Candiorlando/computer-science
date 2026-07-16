@@ -66,6 +66,13 @@ enum TenantStatus {
   ARCHIVED
 }
 
+enum TenantType {
+  STATE_CLIENT
+  CITY_CLIENT
+  AGENCY_CLIENT
+  INDIVIDUAL_COUNSELOR
+}
+
 enum TenantClientStatus {
   INTAKE
   ACTIVE
@@ -104,6 +111,7 @@ model User {
   tenantAssignedClients TenantClient[]     @relation("TenantClientAssignedCounselor")
   tenantCaseloads      TenantCaseload[]    @relation("TenantCaseloadCounselor")
   tenantRecordShares   TenantRecordShare[] @relation("TenantRecordShareUser")
+  tenantAdministrations Tenant[]            @relation("TenantAdministrator")
 
   // Auth.js
   accounts Account[]
@@ -252,6 +260,15 @@ model Tenant {
   name       String
   slug       String       @unique
   status     TenantStatus @default(ACTIVE)
+  tenantType TenantType   @default(AGENCY_CLIENT)
+
+  // Contract limits set by the corporate Master Admin. Tenant admins
+  // may operate only within these agreed counselor/case capacities.
+  contractMaxCounselors Int @default(1)
+  contractMaxActiveCases Int @default(25)
+
+  tenantAdministratorId String?
+  tenantAdministrator   User? @relation("TenantAdministrator", fields: [tenantAdministratorId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -262,6 +279,8 @@ model Tenant {
   recordShares TenantRecordShare[]
 
   @@index([status])
+  @@index([tenantType])
+  @@index([tenantAdministratorId])
 }
 
 model RbacRole {
