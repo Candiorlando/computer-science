@@ -100,6 +100,7 @@ function counselorMenu(unread: number): NavSection[] {
         { href: "/admin/vendor-directory", label: "Vendor Directory", icon: ListChecks },
         { href: "/admin/approval-queue", label: "Approval Queue", icon: ShieldCheck },
         { href: "/admin/user-management", label: "User Management", icon: UserPlus },
+        { href: "/admin/pricing-engine", label: "Pricing Engine", icon: DollarSign },
       ],
     },
     {
