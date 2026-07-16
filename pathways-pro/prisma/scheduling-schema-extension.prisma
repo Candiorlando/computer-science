@@ -173,3 +173,61 @@ model AuditLog {
   @@index([entityType, entityId])
   @@index([actorId, createdAt])
 }
+
+// ─── External calendar sync (Google / Outlook) ────────────────────────
+// Currently tokens live in a short-lived httpOnly cookie (single browser
+// session) — see lib/calendar-cookies.ts. Migrate to this table for
+// server-side sync independent of an open browser (e.g. a nightly job):
+// swap the cookie read/write in app/api/calendar/*/callback and
+// app/api/calendar/sync-event for a lookup/upsert against this model, and
+// encrypt accessToken/refreshToken at the application layer before
+// writing (they are bearer credentials to the counselor's calendar).
+
+enum CalendarProvider {
+  GOOGLE
+  OUTLOOK
+}
+
+model CalendarConnection {
+  id           String           @id @default(cuid())
+  userId       String           // -> User.id (add `calendarConnections CalendarConnection[]` to User)
+  provider     CalendarProvider
+  accessToken  String           // encrypt before persisting
+  refreshToken String?          // encrypt before persisting
+  expiresAt    DateTime
+  connectedAt  DateTime         @default(now())
+
+  @@unique([userId, provider])
+}
+
+// ─── Discovered local events (education / disability / corporate / CE) ─
+// Currently fetched client-side and cached to localStorage (per browser),
+// dismissals tracked per counselor — see lib/discovered-events.ts. Migrate
+// fetching to a server cron (e.g. Vercel Cron hitting /api/events/refresh)
+// writing to this table once real sources (APIs/RSS/iCal) are wired in.
+
+model DiscoveredEvent {
+  id          String   @id @default(cuid())
+  title       String
+  category    String   // "education" | "disability" | "corporate" | "ce"
+  source      String
+  sourceUrl   String
+  startsAt    DateTime
+  endsAt      DateTime
+  location    String
+  description String
+  ceCredits   Float?
+  fetchedAt   DateTime @default(now())
+
+  dismissedBy DiscoveredEventDismissal[]
+}
+
+model DiscoveredEventDismissal {
+  id        String          @id @default(cuid())
+  eventId   String
+  event     DiscoveredEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  userId    String          // -> User.id (counselor who dismissed it)
+  dismissedAt DateTime      @default(now())
+
+  @@unique([eventId, userId])
+}

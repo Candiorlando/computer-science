@@ -94,6 +94,18 @@ export default function BookingCalendar({
       setState("done");
       announce(`Appointment booked for ${fmtDateTime(selected.startsAt, tz)}.`);
       onBooked?.();
+      // Push to any connected external calendar. Best-effort: sync is
+      // optional and must never block or fail the booking itself.
+      fetch("/api/calendar/sync-event", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          title: "Pathways Pro session",
+          description: "Sign in to pathwayspro.app for session details.",
+          startsAt: res.appointment.startsAt,
+          endsAt: res.appointment.endsAt,
+        }),
+      }).catch(() => {});
     } else if (res.error === "slot_unavailable") {
       setState("idle");
       setSelected(null);
