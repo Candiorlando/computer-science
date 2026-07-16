@@ -6,7 +6,7 @@ import { useEffect, useState, type ComponentType } from "react";
 import { clearSession, loadSession } from "@/lib/session";
 import type { AnyUser } from "@/lib/users";
 import { unreadCount } from "@/lib/messages";
-import { isMasterAdmin, canManageBilling } from "@/lib/rbac";
+import { isMasterAdmin, isTenantAdmin, canManageBilling } from "@/lib/rbac";
 import {
   Search,
   ClipboardList,
@@ -62,7 +62,12 @@ interface NavSection {
 
 // ── Counselor / Admin sidebar menu ─────────────────────────────────
 
-function counselorMenu(unread: number, masterAdmin: boolean, billingAccess: boolean): NavSection[] {
+function counselorMenu(
+  unread: number,
+  masterAdmin: boolean,
+  billingAccess: boolean,
+  tenantAdmin: boolean,
+): NavSection[] {
   return [
     {
       items: [
@@ -111,6 +116,12 @@ function counselorMenu(unread: number, masterAdmin: boolean, billingAccess: bool
               { href: "/admin/master-admin", label: "Master Admin", icon: LockKeyhole },
               { href: "/admin/pricing-engine", label: "Pricing Engine", icon: DollarSign },
             ]
+          : []),
+        // Tenant legal/business documents: the tenant admin manages
+        // theirs; master admin can view the contractual relationship
+        // read-only. Ordinary counselors don't see this at all.
+        ...(tenantAdmin || masterAdmin
+          ? [{ href: "/admin/tenant-documents", label: "Agency Documents", icon: FileText }]
           : []),
         { href: "/admin/client-roster", label: "Client Roster", icon: Users },
         { href: "/admin/vendor-directory", label: "Vendor Directory", icon: ListChecks },
@@ -205,7 +216,7 @@ function partnerMenu(unread: number): NavSection[] {
 function sectionsFor(user: AnyUser, unread: number): NavSection[] {
   switch (user.role) {
     case "counselor":
-      return counselorMenu(unread, isMasterAdmin(user), canManageBilling(user));
+      return counselorMenu(unread, isMasterAdmin(user), canManageBilling(user), isTenantAdmin(user));
     case "client":
       return clientMenu(unread);
     case "business":
