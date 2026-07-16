@@ -12,6 +12,7 @@ import {
   UserCog,
   Users,
 } from "lucide-react";
+import MasterAdminGuard from "@/components/MasterAdminGuard";
 
 type TenantType = "State Client" | "City Client" | "Agency Client" | "Individual Counselor";
 
@@ -119,6 +120,7 @@ export default function MasterAdminPage() {
   }
 
   return (
+    <MasterAdminGuard>
     <div className="space-y-6">
       <header className="space-y-3">
         <p className="text-xs uppercase tracking-[0.18em] text-accent font-bold flex items-center gap-2">
@@ -191,6 +193,7 @@ export default function MasterAdminPage() {
         </div>
       </section>
     </div>
+    </MasterAdminGuard>
   );
 }
 

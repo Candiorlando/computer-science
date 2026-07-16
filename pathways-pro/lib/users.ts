@@ -14,6 +14,18 @@ export interface CounselorUser {
   employeeId: string;
   role: "counselor";
   clientKeys: string[];
+  // Platform-level administrator flag — grants access to master-admin-only
+  // tools (tenant provisioning, pricing engine). Distinct from ordinary
+  // counselor/agency-admin duties: a platform Super Admin manages the
+  // business/contract layer and must NOT read client or provider PHI
+  // (case notes, assessments, IPEs) unless separately granted a normal
+  // counselor account for that purpose. See lib/rbac.ts isMasterAdmin().
+  platformAccess?: "SUPER_ADMIN";
+  // Multi-tenant scoping — which agency/tenant this counselor belongs to,
+  // and their role within it. Absent tenantId = legacy/ungrouped demo
+  // counselor (pre-dates the multi-tenant model). See lib/tenants.ts.
+  tenantId?: string;
+  tenantRole?: "TENANT_ADMIN" | "TENANT_USER";
 }
 
 export interface ClientUser {
@@ -42,6 +54,9 @@ export interface BusinessUser {
   orgId: string;
   orgName: string;
   role: "business";
+  // Which agency/tenant manages this business client relationship.
+  // Absent = legacy/ungrouped (pre-dates the multi-tenant model).
+  tenantId?: string;
 }
 
 export type VendorType =
@@ -95,6 +110,57 @@ export type AnyUser =
   | EmploymentPartnerUser;
 
 export const COUNSELORS: Record<string, CounselorUser> = {
+  "master.admin@pathwayspro.app": {
+    email: "master.admin@pathwayspro.app",
+    password: "MasterAdmin1!",
+    name: "Platform Master Admin",
+    credentials: "Platform Administrator",
+    office: "Corporate HQ",
+    agency: "Pathways Pro (Platform)",
+    employeeId: "#001",
+    role: "counselor",
+    clientKeys: [],
+    platformAccess: "SUPER_ADMIN",
+  },
+  "tenantadmin.chicagometro@pathwayspro.app": {
+    email: "tenantadmin.chicagometro@pathwayspro.app",
+    password: "TenantAdmin1!",
+    name: "Renee Okafor",
+    credentials: "CRC · Tenant Administrator",
+    office: "Chicago Metro HQ",
+    agency: "Chicago Metro Rehabilitation Agency",
+    employeeId: "#CM-001",
+    role: "counselor",
+    clientKeys: [],
+    tenantId: "tenant-chicago-metro",
+    tenantRole: "TENANT_ADMIN",
+  },
+  "counselor.chicagometro@pathwayspro.app": {
+    email: "counselor.chicagometro@pathwayspro.app",
+    password: "TenantUser1!",
+    name: "Marcus Delgado",
+    credentials: "CRC",
+    office: "Chicago Metro — South Loop",
+    agency: "Chicago Metro Rehabilitation Agency",
+    employeeId: "#CM-014",
+    role: "counselor",
+    clientKeys: ["client.chicagometro@pathwayspro.app"],
+    tenantId: "tenant-chicago-metro",
+    tenantRole: "TENANT_USER",
+  },
+  "tenantadmin.lakeshore@pathwayspro.app": {
+    email: "tenantadmin.lakeshore@pathwayspro.app",
+    password: "TenantAdmin1!",
+    name: "Priya Nandakumar",
+    credentials: "CRC · Tenant Administrator",
+    office: "Lakeshore HQ",
+    agency: "Lakeshore Vocational Services",
+    employeeId: "#LS-001",
+    role: "counselor",
+    clientKeys: ["client.lakeshore@pathwayspro.app"],
+    tenantId: "tenant-lakeshore",
+    tenantRole: "TENANT_ADMIN",
+  },
   "candace.metcalf@pathwayspro.app": {
     email: "candace.metcalf@pathwayspro.app",
     password: "CRC2026!",
@@ -189,6 +255,34 @@ export const COUNSELORS: Record<string, CounselorUser> = {
 };
 
 export const CLIENTS: Record<string, ClientUser> = {
+  "client.chicagometro@pathwayspro.app": {
+    email: "client.chicagometro@pathwayspro.app",
+    password: "TenantClient1!",
+    name: "Aisha Bell",
+    dob: "1998-04-12",
+    caseId: "CM-2026-0007",
+    counselorEmail: "counselor.chicagometro@pathwayspro.app",
+    counselorName: "Marcus Delgado, CRC",
+    goal: "Administrative Support",
+    status: "In Training",
+    progress: 55,
+    role: "client",
+    nextAppt: "July 22, 2026",
+  },
+  "client.lakeshore@pathwayspro.app": {
+    email: "client.lakeshore@pathwayspro.app",
+    password: "TenantClient1!",
+    name: "Devon Marsh",
+    dob: "1990-09-03",
+    caseId: "LS-2026-0003",
+    counselorEmail: "tenantadmin.lakeshore@pathwayspro.app",
+    counselorName: "Priya Nandakumar, CRC",
+    goal: "Skilled Trades",
+    status: "Intake",
+    progress: 10,
+    role: "client",
+    nextAppt: "July 18, 2026",
+  },
   "jordan.hayes@vr.client": {
     email: "jordan.hayes@vr.client",
     password: "client1234",
@@ -385,6 +479,17 @@ export function authenticate(
 // to localStorage and merge on top of the seed.
 
 export const BUSINESS_USERS_SEED: Record<string, BusinessUser> = {
+  "hr.metrofoods@pathwayspro.app": {
+    email: "hr.metrofoods@pathwayspro.app",
+    password: "TenantBiz1!",
+    name: "Nora Fitzgerald",
+    title: "Director of HR",
+    scopeRole: "hr_director",
+    orgId: "org-metro-foods",
+    orgName: "Metro Foods Distribution",
+    role: "business",
+    tenantId: "tenant-chicago-metro",
+  },
   "aisha.hassan@acmelogistics.com": {
     email: "aisha.hassan@acmelogistics.com",
     password: "demo1234",

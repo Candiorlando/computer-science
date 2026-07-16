@@ -22,9 +22,9 @@ interface NavTab {
   icon: React.ReactNode;
 }
 
-function tabsForRole(role: AnyUser["role"]): NavTab[] {
+function tabsForRole(user: AnyUser): NavTab[] {
   // All non-admin roles get the simplified tab set
-  const home = dashboardRoute(role);
+  const home = dashboardRoute(user);
   return [
     { href: home, label: "Home", icon: <CalendarDays className="w-4 h-4" /> },
     {
@@ -63,7 +63,7 @@ export function ClientTopNav() {
 
   if (!user) return null;
 
-  const tabs = tabsForRole(user.role);
+  const tabs = tabsForRole(user);
   const badge = ROLE_LABELS[user.role] || user.role;
 
   function signOut() {
@@ -77,7 +77,7 @@ export function ClientTopNav() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link
-            href={dashboardRoute(user.role)}
+            href={dashboardRoute(user)}
             className="text-lg tracking-tight font-semibold text-ink flex-shrink-0"
           >
             Pathways Pro
