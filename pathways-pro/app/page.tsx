@@ -27,7 +27,7 @@ export default function HomePage() {
   useEffect(() => {
     setMounted(true);
     const u = loadSession();
-    if (u) router.replace(dashboardRoute(u.role));
+    if (u) router.replace(dashboardRoute(u));
   }, [router]);
 
   if (!mounted) return null;

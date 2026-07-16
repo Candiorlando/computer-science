@@ -10,6 +10,8 @@ import {
   type ClientUser,
   type CounselorUser,
 } from "@/lib/users";
+import { visibleCounselorsFor } from "@/lib/tenants";
+import { isMasterAdmin } from "@/lib/rbac";
 
 type SortKey = "caseId" | "name";
 
@@ -23,12 +25,25 @@ export default function CaseloadPage() {
     const s = loadSession();
     if (!s) return router.replace("/");
     if (s.role !== "counselor") return router.replace("/portal");
+    if (isMasterAdmin(s)) return router.replace("/admin/master-admin");
     setUser(s);
   }, [router]);
 
   const clients = useMemo(() => {
     if (!user) return [];
-    const roster = getCounselorClients(user);
+    // Tenant Admins see their whole agency's caseload; Tenant Users and
+    // solopreneurs see only their own (visibleCounselorsFor returns just
+    // [user] for those, so this is a no-op expansion for them).
+    const seen = new Set<string>();
+    const roster: ClientUser[] = [];
+    for (const c of visibleCounselorsFor(user)) {
+      for (const client of getCounselorClients(c)) {
+        if (!seen.has(client.email)) {
+          seen.add(client.email);
+          roster.push(client);
+        }
+      }
+    }
     const sorted =
       sortKey === "name"
         ? [...roster].sort((a, b) => {

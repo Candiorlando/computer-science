@@ -106,6 +106,20 @@ export const DEMO_PERSONAS: DemoPersona[] = [
     authRole: "counselor",
   },
   {
+    label: "Tenant Administrator (Agency)",
+    description: "Manages one agency's own counselors, clients, pricing, contract, and billing — Chicago Metro Rehabilitation Agency",
+    email: "tenantadmin.chicagometro@pathwayspro.app",
+    password: "TenantAdmin1!",
+    authRole: "counselor",
+  },
+  {
+    label: "Agency Counselor (tenant-scoped)",
+    description: "Employed under a tenant agency — sees only that agency's caseload, no billing access",
+    email: "counselor.chicagometro@pathwayspro.app",
+    password: "TenantUser1!",
+    authRole: "counselor",
+  },
+  {
     label: "Counselor",
     description: "Full caseload, IPE drafting, assessments, and case management",
     email: "demo.counselor@pathwayspro.app",
@@ -167,9 +181,47 @@ export function isMasterAdmin(user: AnyUser | null | undefined): boolean {
   return !!user && user.role === "counselor" && user.platformAccess === "SUPER_ADMIN";
 }
 
+/** True for a tenant's administrator — provisions counselors/clients within
+ *  their own agency, manages the tenant's contract/legal documents and
+ *  service pricing, and is the one who sets up Stripe to receive payment
+ *  on the tenant's behalf. */
+export function isTenantAdmin(user: AnyUser | null | undefined): boolean {
+  return (
+    !!user &&
+    user.role === "counselor" &&
+    !isMasterAdmin(user) &&
+    user.tenantRole === "TENANT_ADMIN"
+  );
+}
+
+/** True for an independent counselor with no agency — handles their own
+ *  billing directly, same as a tenant admin would for their agency. */
+export function isSolopreneur(user: AnyUser | null | undefined): boolean {
+  return (
+    !!user &&
+    user.role === "counselor" &&
+    !isMasterAdmin(user) &&
+    !user.tenantId
+  );
+}
+
+/**
+ * Who may set up and manage Stripe / accounts receivable: the tenant
+ * admin (billing for the whole agency) or a solopreneur (billing for
+ * themselves). Ordinary tenant-affiliated counselors do not — their
+ * tenant admin's account handles billing centrally. The platform Master
+ * Admin is excluded too: that account manages Pathways Pro's own
+ * corporate pricing with tenants, not any tenant's receivables from its
+ * clients.
+ */
+export function canManageBilling(user: AnyUser | null | undefined): boolean {
+  return isTenantAdmin(user) || isSolopreneur(user);
+}
+
 /** Default landing route after login for each role. */
-export function dashboardRoute(role: Role): string {
-  switch (role) {
+export function dashboardRoute(user: AnyUser): string {
+  if (isMasterAdmin(user)) return "/admin/master-admin";
+  switch (user.role) {
     case "counselor":
       return "/case-search";
     case "client":

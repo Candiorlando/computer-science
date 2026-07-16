@@ -10,6 +10,8 @@ import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { loadSession } from "@/lib/session";
 import type { CounselorUser } from "@/lib/users";
+import { visibleCounselorsFor } from "@/lib/tenants";
+import { isMasterAdmin } from "@/lib/rbac";
 import {
   CLIENTS,
   getAllBusinessUsers,
@@ -69,6 +71,9 @@ function CaseSearchInner() {
     const s = loadSession();
     if (!s) return router.replace("/");
     if (s.role !== "counselor") return router.replace("/portal");
+    // Platform Master Admin manages tenants/pricing, not client PHI —
+    // never lands on a case list, even by direct navigation.
+    if (isMasterAdmin(s)) return router.replace("/admin/master-admin");
     seedDemoAccounts();
     setUser(s);
   }, [router]);
@@ -297,8 +302,16 @@ function buildCaseList(user: CounselorUser | null): CaseRow[] {
   const allNotes = loadCaseNotes();
   const threads = threadsForUser(user.email);
 
+  // Tenant isolation: a Tenant Admin sees every counselor's caseload
+  // within their own agency; a Tenant User or solopreneur sees only
+  // their own. visibleCounselorsFor(user) returns just [user] for the
+  // latter two, so this is a no-op expansion for them.
+  const clientKeys = new Set(
+    visibleCounselorsFor(user).flatMap((c) => c.clientKeys),
+  );
+
   // Clients
-  for (const k of user.clientKeys) {
+  for (const k of clientKeys) {
     const c = CLIENTS[k];
     if (!c) continue;
     const noteCount = allNotes.filter((n) => n.clientCaseId === c.caseId)
@@ -334,8 +347,16 @@ function buildCaseList(user: CounselorUser | null): CaseRow[] {
     });
   }
 
-  // Business clients
+  // Business clients — tenant-tagged business clients are visible only
+  // within their own tenant; untagged/legacy ones remain visible to
+  // solopreneurs (no tenant) exactly as before, but are hidden from any
+  // tenant-scoped counselor to keep isolation strict and provable.
   for (const b of Object.values(getAllBusinessUsers())) {
+    if (user.tenantId) {
+      if (b.tenantId !== user.tenantId) continue;
+    } else if (b.tenantId) {
+      continue;
+    }
     const thread = threads.find((t) =>
       t.participants.some((p) => p.email === b.email),
     );

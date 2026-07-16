@@ -6,7 +6,7 @@ import { useEffect, useState, type ComponentType } from "react";
 import { clearSession, loadSession } from "@/lib/session";
 import type { AnyUser } from "@/lib/users";
 import { unreadCount } from "@/lib/messages";
-import { isMasterAdmin } from "@/lib/rbac";
+import { isMasterAdmin, canManageBilling } from "@/lib/rbac";
 import {
   Search,
   ClipboardList,
@@ -62,7 +62,7 @@ interface NavSection {
 
 // ── Counselor / Admin sidebar menu ─────────────────────────────────
 
-function counselorMenu(unread: number, masterAdmin: boolean): NavSection[] {
+function counselorMenu(unread: number, masterAdmin: boolean, billingAccess: boolean): NavSection[] {
   return [
     {
       items: [
@@ -86,7 +86,12 @@ function counselorMenu(unread: number, masterAdmin: boolean): NavSection[] {
         { href: "/dashboard/forensic", label: "Forensic", icon: Scale },
         { href: "/dashboard/daily-briefing", label: "Daily Briefing", icon: Newspaper },
         { href: "/dashboard/financials", label: "Financials (AR/AP)", icon: DollarSign },
-        { href: "/dashboard/payments", label: "Payments & Subscriptions", icon: CreditCard },
+        // Stripe/AR setup: tenant admins bill for their whole agency;
+        // solopreneurs (no tenant) bill for themselves. Ordinary
+        // tenant-affiliated counselors don't manage billing at all.
+        ...(billingAccess
+          ? [{ href: "/dashboard/payments", label: "Payments & Subscriptions", icon: CreditCard }]
+          : []),
         { href: "/dashboard/reports", label: "Reports", icon: BarChart3 },
         { href: "/dashboard/gem-suite", label: "GEM Suite", icon: Megaphone },
         { href: "/dashboard/wioa-compliance-suite", label: "WIOA Compliance", icon: Landmark },
@@ -200,7 +205,7 @@ function partnerMenu(unread: number): NavSection[] {
 function sectionsFor(user: AnyUser, unread: number): NavSection[] {
   switch (user.role) {
     case "counselor":
-      return counselorMenu(unread, isMasterAdmin(user));
+      return counselorMenu(unread, isMasterAdmin(user), canManageBilling(user));
     case "client":
       return clientMenu(unread);
     case "business":

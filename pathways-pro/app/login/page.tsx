@@ -158,7 +158,7 @@ function LoginForm() {
     if (foundUser.role === "counselor" || foundUser.role === "client") {
       saveMode(foundUser.role);
     }
-    router.push(dashboardRoute(foundUser.role));
+    router.push(dashboardRoute(foundUser));
   }
 
   return (
@@ -382,7 +382,7 @@ function DemoModeCard() {
     if (user.role === "counselor" || user.role === "client") {
       saveMode(user.role);
     }
-    router.push(dashboardRoute(user.role));
+    router.push(dashboardRoute(user));
   }
 
   return (

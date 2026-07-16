@@ -10,6 +10,8 @@
 
 import { useEffect, useState } from "react";
 import { EmbeddedOnboarding } from "@/components/EmbeddedOnboarding";
+import AccessGuard from "@/components/AccessGuard";
+import { canManageBilling } from "@/lib/rbac";
 
 const STORAGE_KEY = "pathways-pro:stripe-demo-v1";
 
@@ -167,6 +169,11 @@ export default function PaymentsPage() {
   ];
 
   return (
+    <AccessGuard
+      check={canManageBilling}
+      title="Billing setup is managed by your tenant administrator"
+      message="Accounts receivable and Stripe onboarding are handled centrally by your agency's tenant administrator, or directly by you if you operate as an independent (solopreneur) counselor. Contact your tenant administrator if you need a payment set up."
+    >
     <div className="space-y-8 pb-8">
       <header className="space-y-3 max-w-3xl">
         <p className="inline-block text-xs uppercase tracking-widest text-accent bg-accent/10 px-3 py-1 rounded-full">
@@ -244,5 +251,6 @@ export default function PaymentsPage() {
         in this browser so the demo survives serverless restarts.
       </p>
     </div>
+    </AccessGuard>
   );
 }
