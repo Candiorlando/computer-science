@@ -3,49 +3,48 @@
 @tailwind utilities;
 
 html, body {
-  background: #F5F2E9;
-  color: #1c211e;
+  background: #F8F9FA;
+  color: #2D3748;
 }
 
 .prose-narrow {
   max-width: 65ch;
 }
 
-/* Elegant deep-green → mint gradient with a gold cast at the tail. Class
-   name kept for compatibility with existing components (was teal→blue). */
+/* Deep-teal → sage gradient used across nav highlights and badges */
 .grad-tealblue {
-  background-image: linear-gradient(135deg, #0E5A46 0%, #2E9E7E 60%, #B8892B 130%);
+  background-image: linear-gradient(135deg, #0F4C5C 0%, #1A6B7F 60%, #9CB4A6 130%);
 }
 .grad-tealblue-soft {
-  background-image: linear-gradient(135deg, rgba(15,107,84,0.10) 0%, rgba(46,158,126,0.10) 55%, rgba(184,137,43,0.10) 100%);
+  background-image: linear-gradient(135deg, rgba(15,76,92,0.10) 0%, rgba(26,107,127,0.10) 55%, rgba(156,180,166,0.10) 100%);
 }
 .text-grad-tealblue {
-  background-image: linear-gradient(90deg, #0F6B54 0%, #2E9E7E 55%, #B8892B 100%);
+  background-image: linear-gradient(90deg, #0F4C5C 0%, #1A6B7F 55%, #4CAF50 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
 .ring-tealblue {
-  box-shadow: 0 0 0 2px rgba(15, 107, 84, 0.4);
+  box-shadow: 0 0 0 2px rgba(15, 76, 92, 0.4);
 }
 
 /* Rounded card used across dashboards and marketing pages. */
 .saas-card {
   background: #ffffff;
-  border: 1px solid rgba(28, 33, 30, 0.10);
+  border: 1px solid rgba(45, 55, 72, 0.10);
   border-radius: 14px;
   padding: 1.25rem;
-  box-shadow: 0 1px 2px rgba(28, 33, 30, 0.04);
+  box-shadow: 0 1px 2px rgba(45, 55, 72, 0.04);
 }
 .saas-card:hover {
-  border-color: rgba(184, 137, 43, 0.5); /* gold on hover */
-  box-shadow: 0 4px 14px rgba(28, 33, 30, 0.07);
+  border-color: rgba(15, 76, 92, 0.4);
+  box-shadow: 0 4px 14px rgba(45, 55, 72, 0.07);
 }
 
-/* Media blocks used on the public Careers / Course pages. */
+/* Media blocks */
 .infographic {
   margin: 1.25rem 0;
-  border: 1px solid rgba(28, 33, 30, 0.12);
+  border: 1px solid rgba(45, 55, 72, 0.12);
   border-radius: 14px;
   overflow: hidden;
   background: #ffffff;
@@ -58,8 +57,8 @@ html, body {
 .infographic figcaption {
   padding: 0.75rem 1rem;
   font-size: 0.875rem;
-  color: rgba(28, 33, 30, 0.65);
-  border-top: 1px solid rgba(28, 33, 30, 0.10);
+  color: rgba(45, 55, 72, 0.65);
+  border-top: 1px solid rgba(45, 55, 72, 0.10);
 }
 .videogrid {
   display: grid;
@@ -71,8 +70,18 @@ html, body {
   width: 100%;
   height: auto;
   border-radius: 12px;
-  border: 1px solid rgba(28, 33, 30, 0.12);
-  background: #0E5A46;
+  border: 1px solid rgba(45, 55, 72, 0.12);
+  background: #0F4C5C;
+}
+
+/* Circular progress indicator for the metrics widget */
+.metric-ring {
+  transform: rotate(-90deg);
+}
+.metric-ring circle {
+  fill: none;
+  stroke-width: 8;
+  stroke-linecap: round;
 }
 
 /* ── Print: force printable documents back to black-on-white ── */
@@ -90,4 +99,19 @@ html, body {
     text-shadow: none !important;
     box-shadow: none !important;
   }
+}
+
+.form-field {
+  width: 100%;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(45, 55, 72, 0.15);
+  background: rgba(248, 249, 250, 0.7);
+  padding: 0.625rem 0.75rem;
+  font-size: 0.875rem;
+  color: #2D3748;
+  outline: none;
+}
+.form-field:focus {
+  border-color: #0F4C5C;
+  box-shadow: 0 0 0 2px rgba(15, 76, 92, 0.18);
 }
