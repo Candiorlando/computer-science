@@ -38,6 +38,7 @@ import {
   ShieldCheck,
   ListChecks,
   Megaphone,
+  Landmark,
   LogOut,
 } from "lucide-react";
 
@@ -86,6 +87,7 @@ function counselorMenu(unread: number): NavSection[] {
         { href: "/dashboard/payments", label: "Payments & Subscriptions", icon: CreditCard },
         { href: "/dashboard/reports", label: "Reports", icon: BarChart3 },
         { href: "/dashboard/gem-suite", label: "GEM Suite", icon: Megaphone },
+        { href: "/dashboard/wioa-compliance-suite", label: "WIOA Compliance", icon: Landmark },
         { href: "/dashboard/services-catalog", label: "Service Catalog", icon: Briefcase },
         { href: "/dashboard/client-curriculum", label: "Client Curriculum", icon: BookOpen },
         { href: "/ce", label: "CE Tracker", icon: GraduationCap },

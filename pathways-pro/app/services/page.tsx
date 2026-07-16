@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -13,13 +12,6 @@ import {
   Accessibility,
   ChevronRight,
   Lock,
-  Brain,
-  DollarSign,
-  Clock,
-  FolderSearch,
-  BarChart3,
-  ChevronDown,
-  Sparkles,
 } from "lucide-react";
 import type { ComponentType } from "react";
 
@@ -119,7 +111,6 @@ export default function ServicesPage() {
     <div className="-mx-6 -mt-10 mb-[-2rem]">
       <HeroSection />
       <PillarGrid />
-      <WioaComplianceSuite />
       <PlatformTieIn />
     </div>
   );
@@ -251,192 +242,6 @@ function PillarCard({
         </p>
       </div>
     </article>
-  );
-}
-
-/* ═══════════════════════════════════════════════════════════════════
-   WIOA & STATE GRANT COMPLIANCE SUITE
-   ═══════════════════════════════════════════════════════════════════ */
-
-interface ComplianceSolution {
-  icon: LucideIcon;
-  id: string;
-  headline: string;
-  title: string;
-  capability: string;
-  accent: string;
-  accentBg: string;
-}
-
-const COMPLIANCE_SOLUTIONS: ComplianceSolution[] = [
-  {
-    icon: Brain,
-    id: "note-parser",
-    headline: "Clinical Narrative to Compliance Mapping",
-    title: 'AI "Note-to-Metric" Progress Note Parser',
-    capability:
-      "Our integrated AI natural language processing engine scans regular clinical case notes written by counselors, automatically extracting and mapping required activities to official Illinois workNet and WIOA service categories — matching a resume review note directly to Pre-ETS Workplace Readiness, a job-site visit to Work-Based Learning, or a benefits discussion to Counseling on Post-Secondary opportunities.",
-    accent: "text-violet-700",
-    accentBg: "bg-violet-50",
-  },
-  {
-    icon: DollarSign,
-    id: "billing-generator",
-    headline: "One-Click IDHS-DRS Roster Compilations",
-    title: "Automated Milestone & Phase Billing Generator",
-    capability:
-      "Eliminates manual Excel tracking. The system dynamically tracks participant retention timelines (15, 45, 90-day targets) against the calendar, auto-generating perfectly formatted, audit-ready IDHS-DRS Monthly Group Billing Sheets the moment a milestone is achieved. Counselors review and submit — never reconstruct.",
-    accent: "text-emerald-700",
-    accentBg: "bg-emerald-50",
-  },
-  {
-    icon: Clock,
-    id: "preets-tracker",
-    headline: "Federal Mandate Allocation Safeguards",
-    title: "Pre-ETS Core Activity Time-Tracker",
-    capability:
-      "A specialized tracking matrix for youth transition programs. It ensures every minute of service is explicitly logged under one of the five mandated Pre-ETS categories (Job Exploration, Counseling on Post-Secondary, Workplace Readiness, Work-Based Learning, Self-Advocacy), giving agencies ironclad proof of fund utilization during federal reviews.",
-    accent: "text-sky-700",
-    accentBg: "bg-sky-50",
-  },
-  {
-    icon: FolderSearch,
-    id: "gata-centralizer",
-    headline: "Risk Mitigation & Structural Compliance",
-    title: "GATA Audit-Ready Document Centralizer",
-    capability:
-      "A role-based, secure file repository built explicitly to survive strict Illinois Grant Accountability and Transparency Act (GATA) reviews. It links eligibility verifications, employer paystubs, and Individual Plans for Employment (IPEs) directly to case profiles with randomized sampling views for external auditors — structured so every document is exactly where an auditor expects it.",
-    accent: "text-amber-700",
-    accentBg: "bg-amber-50",
-  },
-  {
-    icon: BarChart3,
-    id: "wioa-analytics",
-    headline: "Real-Time Predictive Performance Metrics",
-    title: "WIOA Performance Indicator Analytics",
-    capability:
-      "Tracks the crucial federal indicators of performance (Median Earnings, 2nd & 4th Quarter Employment/Education Retention, and Measurable Skill Gains) long after a participant exits, ensuring the agency maintains the optimal scoring required to secure consecutive state funding rounds. Predictive trend lines flag at-risk metrics before they impact your next grant cycle.",
-    accent: "text-rose-700",
-    accentBg: "bg-rose-50",
-  },
-];
-
-function WioaComplianceSuite() {
-  const [expandedId, setExpandedId] = useState<string | null>(null);
-
-  function toggle(id: string) {
-    setExpandedId((prev) => (prev === id ? null : id));
-  }
-
-  return (
-    <section className="bg-white border-y border-ink/8">
-      <div className="max-w-7xl mx-auto px-6 py-20 md:py-24 space-y-12">
-        {/* Section header */}
-        <header className="max-w-3xl mx-auto text-center space-y-4">
-          <div className="inline-flex items-center gap-2 bg-violet-50 text-violet-700 text-xs uppercase tracking-[0.2em] font-bold px-4 py-1.5 rounded-full">
-            <Sparkles className="w-3.5 h-3.5" />
-            AI-Powered Compliance
-          </div>
-          <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-ink">
-            WIOA &amp; State Grant Compliance Suite
-          </h2>
-          <p className="text-ink/60 leading-relaxed">
-            Five integrated, AI-powered solutions that transform manual
-            compliance workflows into automated, audit-ready systems —
-            protecting your state funding and freeing counselors to focus
-            on what matters.
-          </p>
-        </header>
-
-        {/* Solution grid: 3 top, 2 bottom centered */}
-        <div className="space-y-5">
-          <div className="grid md:grid-cols-3 gap-5">
-            {COMPLIANCE_SOLUTIONS.slice(0, 3).map((sol) => (
-              <ComplianceCard
-                key={sol.id}
-                solution={sol}
-                isExpanded={expandedId === sol.id}
-                onToggle={() => toggle(sol.id)}
-              />
-            ))}
-          </div>
-          <div className="grid md:grid-cols-2 gap-5 max-w-4xl mx-auto">
-            {COMPLIANCE_SOLUTIONS.slice(3).map((sol) => (
-              <ComplianceCard
-                key={sol.id}
-                solution={sol}
-                isExpanded={expandedId === sol.id}
-                onToggle={() => toggle(sol.id)}
-              />
-            ))}
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function ComplianceCard({
-  solution,
-  isExpanded,
-  onToggle,
-}: {
-  solution: ComplianceSolution;
-  isExpanded: boolean;
-  onToggle: () => void;
-}) {
-  const Icon = solution.icon;
-
-  return (
-    <button
-      type="button"
-      onClick={onToggle}
-      className={`w-full text-left bg-white border rounded-2xl transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 ${
-        isExpanded
-          ? "border-ink/20 shadow-md ring-1 ring-ink/5"
-          : "border-ink/8 hover:border-ink/15"
-      }`}
-    >
-      {/* Header — always visible */}
-      <div className="p-6 space-y-4">
-        <div className="flex items-start justify-between gap-3">
-          <div
-            className={`w-11 h-11 rounded-xl ${solution.accentBg} grid place-items-center flex-shrink-0`}
-          >
-            <Icon className={`w-5 h-5 ${solution.accent}`} />
-          </div>
-          <ChevronDown
-            className={`w-5 h-5 text-ink/30 flex-shrink-0 mt-1 transition-transform duration-300 ${
-              isExpanded ? "rotate-180" : ""
-            }`}
-          />
-        </div>
-
-        <div className="space-y-1.5">
-          <h3 className="font-bold text-[15px] text-ink leading-snug tracking-tight">
-            {solution.title}
-          </h3>
-          <p className={`text-xs font-semibold ${solution.accent}`}>
-            {solution.headline}
-          </p>
-        </div>
-      </div>
-
-      {/* Expandable capability body */}
-      <div
-        className={`overflow-hidden transition-all duration-300 ${
-          isExpanded ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
-        }`}
-      >
-        <div className="px-6 pb-6 pt-0">
-          <div className="border-t border-ink/8 pt-4">
-            <p className="text-sm text-ink/65 leading-relaxed">
-              {solution.capability}
-            </p>
-          </div>
-        </div>
-      </div>
-    </button>
   );
 }
 
