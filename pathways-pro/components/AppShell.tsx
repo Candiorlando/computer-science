@@ -36,6 +36,7 @@ const PUBLIC_PREFIXES = [
   "/login",
   "/claim-account",
   "/services",
+  "/partners",
 ];
 
 function isPublicPath(pathname: string): boolean {
