@@ -11,7 +11,8 @@ import type { ClientUser } from "@/lib/users";
 import BookingCalendar from "@/components/BookingCalendar";
 import AppointmentList from "@/components/AppointmentList";
 import CounselorMatch from "@/components/CounselorMatch";
-import type { Appointment } from "@/lib/scheduling";
+import CalendarExport from "@/components/CalendarExport";
+import { appointmentsForUser, type Appointment } from "@/lib/scheduling";
 
 export default function ClientAppointmentsPage() {
   const router = useRouter();
@@ -87,6 +88,16 @@ export default function ClientAppointmentsPage() {
           key={refresh}
           userEmail={user.email}
           role="client"
+          counterpartLabel={counterpartLabel}
+        />
+      </section>
+
+      <section aria-label="Sync to your calendar">
+        <h2 className="text-lg font-semibold mb-3">Add to your calendar</h2>
+        <CalendarExport
+          key={refresh}
+          appointments={appointmentsForUser(user.email)}
+          calendarName={`${user.name} — Pathways Pro`}
           counterpartLabel={counterpartLabel}
         />
       </section>
