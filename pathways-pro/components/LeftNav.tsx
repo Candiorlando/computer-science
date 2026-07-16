@@ -37,6 +37,9 @@ import {
   UserPlus,
   ShieldCheck,
   ListChecks,
+  Megaphone,
+  Landmark,
+  LockKeyhole,
   LogOut,
 } from "lucide-react";
 
@@ -84,17 +87,22 @@ function counselorMenu(unread: number): NavSection[] {
         { href: "/dashboard/financials", label: "Financials (AR/AP)", icon: DollarSign },
         { href: "/dashboard/payments", label: "Payments & Subscriptions", icon: CreditCard },
         { href: "/dashboard/reports", label: "Reports", icon: BarChart3 },
+        { href: "/dashboard/gem-suite", label: "GEM Suite", icon: Megaphone },
+        { href: "/dashboard/wioa-compliance-suite", label: "WIOA Compliance", icon: Landmark },
         { href: "/dashboard/services-catalog", label: "Service Catalog", icon: Briefcase },
+        { href: "/dashboard/client-curriculum", label: "Client Curriculum", icon: BookOpen },
         { href: "/ce", label: "CE Tracker", icon: GraduationCap },
       ],
     },
     {
       title: "Admin",
       items: [
+        { href: "/admin/master-admin", label: "Master Admin", icon: LockKeyhole },
         { href: "/admin/client-roster", label: "Client Roster", icon: Users },
         { href: "/admin/vendor-directory", label: "Vendor Directory", icon: ListChecks },
         { href: "/admin/approval-queue", label: "Approval Queue", icon: ShieldCheck },
         { href: "/admin/user-management", label: "User Management", icon: UserPlus },
+        { href: "/admin/pricing-engine", label: "Pricing Engine", icon: DollarSign },
       ],
     },
     {
@@ -118,6 +126,7 @@ function clientMenu(unread: number): NavSection[] {
         { href: "/assessment", label: "Assessments", icon: PenTool },
         { href: "/my-assessments", label: "My Assessments", icon: FolderOpen },
         { href: "/transferable-skills", label: "My Skills", icon: Wrench },
+        { href: "/my-courses", label: "My Courses", icon: BookOpen },
         { href: "/courses", label: "Courses", icon: GraduationCap },
         { href: "/report", label: "Documents", icon: FileText },
         { href: "/messages", label: "Messages", icon: Mail, badge: unread },
@@ -205,7 +214,7 @@ function roleBadge(role: AnyUser["role"]): { label: string; bg: string } {
   }[role];
 }
 
-/* ── Component ──────────────────────────────────────────────────── */
+/* ── Component ───���──────────────────────────────────────────────── */
 
 export function LeftNav() {
   const router = useRouter();
