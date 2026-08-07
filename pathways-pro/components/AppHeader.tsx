@@ -101,6 +101,7 @@ export function AppHeader() {
     { href: "/funding", label: "Funding" },
     { href: "/report", label: "My Report" },
     { href: "/ipe", label: "My IPE Plan" },
+    { href: "/my-benefits", label: "My Benefits" },
     { href: "/resources/client", label: "Resources" },
     { href: "/coach", label: "Coach" },
   ];

@@ -47,6 +47,7 @@ function menuFor(user: AnyUser, unread: number): NavItem[] {
       { href: "/appointments", label: "Appointments", icon: "📅" },
       { href: "/progress", label: "My Progress", icon: "📈" },
       { href: "/ipe", label: "My IPE Plan", icon: "📋" },
+      { href: "/my-benefits", label: "My Benefits", icon: "💡" },
       { href: "/assessment", label: "Assessments", icon: "📝" },
       { href: "/my-assessments", label: "My Assessments", icon: "🗂️" },
       { href: "/transferable-skills", label: "My Skills", icon: "🧰" },
