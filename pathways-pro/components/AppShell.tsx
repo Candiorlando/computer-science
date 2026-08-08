@@ -38,6 +38,7 @@ const PUBLIC_PREFIXES = [
   "/services",
   "/partners",
   "/values",
+  "/directory",
 ];
 
 function isPublicPath(pathname: string): boolean {

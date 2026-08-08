@@ -56,29 +56,40 @@ const PARTNER_ORG_TYPES: { value: PartnerOrgType; label: string }[] = [
   { value: "social-enterprise", label: "Social Enterprise" },
 ];
 
+interface InitialValues {
+  entityType?: EntityType;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  orgName?: string;
+}
+
 interface Props {
   counselor: CounselorUser;
   onClose: () => void;
   onSuccess: () => void;
+  // Pre-fills the form — e.g. from a public marketplace quote request the
+  // counselor/agency is converting into a business client.
+  initial?: InitialValues;
 }
 
-export function AddEntityModal({ counselor, onClose, onSuccess }: Props) {
-  const [entityType, setEntityType] = useState<EntityType>("client");
+export function AddEntityModal({ counselor, onClose, onSuccess, initial }: Props) {
+  const [entityType, setEntityType] = useState<EntityType>(initial?.entityType ?? "client");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
   // Shared fields
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
+  const [firstName, setFirstName] = useState(initial?.firstName ?? "");
+  const [lastName, setLastName] = useState(initial?.lastName ?? "");
+  const [email, setEmail] = useState(initial?.email ?? "");
 
   // Client-specific
   const [dob, setDob] = useState("");
   const [goal, setGoal] = useState("");
 
   // Business-specific
-  const [orgName, setOrgName] = useState("");
+  const [orgName, setOrgName] = useState(initial?.orgName ?? "");
   const [jobTitle, setJobTitle] = useState("");
   const [scopeRole, setScopeRole] = useState<BusinessScopeRole>("hr_director");
 
