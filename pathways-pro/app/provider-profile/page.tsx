@@ -21,6 +21,7 @@ import {
   type ProviderProfile,
   type QuoteRequest,
 } from "@/lib/provider-directory";
+import { AddEntityModal } from "@/components/AddEntityModal";
 
 function emptyProfile(counselor: CounselorUser): ProviderProfile {
   return {
@@ -45,6 +46,7 @@ export default function ProviderProfilePage() {
   const [trainingInput, setTrainingInput] = useState("");
   const [saved, setSaved] = useState(false);
   const [quotes, setQuotes] = useState<QuoteRequest[]>([]);
+  const [claimQuote, setClaimQuote] = useState<QuoteRequest | null>(null);
 
   useEffect(() => {
     const s = loadSession();
@@ -298,29 +300,53 @@ export default function ProviderProfilePage() {
                   <span className="text-xs text-ink/50">{new Date(q.createdAt).toLocaleDateString()}</span>
                 </div>
                 <p className="text-ink/70">{q.message}</p>
-                <p className="text-xs text-ink/55">
-                  Reply directly at{" "}
-                  <a href={`mailto:${q.fromEmail}`} className="text-accent hover:underline">
-                    {q.fromEmail}
-                  </a>
-                  . Once you agree on terms, add them as a business client from Case Search to
-                  give them portal access.
-                </p>
-                {q.status === "new" && (
+                <div className="flex items-center gap-3 flex-wrap">
+                  <p className="text-xs text-ink/55">
+                    Reply at{" "}
+                    <a href={`mailto:${q.fromEmail}`} className="text-accent hover:underline">
+                      {q.fromEmail}
+                    </a>
+                  </p>
                   <button
-                    onClick={() => {
-                      updateQuoteStatus(q.id, "contacted");
-                      setQuotes(quoteRequestsFor("provider", user.email));
-                    }}
-                    className="text-xs text-accent hover:underline"
+                    onClick={() => setClaimQuote(q)}
+                    className="text-xs text-accent hover:underline font-medium"
                   >
-                    Mark as contacted
+                    Add as business client →
                   </button>
-                )}
+                  {q.status === "new" && (
+                    <button
+                      onClick={() => {
+                        updateQuoteStatus(q.id, "contacted");
+                        setQuotes(quoteRequestsFor("provider", user.email));
+                      }}
+                      className="text-xs text-ink/55 hover:underline"
+                    >
+                      Mark as contacted
+                    </button>
+                  )}
+                </div>
               </li>
             ))}
           </ul>
         </section>
+      )}
+
+      {claimQuote && (
+        <AddEntityModal
+          counselor={user}
+          initial={{
+            entityType: "business",
+            firstName: claimQuote.fromName.split(" ")[0] ?? "",
+            lastName: claimQuote.fromName.split(" ").slice(1).join(" "),
+            email: claimQuote.fromEmail,
+            orgName: claimQuote.fromOrganization,
+          }}
+          onClose={() => setClaimQuote(null)}
+          onSuccess={() => {
+            updateQuoteStatus(claimQuote.id, "converted");
+            setQuotes(quoteRequestsFor("provider", user.email));
+          }}
+        />
       )}
     </div>
   );

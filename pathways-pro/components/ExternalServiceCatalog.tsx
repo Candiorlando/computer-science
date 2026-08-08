@@ -174,6 +174,9 @@ function ServiceCard({
     service.id,
     requester.effectiveCounselorEmail,
   );
+  // Business clients get descriptions only — fees stay under the agency's
+  // or solopreneur's control and are negotiated directly, never public.
+  const hidePricing = requester.audience === "business";
 
   return (
     <article className="saas-card flex flex-col">
@@ -185,10 +188,15 @@ function ServiceCard({
       </div>
       <p className="text-sm text-ink/70 mb-3 grow">{service.description}</p>
       <ul className="text-xs text-ink/65 space-y-1 mb-3 border-t border-ink/10 pt-2">
-        <li>
-          <strong>Price:</strong>{" "}
-          {formatPrice(price, service.priceUnit)}
-        </li>
+        {hidePricing ? (
+          <li className="text-ink/55 italic">
+            Contact your counselor for pricing on this service.
+          </li>
+        ) : (
+          <li>
+            <strong>Price:</strong> {formatPrice(price, service.priceUnit)}
+          </li>
+        )}
         <li>
           <strong>Turnaround:</strong> {service.turnaround}
         </li>
@@ -253,6 +261,7 @@ function RequestModal({
     .toISOString()
     .slice(0, 10);
   const [dueDate, setDueDate] = useState(defaultDue);
+  const hidePricing = requester.audience === "business";
 
   function submit() {
     const req: ServiceRequest = {
@@ -290,7 +299,8 @@ function RequestModal({
       >
         <h3 className="text-lg font-semibold">{service.title}</h3>
         <p className="text-xs text-ink/55">
-          Counselor review required · {formatPrice(price, service.priceUnit)}
+          Counselor review required
+          {!hidePricing && <> · {formatPrice(price, service.priceUnit)}</>}
         </p>
         <Field label="Subject / client (if applicable)">
           <input

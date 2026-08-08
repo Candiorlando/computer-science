@@ -108,10 +108,30 @@ export function listPublicProviders(): PublicProviderListing[] {
     .filter((x): x is PublicProviderListing => x !== null);
 }
 
+/** Single-profile lookup for the public /directory/provider/[email] page.
+ *  Returns null if the counselor doesn't exist or hasn't published. */
+export function getPublicProviderListing(email: string): PublicProviderListing | null {
+  const profile = loadProviderProfile(email);
+  if (!profile || !profile.visible) return null;
+  const counselor = COUNSELORS[email];
+  if (!counselor) return null;
+  return { profile, counselor, agency: getTenant(counselor.tenantId) };
+}
+
 export interface PublicAgencyListing {
   profile: AgencyProfile;
   tenant: Tenant;
   providerCount: number;
+}
+
+/** Single-profile lookup for the public /directory/agency/[tenantId] page. */
+export function getPublicAgencyListing(tenantId: string): PublicAgencyListing | null {
+  const profile = loadAgencyProfile(tenantId);
+  if (!profile || !profile.visible) return null;
+  const tenant = getTenant(tenantId);
+  if (!tenant) return null;
+  const providerCount = listPublicProviders().filter((p) => p.agency?.id === tenantId).length;
+  return { profile, tenant, providerCount };
 }
 
 export function listPublicAgencies(): PublicAgencyListing[] {

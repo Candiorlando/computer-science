@@ -42,6 +42,8 @@ import {
   Landmark,
   LockKeyhole,
   LogOut,
+  Globe,
+  Store,
 } from "lucide-react";
 
 /* ── Icon type for menu items ────────────────────────────────────── */
@@ -103,6 +105,11 @@ function counselorMenu(
         { href: "/dashboard/services-catalog", label: "Service Catalog", icon: Briefcase },
         { href: "/dashboard/client-curriculum", label: "Client Curriculum", icon: BookOpen },
         { href: "/ce", label: "CE Tracker", icon: GraduationCap },
+        // Public marketplace listing — every counselor (solopreneur or
+        // tenant-affiliated) manages their own; never shows pricing.
+        ...(!masterAdmin
+          ? [{ href: "/provider-profile", label: "Marketplace Profile", icon: Globe }]
+          : []),
       ],
     },
     {
@@ -122,6 +129,11 @@ function counselorMenu(
         // read-only. Ordinary counselors don't see this at all.
         ...(tenantAdmin || masterAdmin
           ? [{ href: "/admin/tenant-documents", label: "Agency Documents", icon: FileText }]
+          : []),
+        // Agency-level public profile (the roster of published
+        // counselors + agency description) — Tenant Admin only.
+        ...(tenantAdmin
+          ? [{ href: "/admin/agency-profile", label: "Agency Public Profile", icon: Store }]
           : []),
         { href: "/admin/client-roster", label: "Client Roster", icon: Users },
         { href: "/admin/vendor-directory", label: "Vendor Directory", icon: ListChecks },
