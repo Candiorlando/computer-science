@@ -6,6 +6,7 @@ import { loadSession } from "@/lib/session";
 import type { CounselorUser } from "@/lib/users";
 import {
   CATEGORY_LABELS,
+  canEditPricing,
   effectiveEnabled,
   effectivePrice,
   formatPrice,
@@ -16,6 +17,7 @@ import {
   type CatalogService,
   type ServiceCategory,
 } from "@/lib/service-catalog";
+import { isMasterAdmin, isTenantAdmin } from "@/lib/rbac";
 
 export default function ServicesCatalogPage() {
   const router = useRouter();
@@ -42,6 +44,10 @@ export default function ServicesCatalogPage() {
 
   if (!user || !profile) return null;
 
+  const editable = canEditPricing(user.email);
+  const tenantScoped = isTenantAdmin(user);
+  const masterAdmin = isMasterAdmin(user);
+
   return (
     <div className="space-y-6">
       <header>
@@ -52,9 +58,14 @@ export default function ServicesCatalogPage() {
           Service catalog &amp; pricing
         </h1>
         <p className="text-ink/65 text-sm mt-1 prose-narrow">
-          {SERVICE_CATALOG.length} services with pre-populated industry rates.
-          Adjust your own pricing — overrides apply only to your caseload.
-          Every change is logged at the bottom for audit.
+          {SERVICE_CATALOG.length} services with pre-populated industry rates.{" "}
+          {masterAdmin
+            ? "Platform-wide view — pricing shown belongs to individual tenants/solopreneurs and is not editable here."
+            : editable
+              ? tenantScoped
+                ? "Select which services your agency offers and set your agency's rates — every counselor in your tenant inherits these. Every change is logged below for audit."
+                : "Select which services you offer and set your own rates. Every change is logged below for audit."
+              : "Informational — showing your agency's current services and rates. Only your Tenant Administrator can change what's offered or its pricing."}
         </p>
       </header>
 
@@ -89,6 +100,7 @@ export default function ServicesCatalogPage() {
             key={s.id}
             service={s}
             counselorEmail={user.email}
+            editable={editable}
             onChange={() => setBump((n) => n + 1)}
           />
         ))}
@@ -163,10 +175,12 @@ function CategoryPill({
 function ServiceRow({
   service,
   counselorEmail,
+  editable,
   onChange,
 }: {
   service: CatalogService;
   counselorEmail: string;
+  editable: boolean;
   onChange: () => void;
 }) {
   const currentPrice = effectivePrice(service.id, counselorEmail);
@@ -212,15 +226,25 @@ function ServiceRow({
           </div>
           <p className="text-sm text-ink/70 mt-1">{service.description}</p>
         </div>
-        <label className="flex items-center gap-2 text-xs">
-          <input
-            type="checkbox"
-            checked={enabled}
-            onChange={toggleEnabled}
-            className="accent-emerald-500 w-4 h-4"
-          />
-          <span>{enabled ? "Enabled" : "Disabled"}</span>
-        </label>
+        {editable ? (
+          <label className="flex items-center gap-2 text-xs">
+            <input
+              type="checkbox"
+              checked={enabled}
+              onChange={toggleEnabled}
+              className="accent-emerald-500 w-4 h-4"
+            />
+            <span>{enabled ? "Enabled" : "Disabled"}</span>
+          </label>
+        ) : (
+          <span
+            className={`text-[10px] uppercase tracking-wider px-2 py-1 rounded-full font-semibold ${
+              enabled ? "bg-emerald-100 text-emerald-900" : "bg-ink/10 text-ink/50"
+            }`}
+          >
+            {enabled ? "Offered" : "Not offered"}
+          </span>
+        )}
       </div>
 
       <div className="grid sm:grid-cols-4 gap-3 mt-3 text-xs">
@@ -234,9 +258,9 @@ function ServiceRow({
         </div>
         <div className="border border-emerald-200 rounded p-2 bg-emerald-50/50">
           <div className="text-[10px] uppercase tracking-wider text-emerald-700 font-semibold">
-            Your price
+            {editable ? "Your price" : "Agency price"}
           </div>
-          {editing ? (
+          {editable && editing ? (
             <div className="flex items-center gap-1 mt-1">
               <span className="text-sm">$</span>
               <input
@@ -266,15 +290,17 @@ function ServiceRow({
               <div className="text-sm font-semibold">
                 {formatPrice(currentPrice, service.priceUnit)}
               </div>
-              <button
-                onClick={() => setEditing(true)}
-                className="text-xs text-emerald-700 hover:underline"
-              >
-                Edit
-              </button>
+              {editable && (
+                <button
+                  onClick={() => setEditing(true)}
+                  className="text-xs text-emerald-700 hover:underline"
+                >
+                  Edit
+                </button>
+              )}
             </div>
           )}
-          {overridden && (
+          {editable && overridden && (
             <button
               onClick={resetToDefault}
               className="text-[10px] text-ink/55 hover:text-emerald-700 mt-1"
