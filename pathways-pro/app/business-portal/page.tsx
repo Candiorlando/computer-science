@@ -2,11 +2,13 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { loadSession, clearSession } from "@/lib/session";
 import type { BusinessUser } from "@/lib/users";
 import {
   acknowledgeRoute,
   documentsForOrg,
+  docKindLabel,
   getCurrentBusinessOrg,
   loadActivity,
   loadEngagements,
@@ -292,7 +294,15 @@ function DocumentsBlock({
 }) {
   return (
     <section>
-      <h2 className="text-2xl mb-3">Documents routed to you</h2>
+      <div className="flex items-baseline justify-between gap-3 mb-3">
+        <h2 className="text-2xl">Documents routed to you</h2>
+        <Link
+          href="/business-portal/documents"
+          className="text-sm text-accent hover:underline whitespace-nowrap"
+        >
+          View all documents →
+        </Link>
+      </div>
       {docs.length === 0 ? (
         <Empty>No documents in your vault yet.</Empty>
       ) : (
@@ -309,7 +319,7 @@ function DocumentsBlock({
               <div className="flex items-baseline justify-between gap-3 flex-wrap mb-1">
                 <h3 className="font-semibold">{doc.title}</h3>
                 <span className="text-xs uppercase tracking-wider text-ink/55">
-                  {kindLabel(doc.kind)}
+                  {docKindLabel(doc.kind)}
                 </span>
               </div>
               <div className="text-sm text-ink/70">
@@ -344,23 +354,6 @@ function DocumentsBlock({
       )}
     </section>
   );
-}
-
-function kindLabel(k: string): string {
-  return (
-    {
-      wec: "Wage-Earning Capacity",
-      lma: "Labor Market Assessment",
-      fce: "Functional Capacity Eval",
-      rtw: "Return-to-Work clearance",
-      "jd-analysis": "JD / ADA Analysis",
-      "accommodation-letter": "Accommodation letter",
-      "ipe-summary": "IPE summary",
-      invoice: "Invoice",
-      msa: "Master Service Agreement",
-      coi: "Certificate of Insurance",
-    } as Record<string, string>
-  )[k] ?? k;
 }
 
 function EngagementsBlock({

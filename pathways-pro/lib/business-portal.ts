@@ -215,7 +215,8 @@ export interface VaultDocument {
     | "jd-analysis"
     | "fce-rtw"
     | "vendor-billing"
-    | "vendor-credential";
+    | "vendor-credential"
+    | "org-onboarding";
   relatedCaseId?: string;
   relatedPlacementId?: string;
   relatedEngagementId?: string;
@@ -289,6 +290,35 @@ export function documentsForOrg(orgId: string): DocumentForRecipient[] {
   return routes
     .map((r) => ({ doc: docs[r.documentId], route: r }))
     .filter((x): x is DocumentForRecipient => Boolean(x.doc));
+}
+
+// Contracts (MSA, certificates of insurance) vs. everything else routed to
+// an org — used to split the document vault into a "Contracts" section and
+// a "Case & service documents" section on the business Documents page.
+const CONTRACT_KINDS: DocKind[] = ["msa", "coi"];
+
+export function contractDocsForOrg(orgId: string): DocumentForRecipient[] {
+  return documentsForOrg(orgId).filter((d) => CONTRACT_KINDS.includes(d.doc.kind));
+}
+export function caseDocsForOrg(orgId: string): DocumentForRecipient[] {
+  return documentsForOrg(orgId).filter((d) => !CONTRACT_KINDS.includes(d.doc.kind));
+}
+
+export function docKindLabel(k: DocKind): string {
+  return (
+    {
+      wec: "Wage-Earning Capacity",
+      lma: "Labor Market Assessment",
+      fce: "Functional Capacity Eval",
+      rtw: "Return-to-Work clearance",
+      "jd-analysis": "JD / ADA Analysis",
+      "accommodation-letter": "Accommodation letter",
+      "ipe-summary": "IPE summary",
+      invoice: "Invoice",
+      msa: "Master Service Agreement",
+      coi: "Certificate of Insurance",
+    } as Record<DocKind, string>
+  )[k] ?? k;
 }
 
 export function acknowledgeRoute(routeId: string) {

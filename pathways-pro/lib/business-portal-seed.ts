@@ -307,6 +307,28 @@ export function seedBusinessPortal() {
       sizeBytes: 92_140,
       sha256: "55b9e1…0a1d",
     },
+    {
+      id: "doc-msa-acme",
+      title: "Acme Logistics — Master Service Agreement",
+      kind: "msa",
+      routingTemplate: "org-onboarding",
+      uploadedByEmail: "candace.metcalf@pathwayspro.app",
+      uploadedByName: "Candace Metcalf, CRC · LPC",
+      uploadedAt: daysAgo(118),
+      sizeBytes: 156_480,
+      sha256: "a3f082…c94b",
+    },
+    {
+      id: "doc-coi-acme",
+      title: "Pathways Pro — Certificate of Insurance (current)",
+      kind: "coi",
+      routingTemplate: "org-onboarding",
+      uploadedByEmail: "candace.metcalf@pathwayspro.app",
+      uploadedByName: "Candace Metcalf, CRC · LPC",
+      uploadedAt: daysAgo(21),
+      sizeBytes: 41_205,
+      sha256: "7d61ef…3a08",
+    },
   ];
   saveDocuments([...loadDocuments(), ...docs]);
 
@@ -371,6 +393,27 @@ export function seedBusinessPortal() {
       accessKind: "view",
       routedAt: daysAgo(60),
       acknowledgedAt: daysAgo(58),
+    },
+    // MSA: signed at onboarding, 118 days ago
+    {
+      id: "rt-msa-acme",
+      documentId: "doc-msa-acme",
+      recipientKind: "org",
+      recipientOrgId: "org-acme",
+      recipientLabel: "Acme Logistics",
+      accessKind: "sign",
+      routedAt: daysAgo(118),
+      acknowledgedAt: daysAgo(115),
+    },
+    // COI: freshly renewed, awaiting HR's annual acknowledgment
+    {
+      id: "rt-coi-acme",
+      documentId: "doc-coi-acme",
+      recipientKind: "org",
+      recipientOrgId: "org-acme",
+      recipientLabel: "Acme Logistics",
+      accessKind: "acknowledge",
+      routedAt: daysAgo(21),
     },
   ];
   saveRoutes([...loadRoutes(), ...routes]);
