@@ -170,7 +170,7 @@ function businessMenu(unread: number): NavSection[] {
         { href: "/business-portal/services", label: "Service Catalog", icon: Briefcase },
         { href: "/business-portal/orders", label: "Service Orders", icon: Package },
         { href: "/business-portal/accounts-payable", label: "Accounts Payable", icon: DollarSign },
-        { href: "/business-portal", label: "Documents", icon: FileText },
+        { href: "/business-portal/documents", label: "Documents", icon: FileText },
         { href: "/messages", label: "Messages", icon: Mail, badge: unread },
         { href: "/case-notes", label: "Case Notes", icon: StickyNote },
         { href: "/settings", label: "Settings", icon: Settings },
