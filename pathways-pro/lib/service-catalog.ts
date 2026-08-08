@@ -3,9 +3,14 @@
 // Unified service catalog — all paid services that Business, Employment
 // Partner, and Vendor portals can request, and that Counselors fulfill.
 //
-// Pricing here is the platform-wide INDUSTRY DEFAULT. Counselors can
-// override per service for their own caseload via the Service
-// Management page; overrides are stored separately and audited.
+// Pricing here is the platform-wide INDUSTRY DEFAULT. A Tenant Admin or
+// solopreneur can override it (price + enable/disable, "select or
+// deselect the services" they offer). Tenant-affiliated counselors share
+// their tenant admin's overrides read-only — see pricingScopeKey() below.
+// Master Admin edits the platform default via /admin/pricing-catalog,
+// never a tenant's own overrides.
+
+import { COUNSELORS } from "./users";
 
 export type ServiceCategory =
   | "workforce-consulting"
@@ -18,7 +23,9 @@ export type ServiceCategory =
   | "one-time"
   | "client-services"
   | "partner-coordination"
-  | "youth-services";
+  | "youth-services"
+  | "forensic"
+  | "counseling-services";
 
 export type PriceUnit =
   | "flat"
@@ -231,7 +238,7 @@ export const SERVICE_CATALOG: CatalogService[] = [
   {
     id: "labor-market-analysis",
     title: "Labor Market Analysis",
-    category: "data-evaluation",
+    category: "forensic",
     description:
       "Identifies viable occupations, wage expectations, and hiring trends.",
     defaultPriceCents: F(100_000),
@@ -245,7 +252,7 @@ export const SERVICE_CATALOG: CatalogService[] = [
   {
     id: "transferable-skills-analysis",
     title: "Transferable Skills Analysis",
-    category: "data-evaluation",
+    category: "forensic",
     description:
       "Maps existing skills to new job opportunities.",
     defaultPriceCents: F(75_000),
@@ -259,7 +266,7 @@ export const SERVICE_CATALOG: CatalogService[] = [
   {
     id: "forensic-vocational-evaluation",
     title: "Forensic Vocational Evaluation",
-    category: "data-evaluation",
+    category: "forensic",
     description:
       "Expert analysis for legal cases, disability claims, and litigation.",
     defaultPriceCents: F(250_000),
@@ -273,7 +280,7 @@ export const SERVICE_CATALOG: CatalogService[] = [
   {
     id: "earning-capacity-assessment",
     title: "Earning Capacity Assessments",
-    category: "data-evaluation",
+    category: "forensic",
     description:
       "Determines employability and wage potential.",
     defaultPriceCents: F(180_000),
@@ -1000,7 +1007,7 @@ export const SERVICE_CATALOG: CatalogService[] = [
   {
     id: "expert-testimony-deposition",
     title: "Expert Testimony & Deposition Support",
-    category: "data-evaluation",
+    category: "forensic",
     description:
       "Vocational expert testimony at deposition or trial — FRCP 26 disclosures, testimony list maintenance, and Daubert/Frye-hardened opinion defense.",
     defaultPriceCents: F(42_500),
@@ -1014,7 +1021,7 @@ export const SERVICE_CATALOG: CatalogService[] = [
   {
     id: "forensic-file-review-rebuttal",
     title: "VE File Review & Rebuttal Report",
-    category: "data-evaluation",
+    category: "forensic",
     description:
       "Critical review of an opposing vocational expert's report — methodology audit, data-source verification, and a written rebuttal opinion.",
     defaultPriceCents: F(295_000),
@@ -1038,6 +1045,69 @@ export const SERVICE_CATALOG: CatalogService[] = [
     turnaround: "Continuous (6-12 mo engagement)",
     aiTemplate:
       "Draft a Justice-Involved Reentry Navigation plan: criminal-history landscape (state expungement/sealing options), Ban-the-Box + Fair Chance jurisdiction map, disclosure script tuned to the target industry, WOTC + Federal Bonding Program eligibility, disability-related accommodations that intersect with parole conditions, and a 90-day placement + retention plan with community-based supports.",
+  },
+
+  // ─── COUNSELING & CLINICAL SERVICES ─────────────────────────────────
+  // Distinguishes vocational counseling (delivered by CRC-level VR
+  // counselors, tied to career/employment planning) from licensed
+  // clinical mental-health counseling (separate licensure, treats
+  // mental-health conditions) — each a standalone, individually
+  // selectable service.
+  {
+    id: "vocational-counseling-services",
+    title: "Vocational Counseling Services",
+    category: "counseling-services",
+    description:
+      "Career and employment-focused counseling delivered by a vocational rehabilitation counselor — goal-setting, occupational choice, and work-adjustment support tied to the client's IPE.",
+    defaultPriceCents: F(9_500),
+    priceUnit: "hourly",
+    availableTo: ["business", "partner", "vendor", "client"],
+    visibleToClient: true,
+    turnaround: "Ongoing",
+    aiTemplate:
+      "Draft a vocational counseling session summary: goal(s) addressed, occupational options discussed, work-adjustment barriers identified, and next steps tied to the client's IPE. Administrative summary only — not a clinical note.",
+  },
+  {
+    id: "eap-counseling-third-party",
+    title: "EAP Counseling — Third-Party Employer Contract",
+    category: "counseling-services",
+    description:
+      "Employee Assistance Program counseling delivered under a third-party contract with a business or corporate client — short-term, confidential counseling access for the employer's workforce, billed to the employer (not the individual employee).",
+    defaultPriceCents: F(150_000),
+    priceUnit: "monthly",
+    availableTo: ["business"],
+    visibleToClient: false,
+    turnaround: "Contract-based (typical: 3-8 sessions per employee per referral)",
+    aiTemplate:
+      "Draft an EAP services summary for the employer contract: covered session allotment per employee-referral, confidentiality commitment (individual session content is never shared with the employer), referral/access process, and utilization reporting format (aggregate, de-identified counts only).",
+  },
+  {
+    id: "counseling-and-guidance",
+    title: "Counseling and Guidance",
+    category: "counseling-services",
+    description:
+      "The core VR service defined at 34 CFR § 361.48(b)(2) — counseling and guidance, including information and support services to assist an individual in exercising informed choice throughout the rehabilitation process.",
+    defaultPriceCents: F(8_500),
+    priceUnit: "hourly",
+    availableTo: ["business", "partner", "vendor", "client"],
+    visibleToClient: true,
+    turnaround: "Ongoing",
+    aiTemplate:
+      "Draft a counseling-and-guidance session summary consistent with 34 CFR 361.48(b)(2): informed-choice topics covered, options presented, decision(s) reached, and follow-up support planned.",
+  },
+  {
+    id: "clinical-counseling-licensed",
+    title: "Clinical Counseling (Licensed Mental Health)",
+    category: "counseling-services",
+    description:
+      "Mental-health counseling delivered by a separately licensed clinical professional (LPC, LCSW, LCPC/LPCC, PsyD, or PhD) — addresses mental-health conditions that intersect with vocational goals. Requires clinical licensure distinct from vocational rehabilitation certification; clinical documentation is kept in a separate confidential record, not the general case file.",
+    defaultPriceCents: F(15_000),
+    priceUnit: "hourly",
+    availableTo: ["business", "partner", "vendor", "client"],
+    visibleToClient: true,
+    turnaround: "Ongoing",
+    aiTemplate:
+      "Draft an administrative session-authorization summary only (session occurred, duration, authorization/billing code) — never clinical content, diagnosis, or treatment notes, which stay in the clinician's separate confidential record.",
   },
 ];
 
@@ -1065,6 +1135,30 @@ export interface CounselorPricingProfile {
 
 const PRICING_KEY = "pathways-pro:counselor-pricing-v1";
 
+/**
+ * Resolves the actual storage key pricing is read/written under. A
+ * tenant-affiliated counselor's pricing lives under their TENANT (one
+ * shared profile the whole agency inherits, set by the Tenant Admin); a
+ * solopreneur's pricing lives under their own email, unchanged from
+ * before tenants existed. Callers still pass a plain counselorEmail —
+ * this indirection is internal so no call site elsewhere in the app
+ * needs to change.
+ */
+function pricingScopeKey(counselorEmail: string): string {
+  const counselor = COUNSELORS[counselorEmail];
+  return counselor?.tenantId ? `tenant:${counselor.tenantId}` : counselorEmail;
+}
+
+/** Whether `counselorEmail` may EDIT pricing (Tenant Admin or
+ *  solopreneur) vs. only view their tenant admin's rates read-only. */
+export function canEditPricing(counselorEmail: string): boolean {
+  const counselor = COUNSELORS[counselorEmail];
+  if (!counselor) return false;
+  if (counselor.platformAccess === "SUPER_ADMIN") return false; // platform-default only, see /admin/pricing-catalog
+  if (!counselor.tenantId) return true; // solopreneur
+  return counselor.tenantRole === "TENANT_ADMIN";
+}
+
 function readAll(): Record<string, CounselorPricingProfile> {
   if (typeof window === "undefined") return {};
   try {
@@ -1085,9 +1179,10 @@ function writeAll(map: Record<string, CounselorPricingProfile>) {
 export function loadCounselorPricing(
   counselorEmail: string,
 ): CounselorPricingProfile {
+  const key = pricingScopeKey(counselorEmail);
   return (
-    readAll()[counselorEmail] ?? {
-      counselorEmail,
+    readAll()[key] ?? {
+      counselorEmail: key,
       overrides: {},
       changeLog: [],
     }
@@ -1099,10 +1194,11 @@ export function setPriceOverride(
   serviceId: string,
   priceCents: number,
 ): CounselorPricingProfile {
+  const key = pricingScopeKey(counselorEmail);
   const map = readAll();
   const profile: CounselorPricingProfile =
-    map[counselorEmail] ?? {
-      counselorEmail,
+    map[key] ?? {
+      counselorEmail: key,
       overrides: {},
       changeLog: [],
     };
@@ -1122,7 +1218,7 @@ export function setPriceOverride(
     },
     ...profile.changeLog,
   ].slice(0, 100);
-  map[counselorEmail] = profile;
+  map[key] = profile;
   writeAll(map);
   return profile;
 }
@@ -1132,10 +1228,11 @@ export function setServiceEnabled(
   serviceId: string,
   enabled: boolean,
 ): CounselorPricingProfile {
+  const key = pricingScopeKey(counselorEmail);
   const map = readAll();
   const profile: CounselorPricingProfile =
-    map[counselorEmail] ?? {
-      counselorEmail,
+    map[key] ?? {
+      counselorEmail: key,
       overrides: {},
       changeLog: [],
     };
@@ -1156,7 +1253,7 @@ export function setServiceEnabled(
     },
     ...profile.changeLog,
   ].slice(0, 100);
-  map[counselorEmail] = profile;
+  map[key] = profile;
   writeAll(map);
   return profile;
 }
@@ -1167,7 +1264,7 @@ export function effectivePrice(
 ): number {
   const base = defaultPrice(serviceId);
   if (!counselorEmail) return base;
-  const profile = readAll()[counselorEmail];
+  const profile = readAll()[pricingScopeKey(counselorEmail)];
   const override = profile?.overrides[serviceId]?.priceCents;
   return override ?? base;
 }
@@ -1177,7 +1274,7 @@ export function effectiveEnabled(
   counselorEmail?: string,
 ): boolean {
   if (!counselorEmail) return true;
-  const profile = readAll()[counselorEmail];
+  const profile = readAll()[pricingScopeKey(counselorEmail)];
   return profile?.overrides[serviceId]?.enabledOverride ?? true;
 }
 
@@ -1219,7 +1316,7 @@ export function formatPrice(
 export const CATEGORY_LABELS: Record<ServiceCategory, string> = {
   "workforce-consulting": "🧭 Employment & Workforce Consulting",
   "ada-compliance": "🏢 ADA / 504 / EEO Compliance & Accommodation",
-  "data-evaluation": "📊 Workforce Data, Evaluation & Forensic",
+  "data-evaluation": "📊 Workforce Data & Evaluation",
   "business-engagement": "🧩 Business Engagement & Employer Partnership",
   training: "🧠 Training & Professional Development",
   "documentation-policy": "🗂️ Documentation, Policy & Systems",
@@ -1228,4 +1325,6 @@ export const CATEGORY_LABELS: Record<ServiceCategory, string> = {
   "client-services": "🤝 Client-Facing Ancillary Services",
   "partner-coordination": "🔗 Employment Partner Coordination",
   "youth-services": "🎓 Youth & Transition Services (Pre-ETS)",
+  forensic: "⚖️ Forensic & Vocational Expert Services",
+  "counseling-services": "🗣️ Counseling & Clinical Services",
 };
