@@ -9,8 +9,12 @@ import { dashboardRoute, ROLE_LABELS } from "@/lib/rbac";
 import {
   CalendarDays,
   MessageSquare,
-  CreditCard,
   BookOpen,
+  Briefcase,
+  FileText,
+  Handshake,
+  Package,
+  ShieldCheck,
   LogOut,
   Menu,
   X,
@@ -23,30 +27,44 @@ interface NavTab {
 }
 
 function tabsForRole(user: AnyUser): NavTab[] {
-  // All non-admin roles get the simplified tab set
   const home = dashboardRoute(user);
+
+  if (user.role === "client") {
+    return [
+      { href: home, label: "Home", icon: <CalendarDays className="w-4 h-4" /> },
+      { href: "/appointments", label: "Appointments", icon: <CalendarDays className="w-4 h-4" /> },
+      { href: "/my-courses", label: "My Courses", icon: <BookOpen className="w-4 h-4" /> },
+      { href: "/self-advocacy", label: "Self Advocacy", icon: <ShieldCheck className="w-4 h-4" /> },
+      { href: "/messages", label: "Secure Messages", icon: <MessageSquare className="w-4 h-4" /> },
+    ];
+  }
+
+  if (user.role === "business") {
+    return [
+      { href: home, label: "Home", icon: <Briefcase className="w-4 h-4" /> },
+      { href: "/business-portal/services", label: "Services", icon: <Briefcase className="w-4 h-4" /> },
+      { href: "/business-portal/orders", label: "Service Orders", icon: <Package className="w-4 h-4" /> },
+      { href: "/business-portal/documents", label: "Documents", icon: <FileText className="w-4 h-4" /> },
+      { href: "/messages", label: "Secure Messages", icon: <MessageSquare className="w-4 h-4" /> },
+    ];
+  }
+
+  if (user.role === "vendor") {
+    return [
+      { href: home, label: "Home", icon: <Briefcase className="w-4 h-4" /> },
+      { href: "/vendor-portal/orders", label: "Service Orders", icon: <Package className="w-4 h-4" /> },
+      { href: "/vendor-portal/services", label: "Services", icon: <Briefcase className="w-4 h-4" /> },
+      { href: "/messages", label: "Secure Messages", icon: <MessageSquare className="w-4 h-4" /> },
+      { href: "/settings", label: "Settings", icon: <ShieldCheck className="w-4 h-4" /> },
+    ];
+  }
+
   return [
-    { href: home, label: "Home", icon: <CalendarDays className="w-4 h-4" /> },
-    {
-      href: "/appointments",
-      label: "Appointments",
-      icon: <CalendarDays className="w-4 h-4" />,
-    },
-    {
-      href: "/my-courses",
-      label: "My Courses",
-      icon: <BookOpen className="w-4 h-4" />,
-    },
-    {
-      href: "/messages",
-      label: "Secure Messages",
-      icon: <MessageSquare className="w-4 h-4" />,
-    },
-    {
-      href: "/settings",
-      label: "Billing",
-      icon: <CreditCard className="w-4 h-4" />,
-    },
+    { href: home, label: "Home", icon: <Handshake className="w-4 h-4" /> },
+    { href: "/partner-portal/opportunities", label: "Opportunities", icon: <Briefcase className="w-4 h-4" /> },
+    { href: "/partner-portal/supported-employment", label: "Placements", icon: <Handshake className="w-4 h-4" /> },
+    { href: "/partner-portal/documents", label: "Documents", icon: <FileText className="w-4 h-4" /> },
+    { href: "/messages", label: "Secure Messages", icon: <MessageSquare className="w-4 h-4" /> },
   ];
 }
 
