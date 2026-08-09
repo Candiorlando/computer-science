@@ -7,6 +7,7 @@ export const ENTITY_TYPES = [
   { value: "state_or_city_agency", label: "State or City Agency" },
   { value: "community_provider", label: "Community Rehabilitation Provider" },
   { value: "business_partner", label: "Business / Corporate Partner" },
+  { value: "private_business", label: "Private Business" },
   { value: "vendor", label: "Vendor / Specialized Service Provider" },
   { value: "employment_partner", label: "Employment Partner" },
   { value: "vocational_client", label: "Vocational Client" },
@@ -71,7 +72,7 @@ export function recommendedFeatures(input: {
     ];
   }
 
-  if (input.entityType === "business_partner") {
+  if (input.entityType === "business_partner" || input.entityType === "private_business") {
     return [
       { title: "Business Portal", route: "/business-portal", reason: "Review approved relationship activity." },
       { title: "Service Orders", route: "/business-portal/orders", reason: "Coordinate authorized services only." },

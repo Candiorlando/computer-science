@@ -19,6 +19,8 @@ export const INDUSTRY_SECTORS = [
   { value: "VETERANS_MILITARY", label: "Veterans Affairs / Military Transition" },
   { value: "NONPROFIT_ADVOCACY", label: "Non-Profit / Advocacy Organization" },
   { value: "INDEPENDENT_CONSULTANT", label: "Independent Contractor / Consultant" },
+  { value: "PRIVATE_BUSINESS", label: "Private Business" },
+  { value: "PRIVATE_BUSINESS", label: "Private Business" },
 ] as const;
 
 export const VENDOR_SERVICES = [
