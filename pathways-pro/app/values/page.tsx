@@ -86,7 +86,7 @@ const values: ValueCard[] = [
 
 export default function ValuesPage() {
   return (
-    <div className="-mx-6 -mt-10 mb-[-2rem] bg-[#FAF9F6]">
+    <div className="-mx-6 -mt-10 mb-[-2rem] pt-16 bg-[#FAF9F6]">
       <HeroManifesto />
       <ValuesMatrix />
       <SystemsImpactBanner />
@@ -105,16 +105,16 @@ function HeroManifesto() {
         <div className="absolute left-0 top-1/3 h-px w-full bg-white" />
         <div className="absolute left-0 top-2/3 h-px w-full bg-white" />
       </div>
-      <div className="relative max-w-5xl mx-auto px-6 py-24 md:py-32 text-center space-y-8">
+      <div className="relative max-w-4xl mx-auto px-6 py-16 md:py-20 text-center space-y-6">
         <p className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.28em] text-amber-200/85 font-bold">
           <ShieldCheck className="w-4 h-4" />
           Our Values
         </p>
-        <h1 className="text-4xl md:text-6xl font-bold tracking-tight leading-[1.05] text-white">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight leading-[1.08] text-white">
           The Covenant of Dignity. The Ecology of Reform.
         </h1>
         <div className="mx-auto h-px w-20 bg-amber-300/70" />
-        <p className="text-lg md:text-xl leading-relaxed text-white/78 max-w-4xl mx-auto">
+        <p className="text-base md:text-lg leading-relaxed text-white/85 max-w-3xl mx-auto">
           Pathways Pro was founded upon a fundamental sociological and ethical
           truth: true rehabilitation is not a solitary endeavor, but a
           restoration of the individual's place within the community. We believe
