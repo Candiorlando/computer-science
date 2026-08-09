@@ -6,6 +6,7 @@ import Link from "next/link";
 import {
   LogIn,
   UserPlus,
+  Building2,
   Mail,
   Lock,
   User,
@@ -72,6 +73,27 @@ export default function LoginPage() {
 
         {/* Demo mode card */}
         <DemoModeCard />
+
+        <Link
+          href="/onboarding?mode=demo"
+          className="group block bg-white border border-accent/20 rounded-xl p-5 hover:border-accent/50 hover:shadow-sm transition"
+        >
+          <div className="flex items-start gap-3">
+            <div className="w-9 h-9 rounded-lg bg-accent/10 text-accent grid place-items-center flex-shrink-0">
+              <Building2 className="w-4 h-4" />
+            </div>
+            <div className="space-y-1">
+              <p className="text-sm font-bold text-ink group-hover:text-accent transition">
+                Demo sign-up for a new entity
+              </p>
+              <p className="text-xs text-ink/60 leading-relaxed">
+                Preview the profile questions for agencies, rehabilitation providers,
+                businesses, vendors, employment partners, or vocational clients.
+                No production account is created.
+              </p>
+            </div>
+          </div>
+        </Link>
 
         <p className="text-center text-xs text-ink/50">
           Received an invitation?{" "}

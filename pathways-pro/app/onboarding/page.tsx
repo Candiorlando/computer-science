@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   ACCOMMODATION_CAPABILITIES,
   BUSINESS_INDUSTRIES,
@@ -19,6 +20,8 @@ import { onboardingSchema } from "@/lib/onboarding-schema";
 const ORG_SIZES = ["1–10", "11–50", "51–200", "201–500", "501–1,000", "1,001+"];
 
 export default function OnboardingPage() {
+  const searchParams = useSearchParams();
+  const demoMode = searchParams.get("mode") === "demo";
   const [role, setRole] = useState<OnboardingRole>("COUNSELOR");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -79,11 +82,11 @@ export default function OnboardingPage() {
     setSubmitted(true);
   }
 
-  if (submitted) return <div className="max-w-3xl mx-auto py-16 px-6 space-y-5"><h1 className="text-3xl font-bold text-ink">Profile submitted for review.</h1><p className="text-ink/65">Your entity classification and requested profile have been captured. A platform or tenant administrator will provision the access appropriate to your role, contract, service relationship, and approved data scope.</p></div>;
+  if (submitted) return <div className="max-w-3xl mx-auto py-16 px-6 space-y-5"><h1 className="text-3xl font-bold text-ink">{demoMode ? "Demo profile complete." : "Profile submitted for review."}</h1><p className="text-ink/65">{demoMode ? "No production account was created. This preview shows how Pathways Pro classifies an entity and recommends a role-appropriate workspace." : "Your entity classification and requested profile have been captured. A platform or tenant administrator will provision the access appropriate to your role, contract, service relationship, and approved data scope."}</p></div>;
 
   return (
     <div className="max-w-4xl mx-auto py-12 px-6 space-y-8">
-      <header className="space-y-3"><p className="text-xs uppercase tracking-widest text-accent font-bold">Profile & Ecosystem Intake</p><h1 className="text-4xl tracking-tight">Build the workspace that fits your role.</h1><p className="text-ink/70">Pathways Pro uses your entity, authority, services, and partnership choices to recommend only the tools relevant to your approved work.</p></header>
+      <header className="space-y-3"><p className="text-xs uppercase tracking-widest text-accent font-bold">{demoMode ? "Demo Entity Profile" : "Profile & Ecosystem Intake"}</p><h1 className="text-4xl tracking-tight">Build the workspace that fits your role.</h1><p className="text-ink/70">{demoMode ? "Explore the sign-up questions and role-specific workspace recommendations. This demo does not create a production account." : "Pathways Pro uses your entity, authority, services, and partnership choices to recommend only the tools relevant to your approved work."}</p></header>
       <form onSubmit={submit} className="space-y-7">
         <Section title="1. Identity & Entity Classification">
           <ChoiceRow label="I am joining as" values={ROLES} selected={role} onChange={(v) => { setRole(v as OnboardingRole); setEntityType(v === "CLIENT" ? "vocational_client" : v === "PARTNER" ? "employment_partner" : v === "VENDOR" ? "vendor" : v === "BUSINESS" ? "business_partner" : "rehabilitation_provider"); }} labels={ROLE_LABELS} />
@@ -94,7 +97,7 @@ export default function OnboardingPage() {
         {(isVendor || isBusiness) && <Section title="3. Services & Engagement"><CheckboxGroup label={isVendor ? "Services you provide" : "Business services you want to receive"} items={isVendor ? VENDOR_SERVICES : BUSINESS_SERVICE_INTERESTS} selected={isVendor ? services : businessServices} onToggle={(x) => toggle(isVendor ? setServices : setBusinessServices, x)} error={isVendor ? errors.services : undefined} /></Section>}
         {(isBusiness || role === "PARTNER") && <Section title="4. Employment Partner Opt-In"><Toggle checked={employmentPartner} setChecked={setEmploymentPartner} label="We want to participate as an employment partner" description="Optional opt-in. Partner participation may qualify an organization for partnership or pricing incentives where contractually available." />{employmentPartner && <div className="space-y-5 pt-4"><div className="grid sm:grid-cols-2 gap-4"><Select label="Organization size" value={orgSize} setValue={setOrgSize} options={ORG_SIZES.map((x) => ({ value: x, label: `${x} employees` }))} error={errors.organizationSize} /><Select label="Placement opportunities" value={String(placements)} setValue={(x) => setPlacements(Number(x))} options={Array.from({ length: 20 }, (_, i) => ({ value: String(i + 1), label: `${i + 1} opportunity${i ? "ies" : ""}` }))} error={errors.placementOpportunities} /></div><CheckboxGroup label="Programs you want to offer" items={PARTNERSHIP_PROGRAMS} selected={programs} onToggle={(x) => toggle(setPrograms, x)} error={errors.partnershipPrograms} /><CheckboxGroup label="Accommodation capabilities your workplace can support" items={ACCOMMODATION_CAPABILITIES} selected={accommodations} onToggle={(x) => toggle(setAccommodations, x)} /><Textarea label="Placement details, limitations, expectations, or accommodations" value={partnerDetails} setValue={setPartnerDetails} placeholder="Describe work environments, limits, schedule expectations, placement design, and any other relevant details." /><Textarea label="Support requested from rehabilitation providers" value={supportNeeds} setValue={setSupportNeeds} placeholder="Describe resources, networking, job coaching, support materials, communication, or provider involvement you expect." /><Toggle checked={publicDirectory} setChecked={setPublicDirectory} label="List our partnership profile publicly" description="Optional. Your organization may be shown as an accommodation, inclusion, and accessibility-minded partner after administrator review." /></div>}</Section>}
         <Section title="Recommended Workspace"><div className="grid sm:grid-cols-2 gap-3">{featurePreview.map((f) => <div key={f.title} className="border border-ink/10 rounded-xl p-4"><p className="font-semibold text-ink">{f.title}</p><p className="text-sm text-ink/60 mt-1">{f.reason}</p></div>)}</div><p className="text-xs text-ink/50">Final feature access is provisioned by the platform or tenant administrator and remains limited to approved roles, assigned cases, shared records, and contractual capacity.</p></Section>
-        <label className="flex gap-3 text-sm text-ink/70 items-start"><input type="checkbox" checked={termsAccepted} onChange={(e) => setTermsAccepted(e.target.checked)} className="mt-1" /><span>I accept the <a href="/terms" className="text-accent underline">Terms of Service and User Consent Agreement</a> and confirm that the information provided is accurate.</span></label>{errors.termsAccepted && <p className="text-sm text-red-600">{errors.termsAccepted}</p>}{errors.form && <p className="text-sm text-red-600">{errors.form}</p>}<button className="w-full bg-accent text-white font-semibold py-3 rounded-lg">Submit Profile for Provisioning</button>
+        <label className="flex gap-3 text-sm text-ink/70 items-start"><input type="checkbox" checked={termsAccepted} onChange={(e) => setTermsAccepted(e.target.checked)} className="mt-1" /><span>I accept the <a href="/terms" className="text-accent underline">Terms of Service and User Consent Agreement</a> and confirm that the information provided is accurate.</span></label>{errors.termsAccepted && <p className="text-sm text-red-600">{errors.termsAccepted}</p>}{errors.form && <p className="text-sm text-red-600">{errors.form}</p>}<button className="w-full bg-accent text-white font-semibold py-3 rounded-lg">{demoMode ? "Preview My Entity Workspace" : "Submit Profile for Provisioning"}</button>
       </form>
     </div>
   );
