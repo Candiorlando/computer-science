@@ -34,7 +34,7 @@ const values: ValueCard[] = [
     philosophy:
       "We reject paternalistic structures that diminish the individual. Drawing upon the deepest ethics of person-centered counseling, we honor the client as the ultimate author of their narrative. True rehabilitation requires a space where the individual’s right to chart their psychosocial adjustment is structurally protected and deeply respected.",
     implementation:
-      "Client-facing portals that grant individuals ownership of their data, seamless communication, and active participation in their Individual Plan for Employment (IPE).",
+      "Product decisions are intended to support client voice, appropriate access, and meaningful participation in planning.",
     accent: "text-amber-700",
     bg: "bg-amber-50",
   },
@@ -45,7 +45,7 @@ const values: ValueCard[] = [
     philosophy:
       "To segregate individuals or devalue their labor is to fracture our social ecology. Every individual possesses an inherent right to Competitive Integrated Employment (CIE)—to labor alongside their peers, earning equitable wages, and contributing meaningfully to the shared life of the community.",
     implementation:
-      "Automated tracking and outcome mapping explicitly aligned with the integration mandates of the Olmstead decision and WIOA guidelines.",
+      "The system is being designed with equity, integration, and responsible accountability in mind.",
     accent: "text-indigo-700",
     bg: "bg-indigo-50",
   },
@@ -56,7 +56,7 @@ const values: ValueCard[] = [
     philosophy:
       "The calling of a rehabilitation counselor is a profound civic duty, one that belongs in the presence of the client, not lost in the machinery of bureaucracy. We build intelligent automation to dismantle administrative burdens, liberating the professional to return to the transformative, human work of counseling.",
     implementation:
-      "AI-driven 'Note-to-Metric' parsing and automated state billing generation that reclaims hours for direct, empathetic service.",
+      "Administrative support is being designed to reduce burden while preserving professional judgment and review.",
     accent: "text-rose-700",
     bg: "bg-rose-50",
   },
@@ -67,7 +67,7 @@ const values: ValueCard[] = [
     philosophy:
       "Genuine reform demands institutions that hold themselves accountable to the common good. By embedding ethical compliance directly into our technological workflows, we ensure that public resources are stewarded transparently, transforming data into a faithful record of human flourishing rather than a mechanism of control.",
     implementation:
-      "GATA-compliant document centralization and immutable audit trails that protect state funding and ensure organizational transparency.",
+      "Information practices are being developed to support responsible stewardship and transparent organizational review.",
     accent: "text-slate-700",
     bg: "bg-slate-50",
   },
@@ -78,7 +78,7 @@ const values: ValueCard[] = [
     philosophy:
       "Inclusion is not a charitable concession; it is the realization of our interconnectedness. We cultivate alliances across corporate, educational, and state institutions to foster a natural, accessible talent ecosystem. We are all co-authors of a society where the dignity of work is a shared civic virtue.",
     implementation:
-      "B2B engagement tools and workforce development portals that connect employers directly to the diverse talent pipelines cultivated by our network.",
+      "Partnership design is intended to foster respectful collaboration among organizations committed to inclusive opportunity.",
     accent: "text-emerald-700",
     bg: "bg-emerald-50",
   },
@@ -195,17 +195,17 @@ function SystemsImpactBanner() {
     {
       icon: FileCheck2,
       title: "WIOA Title IV Compliance",
-      text: "Workflow structures that align individualized planning, measurable progress, service documentation, and employment outcomes with federal vocational rehabilitation expectations.",
+      text: "A commitment to learning from relevant public standards and the needs of rehabilitation communities.",
     },
     {
       icon: Scale,
       title: "Olmstead Mandate",
-      text: "Outcome mapping that centers Competitive Integrated Employment, community integration, equitable wages, and the rejection of segregated systems of labor.",
+      text: "A values-led commitment to community inclusion, equitable opportunity, and the dignity of work.",
     },
     {
       icon: BookOpenCheck,
       title: "State Transparency Standards",
-      text: "Audit-ready documentation practices that support GATA reviews, public stewardship, and organizational accountability without reducing clients to compliance artifacts.",
+      text: "A development posture that values responsible stewardship, transparent practice, and respect for people over paperwork.",
     },
   ];
 

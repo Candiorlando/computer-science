@@ -45,7 +45,7 @@ const PARTNERSHIP_MODELS: PartnershipModel[] = [
     focus:
       "Opportunities for employers to host internships, vocational training, and work experiences.",
     description:
-      "Transform your business operations into an engine for social impact. By partnering with our network for outsourced projects or supported employment, businesses provide crucial work experience for youth and adults with disabilities while meeting corporate CSR and diversity goals.",
+      "Explore a values-led conversation about social impact, meaningful experience, and inclusive opportunity.",
     accent: "text-amber-700",
     accentBg: "bg-amber-50",
     accentBorder: "border-amber-200",
@@ -58,7 +58,7 @@ const PARTNERSHIP_MODELS: PartnershipModel[] = [
     focus:
       "Seamlessly transitioning individuals into your permanent workforce.",
     description:
-      "Our professionals provide the ongoing job coaching and structural matching required for success. Employers gain dedicated, skilled employees while frequently qualifying for the Work Opportunity Tax Credit (WOTC), ensuring a partnership rooted in equitable compensation and true workplace belonging.",
+      "Explore pathways toward equitable hiring, workplace belonging, and mutually beneficial employment relationships.",
     accent: "text-sky-700",
     accentBg: "bg-sky-50",
     accentBorder: "border-sky-200",
@@ -71,7 +71,7 @@ const PARTNERSHIP_MODELS: PartnershipModel[] = [
     focus:
       "Creating work-based learning experiences for young adults.",
     description:
-      "Partner with our network to fulfill state-backed Pre-Employment Transition Services (Pre-ETS). Provide early career exploration and scaffolded learning environments that shape the future workforce — building a pipeline of capable, motivated talent for your industry.",
+      "Consider how early career exploration and supportive learning environments can expand opportunity for young adults.",
     accent: "text-violet-700",
     accentBg: "bg-violet-50",
     accentBorder: "border-violet-200",
@@ -84,7 +84,7 @@ const PARTNERSHIP_MODELS: PartnershipModel[] = [
     focus:
       "Keeping experienced employees on the job after an injury or acquired disability.",
     description:
-      "Our partnership extends to your incumbent workers. We provide expert Work Adjustment counseling, environmental accommodations, and independent EAP solutions to mitigate turnover, streamline workers' compensation transitions, and preserve the dignity of your most valuable assets.",
+      "Discuss people-centered approaches to retention, accessibility, and employee wellbeing as your organization navigates change.",
     accent: "text-teal-700",
     accentBg: "bg-teal-50",
     accentBorder: "border-teal-200",
@@ -102,19 +102,19 @@ const VALUE_PROPS: ValueProp[] = [
     icon: DollarSign,
     title: "Tax & Financial Incentives",
     description:
-      "Streamlined access to the Work Opportunity Tax Credit (WOTC) and state-subsidized training programs that offset onboarding costs and reward inclusive hiring practices.",
+      "A conversation about available incentives and resources may be part of a partnership discussion, subject to eligibility and independent review.",
   },
   {
     icon: Network,
     title: "Seamless Infrastructure",
     description:
-      "Our secure, role-based platform connects your HR team directly with dedicated rehabilitation professionals — no intermediaries, no fragmented communication.",
+      "A developing coordination environment intended to support clear, appropriate communication among approved participants.",
   },
   {
     icon: TrendingUp,
     title: "Systemic Impact",
     description:
-      "Elevate your brand by actively closing the disability employment gap. Measurable outcomes you can report to stakeholders, investors, and the communities you serve.",
+      "Build an authentic, values-aligned approach to accessibility, inclusion, and community participation.",
   },
 ];
 
@@ -190,18 +190,18 @@ function HeroSection() {
               {[
                 {
                   icon: Building2,
-                  label: "150+ Employer Partners",
-                  sub: "Across 12 industries",
+                  label: "Partnership Conversations",
+                  sub: "Built around shared values",
                 },
                 {
                   icon: Users,
-                  label: "2,400+ Placements",
-                  sub: "92% retention at 6 months",
+                  label: "Inclusive Opportunity",
+                  sub: "People-centered workforce development",
                 },
                 {
                   icon: Heart,
-                  label: "78% WOTC Qualification",
-                  sub: "Average $2,400 per hire",
+                  label: "Thoughtful Collaboration",
+                  sub: "Accessible partnership design",
                 },
               ].map((item, i) => (
                 <div

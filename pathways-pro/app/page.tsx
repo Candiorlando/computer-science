@@ -11,12 +11,8 @@ import {
   Building2,
   Scale,
   Users,
-  TrendingUp,
-  Award,
   Briefcase,
   ShieldCheck,
-  BarChart3,
-  Handshake,
   Target,
 } from "lucide-react";
 
@@ -61,10 +57,9 @@ function HeroSection() {
             Restoring Dignity &amp; Paving New Pathways
           </h1>
           <p className="text-lg text-white/85 leading-relaxed max-w-xl">
-            Personalized support, holistic wellness, and actionable
-            opportunity — for individuals rebuilding their lives, agencies
-            scaling their mission, and partners driving inclusive
-            employment.
+            A rehabilitation case-management system in active development for
+            practitioners, agencies, community organizations, and partners
+            working toward more coordinated, person-centered services.
           </p>
           <div className="flex flex-wrap gap-4 pt-1">
             <Link
@@ -99,10 +94,10 @@ function HeroSection() {
             </div>
             {/* Floating metric badges */}
             <div className="absolute top-4 right-4 bg-white/20 backdrop-blur rounded-lg px-3 py-2 text-xs text-white font-semibold">
-              94% Client Satisfaction
+              Built for Rehabilitation Services
             </div>
             <div className="absolute bottom-4 left-4 bg-fresh/30 backdrop-blur rounded-lg px-3 py-2 text-xs text-white font-semibold">
-              2,400+ Lives Transformed
+              In Active Development
             </div>
           </div>
         </div>
@@ -157,133 +152,25 @@ function MissionStatement() {
    ═══════════════════════════════════════════════════════════════════ */
 
 function MetricsDashboard() {
-  const metrics = [
-    {
-      label: "Successful Transition Rate",
-      value: 87,
-      color: "#4CAF50",
-      suffix: "%",
-      description: "Clients transitioning to competitive integrated employment",
-    },
-    {
-      label: "Placement Success",
-      value: 92,
-      color: "#0F4C5C",
-      suffix: "%",
-      description: "Job placement rate within 90 days of plan completion",
-    },
-    {
-      label: "Long-term Retention",
-      value: 78,
-      color: "#9CB4A6",
-      suffix: "%",
-      description: "Clients retained at 12+ months post-placement",
-    },
+  const principles = [
+    { icon: ShieldCheck, title: "Human Judgment First", text: "Technology is designed to support informed professional judgment, not replace it." },
+    { icon: Users, title: "Built for Coordination", text: "A developing system intended to reduce fragmentation across the rehabilitation ecosystem." },
+    { icon: Heart, title: "Dignity by Design", text: "Every product decision begins with client voice, appropriate access, and meaningful participation." },
   ];
 
   return (
     <section className="bg-white">
       <div className="max-w-7xl mx-auto px-6 py-16 md:py-20 space-y-10">
-        <header className="text-center space-y-3">
-          <p className="text-xs uppercase tracking-[0.2em] text-fresh font-bold">
-            Results That Matter
-          </p>
-          <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-ink">
-            Data-Driven Outcomes
-          </h2>
-          <p className="text-ink/60 max-w-2xl mx-auto">
-            Our platform tracks every milestone in the rehabilitation
-            journey, delivering transparent performance metrics that
-            stakeholders can trust.
-          </p>
+        <header className="text-center space-y-3 max-w-2xl mx-auto">
+          <p className="text-xs uppercase tracking-[0.2em] text-fresh font-bold">Built From the Inside of the Work</p>
+          <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-ink">A system shaped by rehabilitation practice.</h2>
+          <p className="text-ink/60">Pathways Pro is in active development. The goal is simple: make the administrative side of rehabilitation more coherent so professionals can focus on people, purpose, and progress.</p>
         </header>
-
-        <div className="grid sm:grid-cols-3 gap-8 max-w-4xl mx-auto">
-          {metrics.map((m) => (
-            <MetricDial key={m.label} {...m} />
-          ))}
-        </div>
-
-        {/* Secondary stats bar */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4">
-          {[
-            { stat: "2,400+", label: "Lives Impacted" },
-            { stat: "150+", label: "Agency Partners" },
-            { stat: "98%", label: "Compliance Rate" },
-            { stat: "4.9/5", label: "Client Satisfaction" },
-          ].map((s) => (
-            <div
-              key={s.label}
-              className="text-center py-4 px-3 bg-cream rounded-xl border border-ink/5"
-            >
-              <div className="text-2xl font-bold text-accent">{s.stat}</div>
-              <div className="text-xs text-ink/55 font-medium mt-1">
-                {s.label}
-              </div>
-            </div>
-          ))}
+        <div className="grid md:grid-cols-3 gap-5 max-w-5xl mx-auto">
+          {principles.map((item) => <div key={item.title} className="border border-ink/10 rounded-2xl p-6 bg-cream/50 space-y-3"><item.icon className="w-6 h-6 text-accent" /><h3 className="font-bold text-ink">{item.title}</h3><p className="text-sm text-ink/65 leading-relaxed">{item.text}</p></div>)}
         </div>
       </div>
     </section>
-  );
-}
-
-/** SVG circular progress dial */
-function MetricDial({
-  label,
-  value,
-  color,
-  suffix,
-  description,
-}: {
-  label: string;
-  value: number;
-  color: string;
-  suffix: string;
-  description: string;
-}) {
-  const radius = 54;
-  const circumference = 2 * Math.PI * radius;
-  const offset = circumference - (value / 100) * circumference;
-
-  return (
-    <div className="flex flex-col items-center text-center space-y-4">
-      <div className="relative w-36 h-36">
-        <svg className="metric-ring w-full h-full" viewBox="0 0 128 128">
-          {/* Track */}
-          <circle
-            cx="64"
-            cy="64"
-            r={radius}
-            stroke="#E8ECEF"
-            strokeWidth="10"
-          />
-          {/* Progress */}
-          <circle
-            cx="64"
-            cy="64"
-            r={radius}
-            stroke={color}
-            strokeWidth="10"
-            strokeDasharray={circumference}
-            strokeDashoffset={offset}
-            className="transition-all duration-1000 ease-out"
-          />
-        </svg>
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-3xl font-bold text-ink">
-            {value}
-            <span className="text-lg">{suffix}</span>
-          </span>
-        </div>
-      </div>
-      <div>
-        <h3 className="font-bold text-sm text-ink">{label}</h3>
-        <p className="text-xs text-ink/55 mt-1 max-w-[200px]">
-          {description}
-        </p>
-      </div>
-    </div>
   );
 }
 
@@ -300,11 +187,8 @@ function StakeholderSections() {
       title: "For Individuals",
       subtitle: "Dignity, Support & Opportunity",
       points: [
-        "A person-centered path toward meaningful participation",
-        "Support that recognizes individual strengths and goals",
-        "Clearer connections across the rehabilitation continuum",
-        "Tools designed to reinforce agency and self-determination",
-        "A secure system that keeps people connected to their progress",
+        "A person-centered approach to rehabilitation and meaningful participation.",
+        "A developing system intended to keep individuals informed and connected to their goals.",
       ],
       cta: "Start Your Journey",
       ctaHref: "/login",
@@ -316,11 +200,8 @@ function StakeholderSections() {
       title: "For Governments & Agencies",
       subtitle: "Secure Coordination, Accountability & Scale",
       points: [
-        "A shared system for coordinated rehabilitation operations",
-        "Structured information stewardship across teams",
-        "Visibility that supports accountable decision-making",
-        "Role-aware access designed for sensitive information",
-        "Flexible capacity for organizations and communities",
+        "A developing coordination system for teams delivering rehabilitation services.",
+        "Designed to support accountable information stewardship and appropriate access.",
       ],
       cta: "Schedule a Demo",
       ctaHref: "/request-demo",
@@ -332,11 +213,8 @@ function StakeholderSections() {
       title: "For Business Clients & Partners",
       subtitle: "Connected Partnerships & Shared Impact",
       points: [
-        "A coordinated ecosystem for community-facing collaboration",
-        "Stronger connections between rehabilitation and opportunity",
-        "Shared visibility across approved participants",
-        "A system designed to support inclusive workforce outcomes",
-        "Practical infrastructure for sustained partnership",
+        "A high-level pathway for organizations interested in inclusive workforce collaboration.",
+        "Partnership conversations shaped around access, dignity, and shared community impact.",
       ],
       cta: "Partner With Us",
       ctaHref: "/contact",
@@ -419,9 +297,7 @@ function FinalCta() {
           Ready to Transform Rehabilitation Outcomes?
         </h2>
         <p className="text-white/75 max-w-xl mx-auto leading-relaxed">
-          Join agencies, counselors, and businesses already using Pathways
-          Pro to drive competitive integrated employment and measurable
-          results.
+          We are welcoming conversations with agencies, practices, and organizations interested in the direction of Pathways Pro as development continues.
         </p>
         <div className="flex flex-wrap justify-center gap-4 pt-2">
           <Link

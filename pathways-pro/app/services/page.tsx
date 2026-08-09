@@ -40,7 +40,7 @@ const PILLARS: Pillar[] = [
     title: "Vocational Empowerment & CIE",
     focus: "Navigating the journey to Competitive Integrated Employment.",
     description:
-      "Aligned with Olmstead principles, we emphasize autonomy, community integration, and strengths-based placement rather than just checking a \"hired\" box. Every career plan is anchored in the individual's inherent capabilities and the labor market realities of their community.",
+      "A values-led approach to rehabilitation services centered on autonomy, meaningful participation, and community connection.",
     accent: "text-amber-700",
     accentBg: "bg-amber-100",
   },
@@ -50,7 +50,7 @@ const PILLARS: Pillar[] = [
     title: "Workers' Compensation & Adjustment",
     focus: "Guiding employers and individuals through the psychosocial complexities of acute injury.",
     description:
-      "Emphasizing restorative adjustment counseling and transparent, ethical compliance frameworks for all parties involved. We bridge the gap between clinical recovery and vocational re-engagement, ensuring the human dimension is never lost in the administrative process.",
+      "A general service area focused on supporting adjustment, communication, and responsible return-to-work conversations.",
     accent: "text-sky-700",
     accentBg: "bg-sky-100",
   },
@@ -60,7 +60,7 @@ const PILLARS: Pillar[] = [
     title: "Forensic & Expert Testimony",
     focus: "Objective, authoritative insight.",
     description:
-      "Providing definitive forensic evaluations and expert witness testimony to uphold systemic integrity and the standard of care in complex cases. Our forensic practice is rooted in methodological rigor, ethical neutrality, and a deep respect for the gravity of the proceedings we inform.",
+      "A professional service area for organizations seeking objective vocational insight in complex situations.",
     accent: "text-slate-700",
     accentBg: "bg-slate-100",
   },
@@ -70,7 +70,7 @@ const PILLARS: Pillar[] = [
     title: "Clinical Counseling & Behavioral Health Integration",
     focus: "Restoring purpose requires healing the whole person.",
     description:
-      "Bridging the gap between vocational objectives and psychological well-being, providing the clinical architecture needed to support emotional resilience. Trauma-informed, strengths-based, and always oriented toward the restoration of agency and self-determination.",
+      "A whole-person perspective that recognizes wellbeing, resilience, and vocational purpose are interconnected.",
     accent: "text-rose-700",
     accentBg: "bg-rose-100",
   },
@@ -80,7 +80,7 @@ const PILLARS: Pillar[] = [
     title: "Youth Transition Services (Pre-ETS)",
     focus: "Dignity begins early.",
     description:
-      "Providing the framework to guide young adults through critical transition periods, shifting focus from special education to lifelong self-determination and autonomy. We prepare the next generation not merely for employment, but for purposeful participation in civic and economic life.",
+      "A transition-focused service area centered on self-determination, exploration, and meaningful early opportunities.",
     accent: "text-violet-700",
     accentBg: "bg-violet-100",
   },
@@ -90,7 +90,7 @@ const PILLARS: Pillar[] = [
     title: "Corporate Consulting & EAP Solutions",
     focus: "True integration requires systemic employer support.",
     description:
-      "Empowering businesses through comprehensive workplace assessments, structural consulting, and independent Employee Assistance Programs (EAP) that transform standard compliance into a culture of holistic well-being. We position employers as active partners in the rehabilitation continuum.",
+      "A consultative area for organizations interested in accessible, inclusive, and people-centered workplace practices.",
     accent: "text-teal-700",
     accentBg: "bg-teal-100",
   },
@@ -100,7 +100,7 @@ const PILLARS: Pillar[] = [
     title: "Assistive Technology & Environmental Accommodations",
     focus: "Belonging means having the right tools to succeed.",
     description:
-      "Seamless coordination of assistive technology, ensuring environments adapt to the individual, rather than forcing the individual to conform to the environment. From ergonomic assessment to adaptive software, we architect the conditions for genuine inclusion.",
+      "A service area guided by the principle that environments should adapt to people and support meaningful participation.",
     accent: "text-emerald-700",
     accentBg: "bg-emerald-100",
   },
@@ -271,9 +271,9 @@ function PlatformTieIn() {
         {/* Trust indicators */}
         <div className="flex flex-wrap justify-center md:justify-start gap-6 pt-2">
           {[
-            { icon: Lock, label: "HIPAA-Aligned Security" },
-            { icon: Shield, label: "Role-Based Access Control" },
-            { icon: Scale, label: "WIOA & Section 508 Compliant" },
+            { icon: Lock, label: "Security-conscious development" },
+            { icon: Shield, label: "Appropriate access design" },
+            { icon: Scale, label: "Standards-informed development" },
           ].map((item) => (
             <div
               key={item.label}
