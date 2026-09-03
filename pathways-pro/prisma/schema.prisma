@@ -1,0 +1,390 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ─── Enums ──────────────────────────────────────────────────
+
+enum UserRole {
+  COUNSELOR
+  CLIENT
+  BUSINESS
+  VENDOR
+  PARTNER
+}
+
+enum IndustrySector {
+  STATE_VR_AGENCY
+  CRP
+  PRIVATE_FORENSIC
+  K12_TRANSITION
+  HIGHER_ED_DISABILITY
+  CORPORATE_ACCOMMODATION
+  VETERANS_MILITARY
+  NONPROFIT_ADVOCACY
+  INDEPENDENT_CONSULTANT
+}
+
+enum TierType {
+  SOLO
+  AGENCY
+}
+
+enum OrgRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+  REVOKED
+}
+
+// ─── B2B multi-tenant RBAC foundation ───────────────────────
+
+enum PlatformAccess {
+  SUPER_ADMIN
+  USER
+}
+
+enum RoleScope {
+  PLATFORM
+  TENANT
+  EXTERNAL
+}
+
+enum TenantStatus {
+  ACTIVE
+  SUSPENDED
+  ARCHIVED
+}
+
+enum TenantType {
+  STATE_CLIENT
+  CITY_CLIENT
+  AGENCY_CLIENT
+  INDIVIDUAL_COUNSELOR
+}
+
+enum TenantClientStatus {
+  INTAKE
+  ACTIVE
+  CLOSED
+}
+
+enum TenantSharePermission {
+  VIEW
+  COMMENT
+  UPLOAD
+}
+
+// ─── Core user ──────────────────────────────────────────────
+
+model User {
+  id             String         @id @default(cuid())
+  clerkUserId    String?        @unique
+  email          String         @unique
+  name           String
+  hashedPassword String?
+  emailVerified  DateTime?
+  activeRole     UserRole       @default(COUNSELOR)
+  platformAccess PlatformAccess @default(USER)
+
+  // Role-specific profiles (at most one each)
+  counselorProfile CounselorProfile?
+  businessProfile  BusinessProfile?
+  vendorProfile    VendorProfile?
+
+  // Multi-tenant billing
+  memberships Membership[]
+  invitations Invitation[] @relation("InvitationAcceptedBy")
+
+  // Strict B2B tenant/RBAC foundation
+  tenantMemberships    TenantMembership[] @relation("TenantMembershipUser")
+  tenantAssignedClients TenantClient[]     @relation("TenantClientAssignedCounselor")
+  tenantCaseloads      TenantCaseload[]    @relation("TenantCaseloadCounselor")
+  tenantRecordShares   TenantRecordShare[] @relation("TenantRecordShareUser")
+  tenantAdministrations Tenant[]            @relation("TenantAdministrator")
+
+  // Auth.js
+  accounts Account[]
+  sessions Session[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ─── Role profiles ──────────────────────────────────────────
+
+model CounselorProfile {
+  id       String         @id @default(cuid())
+  sector   IndustrySector
+  jobTitle String
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model BusinessProfile {
+  id         String         @id @default(cuid())
+  sector     IndustrySector
+  jobTitle   String
+  department String?
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VendorProfile {
+  id       String         @id @default(cuid())
+  sector   IndustrySector
+  jobTitle String
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  services VendorService[]
+}
+
+model VendorService {
+  id   String @id @default(cuid())
+  name String
+
+  vendorId String
+  vendor   VendorProfile @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+
+  @@unique([vendorId, name])
+}
+
+// ─── Multi-tenant billing ───────────────────────────────────
+
+model Organization {
+  id   String   @id @default(cuid())
+  name String
+  tier TierType
+  slug String   @unique
+
+  stripeCustomerId     String? @unique
+  stripeSubscriptionId String? @unique
+  stripePriceId        String?
+
+  seatCount   Int @default(1)
+  seatMinimum Int @default(1)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  members     Membership[]
+  invitations Invitation[]
+}
+
+model Membership {
+  id   String  @id @default(cuid())
+  role OrgRole @default(MEMBER)
+
+  userId String
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  orgId String
+  org   Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, orgId])
+}
+
+model Invitation {
+  id     String       @id @default(cuid())
+  email  String
+  role   OrgRole      @default(MEMBER)
+  status InviteStatus @default(PENDING)
+  token  String       @unique @default(cuid())
+
+  orgId String
+  org   Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  invitedById  String?
+  acceptedById String?
+  acceptedBy   User?   @relation("InvitationAcceptedBy", fields: [acceptedById], references: [id])
+
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([email, status])
+}
+
+// ─── Auth.js tables ─────────────────────────────────────────
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ─── Strict B2B multi-tenant SaaS foundation ────────────────
+// These models are intentionally separate from the legacy Organization
+// billing tables above. Every PHI/case-management table below includes
+// tenantId and must always be queried with tenantId in the where clause.
+
+model Tenant {
+  id         String       @id @default(cuid())
+  clerkOrgId String?      @unique
+  name       String
+  slug       String       @unique
+  status     TenantStatus @default(ACTIVE)
+  tenantType TenantType   @default(AGENCY_CLIENT)
+
+  // Contract limits set by the corporate Master Admin. Tenant admins
+  // may operate only within these agreed counselor/case capacities.
+  contractMaxCounselors Int @default(1)
+  contractMaxActiveCases Int @default(25)
+
+  tenantAdministratorId String?
+  tenantAdministrator   User? @relation("TenantAdministrator", fields: [tenantAdministratorId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  memberships  TenantMembership[]
+  clients      TenantClient[]
+  caseloads    TenantCaseload[]
+  recordShares TenantRecordShare[]
+
+  @@index([status])
+  @@index([tenantType])
+  @@index([tenantAdministratorId])
+}
+
+model RbacRole {
+  id          String    @id
+  scope       RoleScope
+  name        String
+  description String
+  rank        Int
+  isSystem    Boolean   @default(true)
+
+  memberships TenantMembership[]
+
+  @@index([scope, rank])
+}
+
+model TenantMembership {
+  id String @id @default(cuid())
+
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User @relation("TenantMembershipUser", fields: [userId], references: [id], onDelete: Cascade)
+
+  // Expected system role IDs:
+  // SUPER_ADMIN, TENANT_ADMIN, TENANT_USER, EXTERNAL_PORTAL_USER
+  roleId String
+  role   RbacRole @relation(fields: [roleId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, userId])
+  @@index([tenantId, roleId])
+  @@index([userId])
+}
+
+model TenantClient {
+  id String @id @default(cuid())
+
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  assignedCounselorId String?
+  assignedCounselor   User? @relation("TenantClientAssignedCounselor", fields: [assignedCounselorId], references: [id])
+
+  firstName String
+  lastName  String
+  email     String?
+  phone     String?
+  status    TenantClientStatus @default(INTAKE)
+
+  caseloads TenantCaseload[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId])
+  @@index([tenantId, assignedCounselorId])
+  @@index([tenantId, status])
+}
+
+model TenantCaseload {
+  id String @id @default(cuid())
+
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  clientId String
+  client   TenantClient @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  counselorId String
+  counselor   User @relation("TenantCaseloadCounselor", fields: [counselorId], references: [id])
+
+  title String
+  notes String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId])
+  @@index([tenantId, counselorId])
+  @@index([tenantId, clientId])
+  @@unique([tenantId, clientId, counselorId])
+}
+
+model TenantRecordShare {
+  id String @id @default(cuid())
+
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  sharedWithUserId String
+  sharedWithUser   User @relation("TenantRecordShareUser", fields: [sharedWithUserId], references: [id], onDelete: Cascade)
+
+  // Examples: TenantClient, TenantCaseload, Invoice, Referral
+  resourceType String
+  resourceId   String
+  permission   TenantSharePermission
+  expiresAt    DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([tenantId, sharedWithUserId])
+  @@index([tenantId, resourceType, resourceId])
+  @@index([expiresAt])
+}

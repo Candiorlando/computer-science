@@ -1,0 +1,233 @@
+// ─── Scheduling / Telehealth / Messaging schema extension ────────────
+// Merge into schema.prisma after the base schema is migrated, then run
+//   npx prisma migrate dev --name scheduling
+// The app currently persists these client-side (lib/scheduling.ts,
+// lib/matching.ts) so the demo works without a database; these models are
+// the production backend the client-side layer maps onto 1:1.
+//
+// Add the back-relations noted in comments to the existing User / CaseRecord
+// models when merging (Prisma requires both sides of each relation).
+
+enum AppointmentStatus {
+  REQUESTED
+  BOOKED
+  RESCHEDULED
+  CANCELLED
+  COMPLETED
+  NO_SHOW
+}
+
+enum Modality {
+  TELEHEALTH
+  PHONE
+  IN_PERSON
+}
+
+enum ParticipantRole {
+  HOST      // counselor
+  ATTENDEE  // client
+  OBSERVER  // supervisor / interpreter
+}
+
+/// Recurring availability as an RFC-5545 RRULE, authored in the counselor's
+/// own timezone so DST is handled when slots are expanded.
+model AvailabilityRule {
+  id           String  @id @default(cuid())
+  counselorId  String  // -> User.id (add `availabilityRules AvailabilityRule[]` to User)
+  weekday      Int     // 0=Sun … 6=Sat (or store an RRULE string)
+  startTimeMin Int     // minutes from local midnight
+  endTimeMin   Int
+  slotMinutes  Int     @default(50)
+  timezone     String  // IANA tz the rule is authored in
+  active       Boolean @default(true)
+
+  @@index([counselorId, active])
+}
+
+/// One-off overrides: PTO/holidays (block) or extra openings.
+model AvailabilityException {
+  id          String   @id @default(cuid())
+  counselorId String
+  startsAt    DateTime // UTC
+  endsAt      DateTime // UTC
+  isBlock     Boolean  @default(true)
+  reason      String?  // NON-PHI label only
+
+  @@index([counselorId, startsAt])
+}
+
+model Appointment {
+  id          String            @id @default(cuid())
+  caseId      String            // -> CaseRecord.id
+  hostId      String            // counselor -> User.id
+  startsAt    DateTime          // UTC — source of truth
+  endsAt      DateTime          // UTC
+  status      AppointmentStatus @default(BOOKED)
+  modality    Modality          @default(TELEHEALTH)
+  reasonCode  String?           // coded, NOT free text (keep PHI out)
+  createdById String
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  participants AppointmentParticipant[]
+  videoRoom    VideoRoom?
+
+  // Enforce no double-booking at the DB level with a raw migration:
+  //   ALTER TABLE "Appointment" ADD CONSTRAINT no_overlap
+  //   EXCLUDE USING gist ("hostId" WITH =, tstzrange("startsAt","endsAt") WITH &&)
+  //   WHERE (status IN ('BOOKED','RESCHEDULED'));
+  @@index([hostId, startsAt])
+  @@index([caseId])
+}
+
+model AppointmentParticipant {
+  id            String          @id @default(cuid())
+  appointmentId String
+  appointment   Appointment     @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  userId        String
+  role          ParticipantRole
+  timezone      String
+
+  @@unique([appointmentId, userId])
+}
+
+/// Video room metadata. Long-lived join tokens are NOT persisted — mint a
+/// short-lived per-user token from a server route at join time.
+model VideoRoom {
+  id            String      @id @default(cuid())
+  appointmentId String      @unique
+  appointment   Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  provider      String      @default("daily") // "daily" | "zoom" | "chime" | "jitsi"
+  providerRoom  String                        // opaque room name (NO PHI)
+  expiresAt     DateTime
+  createdAt     DateTime    @default(now())
+}
+
+// ─── Secure asynchronous messaging ───────────────────────────────────
+
+model MessageThread {
+  id        String    @id @default(cuid())
+  caseId    String    // -> CaseRecord.id
+  subject   String?   // NON-PHI subject only
+  createdAt DateTime  @default(now())
+  lastMsgAt DateTime  @default(now())
+  messages  Message[]
+
+  @@index([caseId, lastMsgAt])
+}
+
+model Message {
+  id        String        @id @default(cuid())
+  threadId  String
+  thread    MessageThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  senderId  String        // -> User.id
+  body      String        // PHI — field-encrypt at rest + TLS in transit
+  createdAt DateTime      @default(now())
+  reads     MessageRead[]
+
+  @@index([threadId, createdAt])
+}
+
+model MessageRead {
+  id        String   @id @default(cuid())
+  messageId String
+  message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  userId    String
+  readAt    DateTime @default(now())
+
+  @@unique([messageId, userId])
+}
+
+// ─── Intake preferences → matching (feature 1) ───────────────────────
+
+model MatchPreference {
+  id                 String   @id @default(cuid())
+  userId             String   @unique // -> User.id (client)
+  preferredStyles    String[]
+  preferredSpecialty String[]
+  languages          String[]
+  windows            String[] // ["Mornings","Evenings"]
+  updatedAt          DateTime @updatedAt
+}
+
+// Add to CounselorProfile for matching + availability:
+//   specialties        String[]
+//   communicationStyle String[]
+//   languages          String[]
+//   acceptingClients   Boolean @default(true)
+//   bufferMinutes      Int     @default(10)
+//   minNoticeHours     Int     @default(24)
+
+// ─── HIPAA access log (append-only; references only, never PHI values) ─
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  action     String   // "appointment.create", "message.read"
+  entityType String
+  entityId   String
+  ip         String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([actorId, createdAt])
+}
+
+// ─── External calendar sync (Google / Outlook) ────────────────────────
+// Currently tokens live in a short-lived httpOnly cookie (single browser
+// session) — see lib/calendar-cookies.ts. Migrate to this table for
+// server-side sync independent of an open browser (e.g. a nightly job):
+// swap the cookie read/write in app/api/calendar/*/callback and
+// app/api/calendar/sync-event for a lookup/upsert against this model, and
+// encrypt accessToken/refreshToken at the application layer before
+// writing (they are bearer credentials to the counselor's calendar).
+
+enum CalendarProvider {
+  GOOGLE
+  OUTLOOK
+}
+
+model CalendarConnection {
+  id           String           @id @default(cuid())
+  userId       String           // -> User.id (add `calendarConnections CalendarConnection[]` to User)
+  provider     CalendarProvider
+  accessToken  String           // encrypt before persisting
+  refreshToken String?          // encrypt before persisting
+  expiresAt    DateTime
+  connectedAt  DateTime         @default(now())
+
+  @@unique([userId, provider])
+}
+
+// ─── Discovered local events (education / disability / corporate / CE) ─
+// Currently fetched client-side and cached to localStorage (per browser),
+// dismissals tracked per counselor — see lib/discovered-events.ts. Migrate
+// fetching to a server cron (e.g. Vercel Cron hitting /api/events/refresh)
+// writing to this table once real sources (APIs/RSS/iCal) are wired in.
+
+model DiscoveredEvent {
+  id          String   @id @default(cuid())
+  title       String
+  category    String   // "education" | "disability" | "corporate" | "ce"
+  source      String
+  sourceUrl   String
+  startsAt    DateTime
+  endsAt      DateTime
+  location    String
+  description String
+  ceCredits   Float?
+  fetchedAt   DateTime @default(now())
+
+  dismissedBy DiscoveredEventDismissal[]
+}
+
+model DiscoveredEventDismissal {
+  id        String          @id @default(cuid())
+  eventId   String
+  event     DiscoveredEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  userId    String          // -> User.id (counselor who dismissed it)
+  dismissedAt DateTime      @default(now())
+
+  @@unique([eventId, userId])
+}

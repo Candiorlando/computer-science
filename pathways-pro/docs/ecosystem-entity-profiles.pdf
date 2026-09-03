@@ -1,0 +1,404 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+2 0 obj
+<< /Length 2515 >>
+stream
+BT
+/F1 10 Tf
+50 750 Td
+14 TL
+(PATHWAYS PRO ECOSYSTEM ENTITY PROFILES AND ACCESS MANUAL) Tj
+T*
+() Tj
+T*
+(**Internal operations document. Not for public marketing.**) Tj
+T*
+() Tj
+T*
+(DESIGN PRINCIPLE) Tj
+T*
+() Tj
+T*
+(Each profile receives only the features required for its approved work, contractual) Tj
+T*
+(authority, tenant membership, assigned cases, and explicit record shares. Feature visibility) Tj
+T*
+(is not authorization: server-side tenant, role, assignment, and share checks remain) Tj
+T*
+(mandatory.) Tj
+T*
+() Tj
+T*
+(1. CORPORATE MASTER ADMINISTRATOR) Tj
+T*
+() Tj
+T*
+(**Typical entity:** Pathways Pro corporate owner/operator.) Tj
+T*
+() Tj
+T*
+(**Authority:** Creates and manages state, city, agency, and individual counselor tenants;) Tj
+T*
+(assigns tenant administrators; configures contracted counselor and active-case capacity;) Tj
+T*
+(manages platform pricing, contracts, global operations, and aggregate analytics.) Tj
+T*
+() Tj
+T*
+(**Limitations:** Must not access tenant PHI, client case notes, assessments, IPEs, or) Tj
+T*
+(provider records unless separately provisioned as a normal tenant user for that purpose.) Tj
+T*
+() Tj
+T*
+(**Automatic workspace:** Master Admin, Pricing Engine, tenant provisioning, contract) Tj
+T*
+(capacity views, aggregate operational analytics.) Tj
+T*
+() Tj
+T*
+(2. STATE OR CITY AGENCY ADMINISTRATOR) Tj
+T*
+() Tj
+T*
+(**Typical entity:** State VR agency, municipal workforce office, public rehabilitation) Tj
+T*
+(authority.) Tj
+T*
+() Tj
+T*
+(**Authority:** Tenant-scoped administrative oversight; may create or remove approved tenant) Tj
+T*
+(staff up to contract limits, manage agency settings, monitor agency caseloads, coordinate) Tj
+T*
+(approved community providers, and restrict lower-level staff access.) Tj
+T*
+() Tj
+T*
+(**Limitations:** Cannot access another tenant's data; cannot exceed agreed counselor/case) Tj
+T*
+(capacity; must apply least-privilege access; may not use corporate pricing or Master Admin) Tj
+T*
+(tools.) Tj
+T*
+() Tj
+T*
+(**Automatic workspace:** Oversight case search, agency caseload views, approved provider) Tj
+T*
+(coordination, compliance/reporting tools, tenant user management, contract/document access) Tj
+T*
+(when authorized.) Tj
+T*
+() Tj
+T*
+(3. COMMUNITY REHABILITATION PROVIDER / AGENCY ADMINISTRATOR) Tj
+T*
+() Tj
+T*
+(**Typical entity:** CRP, nonprofit provider, transition program, supported employment) Tj
+T*
+(agency.) Tj
+T*
+() Tj
+T*
+(**Authority:** Manages counselors and assigned clients inside its own tenant, coordinates) Tj
+T*
+ET
+endstream
+endobj
+3 0 obj
+<< /Type /Page /Parent 10 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R >> >> /Contents 2 0 R >>
+endobj
+4 0 obj
+<< /Length 2547 >>
+stream
+BT
+/F1 10 Tf
+50 750 Td
+14 TL
+(approved service orders and partner interactions, and manages agency-level workflow within) Tj
+T*
+(contract limits.) Tj
+T*
+() Tj
+T*
+(**Limitations:** No access to state/city client records outside shared or assigned) Tj
+T*
+(authority; no platform-level pricing or tenant provisioning.) Tj
+T*
+() Tj
+T*
+(**Automatic workspace:** Caseload, case notes, approved IPE/assessment workflows, service) Tj
+T*
+(orders, partner coordination, scheduling, agency reports.) Tj
+T*
+() Tj
+T*
+(4. REHABILITATION COUNSELOR / INDIVIDUAL PRACTITIONER) Tj
+T*
+() Tj
+T*
+(**Typical entity:** State counselor, CRP counselor, vocational evaluator, workers') Tj
+T*
+(compensation vocational specialist, forensic provider, transition specialist.) Tj
+T*
+() Tj
+T*
+(**Authority:** Manages only assigned cases and approved business/provider relationships. A) Tj
+T*
+(solo practitioner may administer their own practice where contractually enabled.) Tj
+T*
+() Tj
+T*
+(**Limitations:** No tenant-wide user administration unless designated tenant admin; no) Tj
+T*
+(access to unassigned cases; no external records without a valid share.) Tj
+T*
+() Tj
+T*
+(**Automatic workspace:** Case search, caseload, case notes, IPEs, assessments, scheduling,) Tj
+T*
+(AI-assisted documentation drafts, self-advocacy resources for assigned clients, approved) Tj
+T*
+(service coordination.) Tj
+T*
+() Tj
+T*
+(5. VOCATIONAL CLIENT) Tj
+T*
+() Tj
+T*
+(**Typical entity:** Individual receiving vocational rehabilitation, transition, workers') Tj
+T*
+(compensation, or related support.) Tj
+T*
+() Tj
+T*
+(**Authority:** Views only their own approved plan, appointments, courses, documents,) Tj
+T*
+(messages, progress, and self-advocacy resources.) Tj
+T*
+() Tj
+T*
+(**Limitations:** Cannot view other clients, provider internal notes, agency administration,) Tj
+T*
+(billing, or unshared partner data.) Tj
+T*
+() Tj
+T*
+(**Automatic workspace:** My Vocational Journey, appointments, assigned courses, self-) Tj
+T*
+(advocacy, shared documents, secure messages, benefits and progress resources.) Tj
+T*
+() Tj
+T*
+(6. BUSINESS / CORPORATE PARTNER) Tj
+T*
+() Tj
+T*
+(**Typical entity:** Employer, HR team, workers' compensation employer, corporate) Tj
+T*
+(accommodation client.) Tj
+T*
+() Tj
+T*
+(**Authority:** Views approved service orders, shared documents, placement/engagement) Tj
+T*
+(information, and requested consulting services. May opt into employment partnership) Tj
+T*
+(programming.) Tj
+T*
+() Tj
+T*
+(**Intake classification:** Industry; requested business services; whether it seeks) Tj
+T*
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Page /Parent 10 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R >> >> /Contents 4 0 R >>
+endobj
+6 0 obj
+<< /Length 2786 >>
+stream
+BT
+/F1 10 Tf
+50 750 Td
+14 TL
+(accommodation consulting, return-to-work support, inclusive hiring, forensic services,) Tj
+T*
+(retention support, or EAP coordination; optional employment-partner opt-in.) Tj
+T*
+() Tj
+T*
+(**Limitations:** Cannot view client PHI or unshared case data; only receives record-level) Tj
+T*
+(information explicitly shared through the service relationship.) Tj
+T*
+() Tj
+T*
+(**Automatic workspace:** Business Portal, service orders, documents explicitly shared with) Tj
+T*
+(the organization, secure messages, accounts payable if authorized.) Tj
+T*
+() Tj
+T*
+(7. EMPLOYMENT PARTNER) Tj
+T*
+() Tj
+T*
+(**Typical entity:** Employer, internship host, social enterprise, community organization,) Tj
+T*
+(education partner.) Tj
+T*
+() Tj
+T*
+(**Intake classification:** Industry, organization size, program selections, 1‚Äì20 placement) Tj
+T*
+(opportunity capacity, accommodation capabilities, placement limitations/expectations,) Tj
+T*
+(requested provider support, optional public directory listing.) Tj
+T*
+() Tj
+T*
+(**Program choices:** Student disability internships; short-term work experience; first-time) Tj
+T*
+(employment exposure; supported employment; customized employment; veteran pathway; incumbent) Tj
+T*
+(worker disability adjustment; accessibility and values adoption.) Tj
+T*
+() Tj
+T*
+(**Accommodation capabilities:** Developmental/cognitive/intellectual disability support;) Tj
+T*
+(veterans; new disability adjustment; mobility and wheelchair access; limited hand) Tj
+T*
+(use/cerebral palsy; brain injury; sensory/neurodivergent/mental health accommodations.) Tj
+T*
+() Tj
+T*
+(**Limitations:** Cannot browse client records; sees only approved opportunities, placements,) Tj
+T*
+(documents, messages, and explicitly shared support materials.) Tj
+T*
+() Tj
+T*
+(**Automatic workspace:** Employment Partner Portal, opportunities, supported employment) Tj
+T*
+(coordination, shared documents, secure messages, accommodation requests when authorized.) Tj
+T*
+() Tj
+T*
+(8. VENDOR / SPECIALIZED SERVICE PROVIDER) Tj
+T*
+() Tj
+T*
+(**Typical entity:** Vocational evaluator, job coach, benefits planner, assistive technology) Tj
+T*
+(specialist, training provider, forensic evaluator, accommodation consultant.) Tj
+T*
+() Tj
+T*
+(**Authority:** Receives and completes approved service orders only; can provide) Tj
+T*
+(deliverables, documentation, and secure messages related to authorized work.) Tj
+T*
+() Tj
+T*
+(**Limitations:** No unrelated client records, agency administration, general caseload) Tj
+T*
+(access, or billing authority beyond approved service relationships.) Tj
+T*
+() Tj
+T*
+(**Automatic workspace:** Vendor Portal, service orders, offered services, shared documents,) Tj
+T*
+(secure messages, settings.) Tj
+T*
+() Tj
+T*
+(PROVISIONING DECISION FLOW) Tj
+T*
+() Tj
+T*
+ET
+endstream
+endobj
+7 0 obj
+<< /Type /Page /Parent 10 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R >> >> /Contents 6 0 R >>
+endobj
+8 0 obj
+<< /Length 1048 >>
+stream
+BT
+/F1 10 Tf
+50 750 Td
+14 TL
+(1. Classify entity and legal/contract relationship.) Tj
+T*
+(2. Identify tenant and administrator authority.) Tj
+T*
+(3. Capture specialty, industry, requested services, and employment-partner program choices.) Tj
+T*
+(4. Evaluate contract limits, assignment boundaries, record shares, and data sensitivity.) Tj
+T*
+(5. Provision only relevant workspace features.) Tj
+T*
+(6. Re-review permissions when a user changes role, employer, tenant, contract status, or) Tj
+T*
+(assignment.) Tj
+T*
+() Tj
+T*
+(SECURITY CONTROLS) Tj
+T*
+() Tj
+T*
+(‚Ä¢ Tenant ID included in every tenant-owned query.) Tj
+T*
+(‚Ä¢ Counselor access limited to assigned cases unless tenant admin authority is explicitly) Tj
+T*
+(granted.) Tj
+T*
+(‚Ä¢ External entities use record-level shares; access expires when the relationship ends.) Tj
+T*
+(‚Ä¢ Corporate Master Admin controls platform/contract administration but does not receive) Tj
+T*
+(tenant PHI by default.) Tj
+T*
+(‚Ä¢ UI visibility is supplemented by API/database authorization enforcement.) Tj
+T*
+ET
+endstream
+endobj
+9 0 obj
+<< /Type /Page /Parent 10 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R >> >> /Contents 8 0 R >>
+endobj
+10 0 obj
+<< /Type /Pages /Kids [3 0 R 5 0 R 7 0 R 9 0 R] /Count 4 >>
+endobj
+11 0 obj
+<< /Type /Catalog /Pages 10 0 R >>
+endobj
+xref
+0 12
+0000000000 65535 f 
+0000000015 00000 n 
+0000000085 00000 n 
+0000002652 00000 n 
+0000002779 00000 n 
+0000005378 00000 n 
+0000005505 00000 n 
+0000008343 00000 n 
+0000008470 00000 n 
+0000009570 00000 n 
+0000009697 00000 n 
+0000009773 00000 n 
+trailer
+<< /Size 12 /Root 11 0 R >>
+startxref
+9824
+%%EOF
