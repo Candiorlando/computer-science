@@ -4,3 +4,5 @@
 .next
 node_modules
 tsconfig.tsbuildinfo
+# Sensitive legal/medical working file — kept local only (see PR #3 discussion)
+Adverse_Actions_Post_EEOC_Filing.md
