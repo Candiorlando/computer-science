@@ -1,3 +1,5 @@
 .idea
 *.swp
 *.swo
+# Sensitive legal/medical working file — kept local only (see PR #3 discussion)
+Adverse_Actions_Post_EEOC_Filing.md
